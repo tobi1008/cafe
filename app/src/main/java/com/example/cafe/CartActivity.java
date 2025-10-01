@@ -1,23 +1,23 @@
 package com.example.cafe;
 
-import android.content.Intent; // Thêm import này
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
 public class CartActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerViewCart;
+    private RecyclerView cartRecyclerView;
     private CartAdapter cartAdapter;
-    private List<CartItem> cartItems;
-    private TextView textViewTotal;
+    private TextView textViewTotalPrice;
     private Button buttonCheckout;
 
     @Override
@@ -25,37 +25,50 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
-        recyclerViewCart = findViewById(R.id.recyclerViewCart);
-        textViewTotal = findViewById(R.id.textViewTotal);
+        textViewTotalPrice = findViewById(R.id.textViewTotalPrice);
         buttonCheckout = findViewById(R.id.buttonCheckout);
+        cartRecyclerView = findViewById(R.id.recyclerViewCart);
+        cartRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        cartItems = CartManager.getInstance().getCartItems();
+        updateCart();
 
-        recyclerViewCart.setLayoutManager(new LinearLayoutManager(this));
-        cartAdapter = new CartAdapter(cartItems);
-        recyclerViewCart.setAdapter(cartAdapter);
-
-        calculateTotal();
-
-        buttonCheckout.setOnClickListener(v -> {
-            // Cập nhật để chuyển sang màn hình CheckoutActivity
-            if (cartItems.isEmpty()) {
-                Toast.makeText(this, "Giỏ hàng của bạn đang trống", Toast.LENGTH_SHORT).show();
-            } else {
+        buttonCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 Intent intent = new Intent(CartActivity.this, CheckoutActivity.class);
                 startActivity(intent);
             }
         });
     }
 
-    private void calculateTotal() {
-        double total = 0;
-        for (CartItem item : cartItems) {
-            total += item.getProduct().getPrice() * item.getQuantity();
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật lại giỏ hàng mỗi khi quay lại màn hình này
+        updateCart();
+    }
 
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        textViewTotal.setText(formatter.format(total));
+    private void updateCart() {
+        List<CartItem> cartItems = CartManager.getInstance().getCartItems();
+        cartAdapter = new CartAdapter(cartItems);
+        cartRecyclerView.setAdapter(cartAdapter);
+
+        // --- SỬA LỖI Ở ĐÂY ---
+        // Sử dụng phương thức mới getGia()
+        double totalPrice = CartManager.getInstance().getTotalPrice();
+
+        // Định dạng tiền tệ
+        Locale localeVN = new Locale("vi", "VN");
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(localeVN);
+        textViewTotalPrice.setText(currencyFormatter.format(totalPrice));
+
+        // Ẩn/Hiện nút checkout
+        if (cartItems.isEmpty()) {
+            buttonCheckout.setVisibility(View.GONE);
+            textViewTotalPrice.setText("Giỏ hàng của bạn đang trống");
+        } else {
+            buttonCheckout.setVisibility(View.VISIBLE);
+        }
     }
 }
 

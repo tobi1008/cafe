@@ -5,33 +5,51 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class ProfileActivity extends AppCompatActivity {
+
+    private TextView userEmailTextView;
+    private Button logoutButton, adminButton; // Thêm biến cho nút Admin
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        TextView textViewProfileEmail = findViewById(R.id.textViewProfileEmail);
-        Button buttonLogout = findViewById(R.id.buttonLogout);
+        userEmailTextView = findViewById(R.id.textViewUserEmail);
+        logoutButton = findViewById(R.id.buttonLogout);
+        adminButton = findViewById(R.id.buttonAdminPanel); // Ánh xạ nút Admin
 
-        // Lấy SharedPreferences để đọc thông tin
+        // Lấy email từ SharedPreferences và hiển thị
         SharedPreferences prefs = getSharedPreferences("MyPrefsFile", MODE_PRIVATE);
-        String email = prefs.getString("email", "Không có thông tin"); // Lấy email đã lưu
+        String email = prefs.getString("email", "Không tìm thấy email");
+        userEmailTextView.setText(email);
 
-        // Hiển thị email lên TextView
-        textViewProfileEmail.setText(email);
+        // Xử lý sự kiện đăng xuất
+        logoutButton.setOnClickListener(v -> {
+            // Xóa thông tin đăng nhập và quay về màn hình Login
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear();
+            editor.apply();
 
-        // Xử lý sự kiện cho nút Đăng xuất
-        buttonLogout.setOnClickListener(v -> {
-            // Tạo Intent để quay về màn hình đăng nhập
+            Toast.makeText(ProfileActivity.this, "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+
             Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
-            // Xóa hết các Activity cũ và tạo một task mới, để người dùng không thể back lại
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish(); // Đóng màn hình Profile
+            finish();
         });
+
+        // --- LOGIC MỚI ĐƯỢC THÊM VÀO ---
+        // Xử lý sự kiện khi nhấn nút Admin
+        adminButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ProfileActivity.this, AdminActivity.class);
+            startActivity(intent);
+        });
+        // ------------------------------------
     }
 }
+

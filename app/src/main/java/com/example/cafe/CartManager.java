@@ -3,15 +3,14 @@ package com.example.cafe;
 import java.util.ArrayList;
 import java.util.List;
 
-// Lớp này dùng mẫu Singleton để đảm bảo chỉ có một giỏ hàng duy nhất trong toàn ứng dụng
 public class CartManager {
     private static CartManager instance;
-    private List<CartItem> cartItems;
+    private final List<CartItem> cartItems = new ArrayList<>();
 
-    private CartManager() {
-        cartItems = new ArrayList<>();
-    }
+    // Constructor private để không ai tạo mới được
+    private CartManager() {}
 
+    // Phương thức để lấy instance duy nhất của CartManager
     public static synchronized CartManager getInstance() {
         if (instance == null) {
             instance = new CartManager();
@@ -19,23 +18,34 @@ public class CartManager {
         return instance;
     }
 
-    public void addItem(Product product) {
+    // PHƯƠNG THỨC BỊ THIẾU LÀ ĐÂY
+    public void addProduct(Product product) {
         // Kiểm tra xem sản phẩm đã có trong giỏ chưa
         for (CartItem item : cartItems) {
-            if (item.getProduct().getName().equals(product.getName())) {
-                item.setQuantity(item.getQuantity() + 1); // Nếu có rồi thì tăng số lượng
-                return;
+            if (item.getProduct().getTen().equals(product.getTen())) {
+                // Nếu có rồi thì chỉ tăng số lượng
+                item.setQuantity(item.getQuantity() + 1);
+                return; // Kết thúc
             }
         }
-        // Nếu chưa có, thêm mới vào giỏ
-        cartItems.add(new CartItem(product));
+        // Nếu chưa có thì thêm mới vào giỏ với số lượng là 1
+        cartItems.add(new CartItem(product, 1));
     }
 
     public List<CartItem> getCartItems() {
         return cartItems;
     }
 
+    public double getTotalPrice() {
+        double total = 0;
+        for (CartItem item : cartItems) {
+            total += item.getProduct().getGia() * item.getQuantity();
+        }
+        return total;
+    }
+
     public void clearCart() {
         cartItems.clear();
     }
 }
+

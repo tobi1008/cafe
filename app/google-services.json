@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "606713253756",
+    "project_id": "btandroid-900f8",
+    "storage_bucket": "btandroid-900f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:606713253756:android:5b65ca6aa038814d5b5ef9",
+        "android_client_info": {
+          "package_name": "com.example.cafe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATmvmEmcJqE1ucYlkRxIepLTpyikzJMHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

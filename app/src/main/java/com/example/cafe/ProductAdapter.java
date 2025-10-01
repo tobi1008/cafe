@@ -9,7 +9,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide; // Import thư viện Glide
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,16 +33,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.productName.setText(product.getName());
-        holder.productImage.setImageResource(product.getImageResId());
 
+        // Cập nhật để dùng các getter mới từ Product.java
+        holder.productNameTextView.setText(product.getTen());
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        holder.productPrice.setText(formatter.format(product.getPrice()));
+        holder.productPriceTextView.setText(formatter.format(product.getGia()));
 
-        // Cập nhật sự kiện click cho nút "+"
+        // Dùng Glide để tải ảnh từ URL
+        Glide.with(holder.itemView.getContext())
+                .load(product.getHinhAnh()) // Lấy URL từ product
+                .placeholder(R.drawable.ic_placeholder) // Ảnh hiển thị trong lúc chờ tải
+                .into(holder.productImageView); // Nơi hiển thị ảnh
+
         holder.addButton.setOnClickListener(v -> {
-            CartManager.getInstance().addItem(product);
-            Toast.makeText(v.getContext(), "Đã thêm " + product.getName(), Toast.LENGTH_SHORT).show();
+            CartManager.getInstance().addProduct(product);
+            Toast.makeText(v.getContext(), "Đã thêm " + product.getTen(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -49,22 +56,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    public void filterList(List<Product> filteredList) {
-        this.productList = filteredList;
+    // Cập nhật danh sách cho chức năng tìm kiếm
+    public void filterList(ArrayList<Product> filteredList) {
+        productList = filteredList;
         notifyDataSetChanged();
     }
 
     static class ProductViewHolder extends RecyclerView.ViewHolder {
-        ImageView productImage;
-        TextView productName, productPrice;
+        ImageView productImageView;
+        TextView productNameTextView;
+        TextView productPriceTextView;
         Button addButton;
 
         public ProductViewHolder(@NonNull View itemView) {
             super(itemView);
-            productImage = itemView.findViewById(R.id.imageViewProduct);
-            productName = itemView.findViewById(R.id.textViewProductName);
-            productPrice = itemView.findViewById(R.id.textViewProductPrice);
-            addButton = itemView.findViewById(R.id.buttonAddToCart);
+            productImageView = itemView.findViewById(R.id.imageViewProduct);
+            productNameTextView = itemView.findViewById(R.id.textViewProductName);
+            productPriceTextView = itemView.findViewById(R.id.textViewProductPrice);
+            addButton = itemView.findViewById(R.id.buttonAdd);
         }
     }
 }
