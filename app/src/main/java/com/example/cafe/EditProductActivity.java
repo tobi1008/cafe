@@ -4,93 +4,85 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EditProductActivity extends AppCompatActivity {
 
     private EditText etName, etPrice, etDescription, etImageUrl;
-    private Button btnSaveChanges;
-    private FirebaseFirestore db;
-    private String productId;
-    private DocumentReference productRef;
+    private Button btnUpdateProduct;
+    private AppDatabase appDatabase;
+    private ExecutorService executorService;
+    private int productId;
+    private Product currentProduct;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_product);
 
-        db = FirebaseFirestore.getInstance();
+        appDatabase = AppDatabase.getDatabase(this);
+        executorService = Executors.newSingleThreadExecutor();
 
-        etName = findViewById(R.id.editTextProductName);
-        etPrice = findViewById(R.id.editTextProductPrice);
-        etDescription = findViewById(R.id.editTextProductDescription);
-        etImageUrl = findViewById(R.id.editTextProductImageUrl);
-        btnSaveChanges = findViewById(R.id.buttonSaveChanges);
+        etName = findViewById(R.id.editTextEditProductName);
+        etPrice = findViewById(R.id.editTextEditProductPrice);
+        etDescription = findViewById(R.id.editTextEditProductDescription);
+        etImageUrl = findViewById(R.id.editTextEditProductImageUrl);
+        btnUpdateProduct = findViewById(R.id.buttonUpdateProduct);
 
-        // Lấy ID của sản phẩm được truyền từ ManageProductsActivity
-        productId = getIntent().getStringExtra("PRODUCT_ID");
-        if (productId == null || productId.isEmpty()) {
-            Toast.makeText(this, "Lỗi: Không tìm thấy ID sản phẩm", Toast.LENGTH_SHORT).show();
-            finish(); // Đóng Activity nếu không có ID
+        productId = getIntent().getIntExtra("PRODUCT_ID", -1);
+        if (productId == -1) {
+            Toast.makeText(this, "Lỗi: Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
+            finish();
             return;
         }
 
-        // Tạo tham chiếu đến document sản phẩm trên Firestore
-        productRef = db.collection("cafe").document(productId);
+        loadProductDetails();
 
-        loadProductData();
-
-        btnSaveChanges.setOnClickListener(v -> saveChanges());
+        btnUpdateProduct.setOnClickListener(v -> updateProduct());
     }
 
-    // Tải dữ liệu hiện tại của sản phẩm và hiển thị lên các ô EditText
-    private void loadProductData() {
-        productRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                Product product = documentSnapshot.toObject(Product.class);
-                if (product != null) {
-                    etName.setText(product.getTen());
-                    etPrice.setText(String.valueOf(product.getGia()));
-                    etDescription.setText(product.getMoTa());
-                    etImageUrl.setText(product.getHinhAnh());
+    private void loadProductDetails() {
+        executorService.execute(() -> {
+            currentProduct = appDatabase.productDao().getProductById(productId);
+            runOnUiThread(() -> {
+                if (currentProduct != null) {
+                    etName.setText(currentProduct.getTen());
+                    etPrice.setText(String.valueOf(currentProduct.getGia()));
+                    etDescription.setText(currentProduct.getMoTa());
+                    etImageUrl.setText(currentProduct.getHinhAnh());
                 }
-            } else {
-                Toast.makeText(this, "Không tìm thấy sản phẩm", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Lỗi khi tải dữ liệu", Toast.LENGTH_SHORT).show();
+            });
         });
     }
 
-    // Lưu lại những thay đổi lên Firestore
-    private void saveChanges() {
+    private void updateProduct() {
         String ten = etName.getText().toString().trim();
         String giaStr = etPrice.getText().toString().trim();
         String moTa = etDescription.getText().toString().trim();
         String hinhAnh = etImageUrl.getText().toString().trim();
 
         if (ten.isEmpty() || giaStr.isEmpty()) {
-            Toast.makeText(this, "Tên và giá không được để trống", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Vui lòng nhập tên và giá", Toast.LENGTH_SHORT).show();
             return;
         }
 
         double gia = Double.parseDouble(giaStr);
 
-        // Cập nhật các trường của document
-        productRef.update(
-                "ten", ten,
-                "gia", gia,
-                "moTa", moTa,
-                "hinhAnh", hinhAnh
-        ).addOnSuccessListener(aVoid -> {
-            Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-            finish(); // Đóng màn hình sửa sau khi cập nhật
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+        // Cập nhật thông tin cho sản phẩm hiện tại
+        currentProduct.setTen(ten);
+        currentProduct.setGia(gia);
+        currentProduct.setMoTa(moTa);
+        currentProduct.setHinhAnh(hinhAnh);
+
+        executorService.execute(() -> {
+            appDatabase.productDao().updateProduct(currentProduct);
+            runOnUiThread(() -> {
+                Toast.makeText(EditProductActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                finish(); // Đóng màn hình sửa và quay lại danh sách
+            });
         });
     }
 }
+

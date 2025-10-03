@@ -2,40 +2,38 @@ package com.example.cafe;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AdminActivity extends AppCompatActivity {
 
     private EditText etName, etPrice, etDescription, etImageUrl;
-    private Button btnAddProduct, btnManageProducts; // Thêm nút quản lý
-    private FirebaseFirestore db;
+    private Button btnAddProduct, btnManageProducts;
+    private AppDatabase appDatabase;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin);
 
-        db = FirebaseFirestore.getInstance();
+        // Khởi tạo database và ExecutorService để chạy tác vụ nền
+        appDatabase = AppDatabase.getDatabase(this);
+        executorService = Executors.newSingleThreadExecutor();
 
         etName = findViewById(R.id.editTextProductName);
         etPrice = findViewById(R.id.editTextProductPrice);
         etDescription = findViewById(R.id.editTextProductDescription);
         etImageUrl = findViewById(R.id.editTextProductImageUrl);
         btnAddProduct = findViewById(R.id.buttonAddProduct);
-        btnManageProducts = findViewById(R.id.buttonManageProducts); // Ánh xạ nút mới
+        btnManageProducts = findViewById(R.id.buttonManageProducts);
 
-        btnAddProduct.setOnClickListener(v -> {
-            addProduct();
-        });
+        btnAddProduct.setOnClickListener(v -> addProduct());
 
-        // Mở màn hình quản lý sản phẩm khi nhấn nút
         btnManageProducts.setOnClickListener(v -> {
             startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class));
         });
@@ -55,22 +53,18 @@ public class AdminActivity extends AppCompatActivity {
         double gia = Double.parseDouble(giaStr);
         Product newProduct = new Product(ten, gia, moTa, hinhAnh);
 
-        db.collection("cafe")
-                .add(newProduct)
-                .addOnSuccessListener(documentReference -> {
-                    String docId = documentReference.getId();
-                    Log.d("Firestore", "Sản phẩm đã được thêm với ID: " + docId);
-                    Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
-                    documentReference.update("id", docId);
-                    etName.setText("");
-                    etPrice.setText("");
-                    etDescription.setText("");
-                    etImageUrl.setText("");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Lỗi khi thêm sản phẩm", e);
-                    Toast.makeText(AdminActivity.this, "Thêm sản phẩm thất bại!", Toast.LENGTH_SHORT).show();
-                });
+        // Chạy tác vụ thêm sản phẩm trên một luồng nền
+        executorService.execute(() -> {
+            appDatabase.productDao().insertProduct(newProduct);
+            // Hiển thị thông báo trên luồng UI chính
+            runOnUiThread(() -> {
+                Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
+                etName.setText("");
+                etPrice.setText("");
+                etDescription.setText("");
+                etImageUrl.setText("");
+            });
+        });
     }
 }
 

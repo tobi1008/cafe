@@ -4,87 +4,83 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.widget.EditText;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
+    private RecyclerView productRecyclerView;
     private ProductAdapter productAdapter;
-    private ArrayList<Product> allProducts;
+    private List<Product> productList = new ArrayList<>();
+    private List<Product> fullProductList = new ArrayList<>(); // Danh sách gốc để tìm kiếm
     private EditText searchEditText;
-    private FirebaseFirestore db; // Khai báo Firestore
-    private static final String TAG = "HomeActivity"; // Tag để debug
+    private AppDatabase appDatabase;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        recyclerView = findViewById(R.id.recyclerViewProducts);
+        appDatabase = AppDatabase.getDatabase(this);
+        executorService = Executors.newSingleThreadExecutor();
+
+        productRecyclerView = findViewById(R.id.productRecyclerView);
         searchEditText = findViewById(R.id.searchEditText);
 
-        // Khởi tạo Firestore
-        db = FirebaseFirestore.getInstance();
-
-        // Cài đặt RecyclerView
-        allProducts = new ArrayList<>();
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        productAdapter = new ProductAdapter(allProducts);
-        recyclerView.setAdapter(productAdapter);
-
-        // Lấy dữ liệu từ Firestore
-        fetchProductsFromFirestore();
-
+        setupRecyclerView();
+        setupBottomNavigationView();
         setupSearch();
-        setupBottomNav();
     }
 
-    private void fetchProductsFromFirestore() {
-        db.collection("cafe") // Lấy từ collection "cafe"
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        allProducts.clear(); // Xóa dữ liệu cũ
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            // Tự động chuyển đổi document thành đối tượng Product
-                            Product product = document.toObject(Product.class);
-                            allProducts.add(product);
-                        }
-                        productAdapter.notifyDataSetChanged(); // Cập nhật RecyclerView
-                    } else {
-                        Log.w(TAG, "Error getting documents.", task.getException());
-                        Toast.makeText(HomeActivity.this, "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
-                    }
-                });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadProductsFromDb(); // Tải lại dữ liệu mỗi khi quay lại màn hình
+    }
+
+    private void setupRecyclerView() {
+        productAdapter = new ProductAdapter(this, productList);
+        productRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        productRecyclerView.setAdapter(productAdapter);
+    }
+
+    private void loadProductsFromDb() {
+        executorService.execute(() -> {
+            List<Product> products = appDatabase.productDao().getAllProducts();
+            runOnUiThread(() -> {
+                fullProductList.clear();
+                fullProductList.addAll(products);
+                filter(searchEditText.getText().toString()); // Lọc lại theo text đang có trong ô search
+            });
+        });
     }
 
     private void setupSearch() {
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filter(s.toString());
             }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
     }
 
     private void filter(String text) {
-        ArrayList<Product> filteredList = new ArrayList<>();
-        for (Product item : allProducts) {
-            // Cập nhật để dùng getTen()
+        List<Product> filteredList = new ArrayList<>();
+        for (Product item : fullProductList) {
             if (item.getTen().toLowerCase().contains(text.toLowerCase())) {
                 filteredList.add(item);
             }
@@ -92,7 +88,7 @@ public class HomeActivity extends AppCompatActivity {
         productAdapter.filterList(filteredList);
     }
 
-    private void setupBottomNav() {
+    private void setupBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
         bottomNavigationView.setOnItemSelectedListener(item -> {

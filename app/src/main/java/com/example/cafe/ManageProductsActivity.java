@@ -1,97 +1,79 @@
 package com.example.cafe;
 
-import android.content.Intent; // Thêm import này
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ManageProductsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ManageProductsAdapter adapter;
-    private List<Product> productList;
-    private FirebaseFirestore db;
+    private List<Product> productList = new ArrayList<>();
+    private AppDatabase appDatabase;
+    private ExecutorService executorService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_products);
 
-        db = FirebaseFirestore.getInstance();
-        productList = new ArrayList<>();
+        appDatabase = AppDatabase.getDatabase(this);
+        executorService = Executors.newSingleThreadExecutor();
+
         recyclerView = findViewById(R.id.recyclerViewManageProducts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new ManageProductsAdapter(this, productList, product -> {
-            // --- XỬ LÝ SỰ KIỆN SỬA ---
-            Intent intent = new Intent(ManageProductsActivity.this, EditProductActivity.class);
-            intent.putExtra("PRODUCT_ID", product.getId()); // Truyền ID của sản phẩm qua
-            startActivity(intent);
-            // -------------------------
-        }, product -> {
-            // Xử lý sự kiện XOÁ sản phẩm
-            new AlertDialog.Builder(this)
-                    .setTitle("Xác nhận Xoá")
-                    .setMessage("Bạn có chắc chắn muốn xoá sản phẩm '" + product.getTen() + "' không?")
-                    .setPositiveButton("Xoá", (dialog, which) -> deleteProduct(product))
-                    .setNegativeButton("Huỷ", null)
-                    .show();
-        });
-
+        adapter = new ManageProductsAdapter(this, productList,
+                product -> { // Edit click listener
+                    Intent intent = new Intent(ManageProductsActivity.this, EditProductActivity.class);
+                    intent.putExtra("PRODUCT_ID", product.getId());
+                    startActivity(intent);
+                },
+                product -> { // Delete click listener
+                    showDeleteConfirmationDialog(product);
+                });
         recyclerView.setAdapter(adapter);
     }
 
-    // Tải lại dữ liệu mỗi khi quay lại màn hình này
     @Override
     protected void onResume() {
         super.onResume();
-        fetchProducts();
+        loadProducts(); // Tải lại danh sách mỗi khi quay lại màn hình này
     }
 
-    private void fetchProducts() {
-        db.collection("cafe")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        productList.clear();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Product product = document.toObject(Product.class);
-                            productList.add(product);
-                        }
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        Log.w("Firestore", "Error getting documents.", task.getException());
-                    }
-                });
+    private void loadProducts() {
+        executorService.execute(() -> {
+            List<Product> productsFromDb = appDatabase.productDao().getAllProducts();
+            runOnUiThread(() -> {
+                productList.clear();
+                productList.addAll(productsFromDb);
+                adapter.notifyDataSetChanged();
+            });
+        });
+    }
+
+    private void showDeleteConfirmationDialog(Product product) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận Xóa")
+                .setMessage("Bạn có chắc chắn muốn xóa sản phẩm '" + product.getTen() + "' không?")
+                .setPositiveButton("Xóa", (dialog, which) -> deleteProduct(product))
+                .setNegativeButton("Hủy", null)
+                .show();
     }
 
     private void deleteProduct(Product product) {
-        if (product.getId() == null || product.getId().isEmpty()) {
-            Toast.makeText(this, "Không thể xoá sản phẩm không có ID", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        db.collection("cafe").document(product.getId())
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Đã xoá sản phẩm: " + product.getTen(), Toast.LENGTH_SHORT).show();
-                    fetchProducts(); // Tải lại danh sách sau khi xoá
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Lỗi khi xoá sản phẩm", Toast.LENGTH_SHORT).show();
-                    Log.w("Firestore", "Error deleting document", e);
-                });
+        executorService.execute(() -> {
+            appDatabase.productDao().deleteProduct(product);
+            // Sau khi xóa, tải lại danh sách trên luồng UI
+            runOnUiThread(this::loadProducts);
+        });
     }
 }
 

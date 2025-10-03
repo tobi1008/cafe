@@ -1,73 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp"
     tools:context=".CheckoutActivity">
 
     <TextView
-        android:id="@+id/textViewTitle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Thông tin giao hàng"
-        android:textColor="@color/colorPrimary"
+        android:text="Thông tin Giao hàng"
         android:textSize="24sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="24dp"/>
 
     <EditText
-        android:id="@+id/editTextName"
-        android:layout_width="0dp"
+        android:id="@+id/editTextCheckoutName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/edit_text_background"
-        android:hint="Họ và tên"
+        android:hint="Họ và Tên"
         android:inputType="textPersonName"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
+        android:layout_marginBottom="8dp"/>
 
     <EditText
-        android:id="@+id/editTextPhone"
-        android:layout_width="0dp"
+        android:id="@+id/editTextCheckoutPhone"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/edit_text_background"
         android:hint="Số điện thoại"
         android:inputType="phone"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextName" />
+        android:layout_marginBottom="8dp"/>
 
     <EditText
-        android:id="@+id/editTextAddress"
-        android:layout_width="0dp"
+        android:id="@+id/editTextCheckoutAddress"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/edit_text_background"
         android:hint="Địa chỉ giao hàng"
         android:inputType="textPostalAddress"
-        android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPhone" />
+        android:layout_marginBottom="16dp"/>
 
     <Button
         android:id="@+id/buttonConfirmOrder"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:padding="12dp"
-        android:text="Xác nhận Đặt hàng"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextAddress" />
+        android:text="Xác nhận Đặt hàng"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
+

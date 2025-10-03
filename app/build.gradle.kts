@@ -1,7 +1,8 @@
 plugins {
-    alias(libs.plugins.android.application)
-//    id("com.android.application")
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -31,6 +32,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    // THÊM KHỐI CODE NÀY ĐỂ ĐỒNG BỘ HÓA JVM TARGET
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -49,4 +54,11 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    // --- Room Database ---
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+// Hỗ trợ thêm cho coroutines (tùy chọn nhưng khuyến nghị)
+    implementation("androidx.room:room-ktx:$room_version")
 }
+

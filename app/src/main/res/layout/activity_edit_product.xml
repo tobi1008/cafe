@@ -16,14 +16,14 @@
         android:layout_marginBottom="24dp"/>
 
     <EditText
-        android:id="@+id/editTextProductName"
+        android:id="@+id/editTextEditProductName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Tên sản phẩm"
         android:layout_marginBottom="8dp"/>
 
     <EditText
-        android:id="@+id/editTextProductPrice"
+        android:id="@+id/editTextEditProductPrice"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Giá"
@@ -31,23 +31,24 @@
         android:layout_marginBottom="8dp"/>
 
     <EditText
-        android:id="@+id/editTextProductDescription"
+        android:id="@+id/editTextEditProductDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Mô tả ngắn"
         android:layout_marginBottom="8dp"/>
 
     <EditText
-        android:id="@+id/editTextProductImageUrl"
+        android:id="@+id/editTextEditProductImageUrl"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="URL Hình ảnh"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/buttonSaveChanges"
+        android:id="@+id/buttonUpdateProduct"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Lưu Thay Đổi"/>
+        android:text="Cập Nhật Sản Phẩm"/>
 
 </LinearLayout>
+

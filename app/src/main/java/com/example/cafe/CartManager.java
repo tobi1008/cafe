@@ -1,51 +1,64 @@
 package com.example.cafe;
 
-import java.util.ArrayList;
+import android.content.Context;
+
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class CartManager {
-    private static CartManager instance;
-    private final List<CartItem> cartItems = new ArrayList<>();
 
-    // Constructor private để không ai tạo mới được
-    private CartManager() {}
+    private static volatile CartManager INSTANCE;
+    private AppDatabase appDatabase;
+    private ExecutorService executorService;
 
-    // Phương thức để lấy instance duy nhất của CartManager
-    public static synchronized CartManager getInstance() {
-        if (instance == null) {
-            instance = new CartManager();
-        }
-        return instance;
+    private CartManager(Context context) {
+        appDatabase = AppDatabase.getDatabase(context.getApplicationContext());
+        executorService = Executors.newSingleThreadExecutor();
     }
 
-    // PHƯƠNG THỨC BỊ THIẾU LÀ ĐÂY
-    public void addProduct(Product product) {
-        // Kiểm tra xem sản phẩm đã có trong giỏ chưa
-        for (CartItem item : cartItems) {
-            if (item.getProduct().getTen().equals(product.getTen())) {
-                // Nếu có rồi thì chỉ tăng số lượng
-                item.setQuantity(item.getQuantity() + 1);
-                return; // Kết thúc
+    public static CartManager getInstance(Context context) {
+        if (INSTANCE == null) {
+            synchronized (CartManager.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new CartManager(context);
+                }
             }
         }
-        // Nếu chưa có thì thêm mới vào giỏ với số lượng là 1
-        cartItems.add(new CartItem(product, 1));
+        return INSTANCE;
     }
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
+    public void addProduct(Product product) {
+        executorService.execute(() -> {
+            CartItem existingItem = appDatabase.cartItemDao().getCartItemByProductId(product.getId());
+            if (existingItem != null) {
+                // Nếu sản phẩm đã có, tăng số lượng
+                existingItem.setQuantity(existingItem.getQuantity() + 1);
+                appDatabase.cartItemDao().update(existingItem);
+            } else {
+                // Nếu chưa có, tạo item mới
+                CartItem newItem = new CartItem(product.getId(), product.getTen(), product.getGia(), product.getHinhAnh(), 1);
+                appDatabase.cartItemDao().insert(newItem);
+            }
+        });
     }
 
-    public double getTotalPrice() {
-        double total = 0;
-        for (CartItem item : cartItems) {
-            total += item.getProduct().getGia() * item.getQuantity();
-        }
-        return total;
+    public void updateCartItem(CartItem cartItem) {
+        executorService.execute(() -> appDatabase.cartItemDao().update(cartItem));
+    }
+
+    public void deleteCartItem(CartItem cartItem) {
+        executorService.execute(() -> appDatabase.cartItemDao().delete(cartItem));
     }
 
     public void clearCart() {
-        cartItems.clear();
+        executorService.execute(() -> appDatabase.cartItemDao().deleteAllItems());
+    }
+
+    // Lấy danh sách sản phẩm (hàm này cần trả về kết quả từ luồng nền)
+    public Future<List<CartItem>> getCartItems() {
+        return executorService.submit(() -> appDatabase.cartItemDao().getAllCartItems());
     }
 }
 

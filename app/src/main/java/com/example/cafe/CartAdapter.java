@@ -1,58 +1,103 @@
 package com.example.cafe;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.bumptech.glide.Glide;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 
-public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
-    private List<CartItem> cartItems;
+    private Context context;
+    private List<CartItem> cartItemList;
+    private CartManager cartManager;
+    private CartItemListener listener;
 
-    public CartAdapter(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
+    public interface CartItemListener {
+        void onQuantityChanged();
+        void onItemDeleted();
+    }
+
+    public CartAdapter(Context context, List<CartItem> cartItemList, CartItemListener listener) {
+        this.context = context;
+        this.cartItemList = cartItemList;
+        this.cartManager = CartManager.getInstance(context);
+        this.listener = listener;
     }
 
     @NonNull
     @Override
-    public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
-        return new CartViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_cart, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        CartItem cartItem = cartItems.get(position);
-        Product product = cartItem.getProduct();
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        CartItem cartItem = cartItemList.get(position);
 
-        // SỬA LỖI Ở ĐÂY: Dùng getTen() và getGia() thay vì getName() và getPrice()
-        holder.productName.setText(product.getTen());
+        // Lấy thông tin trực tiếp từ cartItem, không cần getProduct() nữa
+        holder.productName.setText(cartItem.getProductName());
+        holder.quantity.setText(String.valueOf(cartItem.getQuantity()));
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        holder.productPrice.setText(formatter.format(product.getGia()));
+        holder.productPrice.setText(formatter.format(cartItem.getProductPrice()));
 
-        holder.quantity.setText("x " + cartItem.getQuantity());
+        Glide.with(context)
+                .load(cartItem.getProductImage())
+                .placeholder(R.drawable.ic_placeholder)
+                .into(holder.productImage);
+
+        holder.btnIncrease.setOnClickListener(v -> {
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+            cartManager.updateCartItem(cartItem);
+            holder.quantity.setText(String.valueOf(cartItem.getQuantity()));
+            listener.onQuantityChanged();
+        });
+
+        holder.btnDecrease.setOnClickListener(v -> {
+            if (cartItem.getQuantity() > 1) {
+                cartItem.setQuantity(cartItem.getQuantity() - 1);
+                cartManager.updateCartItem(cartItem);
+                holder.quantity.setText(String.valueOf(cartItem.getQuantity()));
+                listener.onQuantityChanged();
+            }
+        });
+
+        holder.btnDelete.setOnClickListener(v -> {
+            cartManager.deleteCartItem(cartItem);
+            // Không cần xóa khỏi list ở đây nữa vì CartActivity sẽ tải lại
+            listener.onItemDeleted();
+        });
     }
 
     @Override
     public int getItemCount() {
-        return cartItems.size();
+        return cartItemList.size();
     }
 
-    static class CartViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView productImage;
         TextView productName, productPrice, quantity;
+        Button btnIncrease, btnDecrease, btnDelete;
 
-        public CartViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            productImage = itemView.findViewById(R.id.imageViewCartItem);
             productName = itemView.findViewById(R.id.textViewCartItemName);
             productPrice = itemView.findViewById(R.id.textViewCartItemPrice);
-            quantity = itemView.findViewById(R.id.textViewCartItemQuantity);
+            quantity = itemView.findViewById(R.id.textViewQuantity);
+            btnIncrease = itemView.findViewById(R.id.buttonIncrease);
+            btnDecrease = itemView.findViewById(R.id.buttonDecrease);
+            btnDelete = itemView.findViewById(R.id.buttonDelete);
         }
     }
 }
