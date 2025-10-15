@@ -2,19 +2,18 @@ package com.example.cafe;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AdminActivity extends AppCompatActivity {
 
-    private EditText etName, etPrice, etDescription, etImageUrl;
-    private Button btnAddProduct, btnManageProducts; // Thêm nút quản lý
+    private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent, etCategory;
+    private Button btnAddProduct, btnManageProducts, btnManageOrders;
     private FirebaseFirestore db;
 
     @Override
@@ -24,51 +23,70 @@ public class AdminActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
+        // Ánh xạ đầy đủ các UI components
         etName = findViewById(R.id.editTextProductName);
-        etPrice = findViewById(R.id.editTextProductPrice);
+        etPriceS = findViewById(R.id.editTextPriceS);
+        etPriceM = findViewById(R.id.editTextPriceM);
+        etPriceL = findViewById(R.id.editTextPriceL);
         etDescription = findViewById(R.id.editTextProductDescription);
         etImageUrl = findViewById(R.id.editTextProductImageUrl);
+        etSalePercent = findViewById(R.id.editTextSalePercent);
+        etCategory = findViewById(R.id.editTextCategory);
         btnAddProduct = findViewById(R.id.buttonAddProduct);
-        btnManageProducts = findViewById(R.id.buttonManageProducts); // Ánh xạ nút mới
+        btnManageProducts = findViewById(R.id.buttonManageProducts);
+        btnManageOrders = findViewById(R.id.buttonManageOrders);
 
-        btnAddProduct.setOnClickListener(v -> {
-            addProduct();
-        });
-
-        // Mở màn hình quản lý sản phẩm khi nhấn nút
-        btnManageProducts.setOnClickListener(v -> {
-            startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class));
-        });
+        btnAddProduct.setOnClickListener(v -> addProduct());
+        btnManageProducts.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class)));
+        btnManageOrders.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageOrdersActivity.class)));
     }
 
     private void addProduct() {
+        // Lấy dữ liệu từ các ô nhập liệu
         String ten = etName.getText().toString().trim();
-        String giaStr = etPrice.getText().toString().trim();
+        String priceSStr = etPriceS.getText().toString().trim();
+        String priceMStr = etPriceM.getText().toString().trim();
+        String priceLStr = etPriceL.getText().toString().trim();
         String moTa = etDescription.getText().toString().trim();
         String hinhAnh = etImageUrl.getText().toString().trim();
+        String salePercentStr = etSalePercent.getText().toString().trim();
+        String category = etCategory.getText().toString().trim();
 
-        if (ten.isEmpty() || giaStr.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập tên và giá", Toast.LENGTH_SHORT).show();
+        // Kiểm tra các trường bắt buộc
+        if (ten.isEmpty() || priceMStr.isEmpty() || category.isEmpty()) {
+            Toast.makeText(this, "Vui lòng nhập tên, giá size M và danh mục", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double gia = Double.parseDouble(giaStr);
-        Product newProduct = new Product(ten, gia, moTa, hinhAnh);
+        // Tạo một Map để chứa giá các size
+        Map<String, Double> gia = new HashMap<>();
+        if (!priceSStr.isEmpty()) gia.put("S", Double.parseDouble(priceSStr));
+        if (!priceMStr.isEmpty()) gia.put("M", Double.parseDouble(priceMStr));
+        if (!priceLStr.isEmpty()) gia.put("L", Double.parseDouble(priceLStr));
 
+        int phanTramGiamGia = salePercentStr.isEmpty() ? 0 : Integer.parseInt(salePercentStr);
+
+        // Tạo đối tượng Product mới
+        Product newProduct = new Product(null, ten, gia, moTa, hinhAnh, phanTramGiamGia, category);
+
+        // Thêm sản phẩm lên Firestore
         db.collection("cafe")
                 .add(newProduct)
                 .addOnSuccessListener(documentReference -> {
                     String docId = documentReference.getId();
-                    Log.d("Firestore", "Sản phẩm đã được thêm với ID: " + docId);
+                    documentReference.update("id", docId); // Cập nhật lại ID cho sản phẩm
                     Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
-                    documentReference.update("id", docId);
+                    // Xóa trống các ô nhập liệu
                     etName.setText("");
-                    etPrice.setText("");
+                    etPriceS.setText("");
+                    etPriceM.setText("");
+                    etPriceL.setText("");
                     etDescription.setText("");
                     etImageUrl.setText("");
+                    etSalePercent.setText("");
+                    etCategory.setText("");
                 })
                 .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Lỗi khi thêm sản phẩm", e);
                     Toast.makeText(AdminActivity.this, "Thêm sản phẩm thất bại!", Toast.LENGTH_SHORT).show();
                 });
     }

@@ -2,12 +2,19 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#6D4C41</color> <!-- Màu Nâu Cà Phê -->
 
-    <!-- Màu cho các hành động nguy hiểm (Xóa) -->
-    <color name="colorDelete">#D32F2F</color> <!-- Một màu đỏ đậm -->
+    <!-- MÀU CHỦ ĐẠO MỚI (TÔNG NÂU CÀ PHÊ) -->
+    <color name="colorPrimary">#6D4C41</color> <!-- Nâu đậm -->
+    <color name="colorPrimaryVariant">#4E342E</color> <!-- Nâu rất đậm -->
+    <color name="colorOnPrimary">#FFFFFF</color> <!-- Màu chữ trên nền nâu (Trắng) -->
 
-    <!-- Màu cho các hành động cảnh báo (Sửa) -->
-    <color name="colorWarning">#FFA000</color> <!-- Một màu vàng cam -->
+    <!-- MÀU PHỤ (ACCENT COLOR) -->
+    <color name="colorSecondary">#A1887F</color> <!-- Nâu nhạt -->
+    <color name="colorSecondaryVariant">#8D6E63</color> <!-- Nâu nhạt hơn -->
+    <color name="colorOnSecondary">#000000</color> <!-- Màu chữ trên nền nâu nhạt (Đen) -->
+
+    <!-- MÀU CẢNH BÁO / XÓA -->
+    <color name="colorDelete">#D32F2F</color>
+    <color name="colorWarning">#FFA000</color>
 </resources>
 

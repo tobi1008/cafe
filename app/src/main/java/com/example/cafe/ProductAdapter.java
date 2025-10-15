@@ -1,53 +1,68 @@
 package com.example.cafe;
 
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide; // Import thư viện Glide
+import com.bumptech.glide.Glide;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
+    private Context context;
     private List<Product> productList;
 
-    public ProductAdapter(List<Product> productList) {
+    public ProductAdapter(Context context, List<Product> productList) {
+        this.context = context;
         this.productList = productList;
     }
 
     @NonNull
     @Override
-    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
-        return new ProductViewHolder(view);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.item_product, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        // Cập nhật để dùng các getter mới từ Product.java
-        holder.productNameTextView.setText(product.getTen());
+        holder.productName.setText(product.getTen());
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        holder.productPriceTextView.setText(formatter.format(product.getGia()));
 
-        // Dùng Glide để tải ảnh từ URL
-        Glide.with(holder.itemView.getContext())
-                .load(product.getHinhAnh()) // Lấy URL từ product
-                .placeholder(R.drawable.ic_placeholder) // Ảnh hiển thị trong lúc chờ tải
-                .into(holder.productImageView); // Nơi hiển thị ảnh
+        // Logic hiển thị giá
+        if (product.getPhanTramGiamGia() > 0) {
+            holder.productPrice.setText(formatter.format(product.getFinalPriceForSize("M"))); // Hiển thị giá size M làm mặc định
+            holder.originalPrice.setText(formatter.format(product.getPriceForSize("M")));
+            holder.originalPrice.setPaintFlags(holder.originalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.originalPrice.setVisibility(View.VISIBLE);
+        } else {
+            holder.productPrice.setText(formatter.format(product.getPriceForSize("M")));
+            holder.originalPrice.setVisibility(View.GONE);
+        }
 
-        holder.addButton.setOnClickListener(v -> {
-            CartManager.getInstance().addProduct(product);
-            Toast.makeText(v.getContext(), "Đã thêm " + product.getTen(), Toast.LENGTH_SHORT).show();
+        Glide.with(context)
+                .load(product.getHinhAnh())
+                .placeholder(R.drawable.ic_placeholder)
+                .error(R.drawable.ic_placeholder)
+                .into(holder.productImage);
+
+        // THAY ĐỔI LOGIC: Nhấn vào toàn bộ item để mở trang chi tiết
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ProductDetailActivity.class);
+            intent.putExtra("PRODUCT_DETAIL", product); // Truyền cả đối tượng product đi
+            context.startActivity(intent);
         });
     }
 
@@ -56,24 +71,28 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    // Cập nhật danh sách cho chức năng tìm kiếm
-    public void filterList(ArrayList<Product> filteredList) {
-        productList = filteredList;
+    public void filterList(List<Product> filteredList) {
+        this.productList = filteredList;
         notifyDataSetChanged();
     }
 
-    static class ProductViewHolder extends RecyclerView.ViewHolder {
-        ImageView productImageView;
-        TextView productNameTextView;
-        TextView productPriceTextView;
-        Button addButton;
+    public List<Product> getCurrentList() {
+        // Cần copy list để tránh lỗi ConcurrentModificationException
+        return new ArrayList<>(this.productList);
+    }
 
-        public ProductViewHolder(@NonNull View itemView) {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView productImage;
+        TextView productName, productPrice, originalPrice;
+        // Đã xóa Button addButton
+
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            productImageView = itemView.findViewById(R.id.imageViewProduct);
-            productNameTextView = itemView.findViewById(R.id.textViewProductName);
-            productPriceTextView = itemView.findViewById(R.id.textViewProductPrice);
-            addButton = itemView.findViewById(R.id.buttonAdd);
+            productImage = itemView.findViewById(R.id.imageViewProduct);
+            productName = itemView.findViewById(R.id.textViewProductName);
+            productPrice = itemView.findViewById(R.id.textViewProductPrice);
+            originalPrice = itemView.findViewById(R.id.textViewOriginalPrice);
+            // Đã xóa ánh xạ cho buttonAdd
         }
     }
 }

@@ -1,66 +1,74 @@
 package com.example.cafe;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
-import android.content.SharedPreferences;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
+
+    private EditText emailEditText, passwordEditText;
+    private Button loginButton;
+    private TextView signupTextView;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        final EditText emailEditText = findViewById(R.id.editTextEmail);
-        final EditText passwordEditText = findViewById(R.id.editTextPassword);
-        Button loginButton = findViewById(R.id.buttonLogin);
-        TextView signupTextView = findViewById(R.id.textViewSignUp);
+        mAuth = FirebaseAuth.getInstance();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String emailInput = emailEditText.getText().toString().trim();
-                String passwordInput = passwordEditText.getText().toString().trim();
+        emailEditText = findViewById(R.id.editTextEmail);
+        passwordEditText = findViewById(R.id.editTextPassword);
+        loginButton = findViewById(R.id.buttonLogin);
+        signupTextView = findViewById(R.id.textViewSignUp);
 
-                if (emailInput.isEmpty() || passwordInput.isEmpty()) {
-                    Toast.makeText(LoginActivity.this, "Vui lòng nhập email và mật khẩu.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        loginButton.setOnClickListener(v -> {
+            String email = emailEditText.getText().toString().trim();
+            String password = passwordEditText.getText().toString().trim();
 
-                SharedPreferences prefs = getSharedPreferences(SignupActivity.MY_PREFS_NAME, MODE_PRIVATE);
-                String savedEmail = prefs.getString("email", null);
-                String savedPassword = prefs.getString("password", null);
-
-                if (emailInput.equals(savedEmail) && passwordInput.equals(savedPassword)) {
-                    // --- ĐIỂM THAY ĐỔI QUAN TRỌNG ---
-                    Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-
-                    // Tạo Intent để chuyển sang HomeActivity
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-
-                    // Đóng LoginActivity để người dùng không thể nhấn nút Back để quay lại
-                    finish();
-
-                } else {
-                    Toast.makeText(LoginActivity.this, "Sai email hoặc mật khẩu.", Toast.LENGTH_SHORT).show();
-                }
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Vui lòng nhập email và mật khẩu.", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            // Dùng FirebaseAuth để đăng nhập
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            // Đăng nhập thành công, chuyển đến HomeActivity
+                            Toast.makeText(LoginActivity.this, "Đăng nhập thành công.", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                            finish();
+                        } else {
+                            // Nếu đăng nhập thất bại
+                            Toast.makeText(LoginActivity.this, "Đăng nhập thất bại: " + task.getException().getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
-        signupTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-                startActivity(intent);
-            }
+        signupTextView.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         });
     }
-}
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Kiểm tra xem người dùng đã đăng nhập chưa, nếu rồi thì vào thẳng trang Home
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+            finish();
+        }
+    }
+}

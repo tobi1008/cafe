@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">cafe</string>
+    <string name="app_name">Cafe</string>
+
+    <!-- THÊM MẢNG NÀY ĐỂ QUẢN LÝ CÁC TRẠNG THÁI ĐƠN HÀNG -->
+    <string-array name="order_status_options">
+        <item>Đang chờ xử lý</item>
+        <item>Đang giao hàng</item>
+        <item>Đã hoàn thành</item>
+        <item>Đã hủy</item>
+    </string-array>
 </resources>

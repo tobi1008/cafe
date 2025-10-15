@@ -1,51 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
     android:padding="16dp"
     tools:context=".ProfileActivity">
 
     <TextView
+        android:id="@+id/textViewProfileTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Thông Tin Tài Khoản"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="32dp"/>
 
     <TextView
+        android:id="@+id/textViewEmailLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Email đăng nhập:"
+        android:text="Email:"
+        android:layout_below="@id/textViewProfileTitle"
         android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/textViewUserEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/textViewEmailLabel"
         android:text="user@example.com"
-        android:textSize="20sp"
+        android:textSize="18sp"
         android:textStyle="bold"
-        android:layout_marginBottom="48dp"/>
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- NÚT LỊCH SỬ ĐƠN HÀNG VỚI ID CHÍNH XÁC -->
+    <Button
+        android:id="@+id/buttonOrderHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewUserEmail"
+        android:text="Lịch sử Đơn hàng"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/buttonAdminPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonOrderHistory"
+        android:text="Bảng điều khiển Admin"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_marginBottom="16dp"/>
 
     <Button
         android:id="@+id/buttonLogout"
+        style="@style/Widget.Material3.Button.OutlinedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:text="Đăng xuất"/>
 
-    <!-- NÚT MỚI ĐƯỢC THÊM VÀO -->
-    <Button
-        android:id="@+id/buttonAdminPanel"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Truy cập trang Admin"
-        android:textColor="@color/colorPrimary" />
-
-</LinearLayout>
+</RelativeLayout>
 

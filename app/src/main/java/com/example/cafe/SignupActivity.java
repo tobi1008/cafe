@@ -1,65 +1,75 @@
 package com.example.cafe;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignupActivity extends AppCompatActivity {
 
-    // Đặt một tên hằng số cho file SharedPreferences để có thể dùng lại ở màn hình Login
-    public static final String MY_PREFS_NAME = "MyPrefsFile";
+    private EditText emailEditText, passwordEditText, confirmPasswordEditText;
+    private Button signupButton;
+    private TextView loginTextView;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        // Ánh xạ các view từ layout
-        final EditText emailEditText = findViewById(R.id.editTextEmail);
-        final EditText passwordEditText = findViewById(R.id.editTextPassword);
-        final EditText confirmPasswordEditText = findViewById(R.id.editTextConfirmPassword);
-        Button signupButton = findViewById(R.id.buttonSignup);
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
-        // Thiết lập sự kiện click cho nút Đăng ký
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = emailEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
-                String confirmPassword = confirmPasswordEditText.getText().toString().trim();
+        // SỬA LỖI Ở ĐÂY: Ánh xạ các UI components từ layout
+        emailEditText = findViewById(R.id.editTextEmail);
+        passwordEditText = findViewById(R.id.editTextPassword);
+        confirmPasswordEditText = findViewById(R.id.editTextConfirmPassword);
+        signupButton = findViewById(R.id.buttonSignUp);
+        loginTextView = findViewById(R.id.textViewLogin);
 
-                // Kiểm tra dữ liệu đầu vào
-                if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                    Toast.makeText(SignupActivity.this, "Vui lòng điền đầy đủ thông tin.", Toast.LENGTH_SHORT).show();
-                } else if (!password.equals(confirmPassword)) {
-                    Toast.makeText(SignupActivity.this, "Mật khẩu xác nhận không khớp.", Toast.LENGTH_SHORT).show();
-                } else {
-                    // --- BẮT ĐẦU LƯU DỮ LIỆU VỚI SharedPreferences ---
+        signupButton.setOnClickListener(v -> {
+            String email = emailEditText.getText().toString().trim();
+            String password = passwordEditText.getText().toString().trim();
+            String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-                    // 1. Lấy đối tượng SharedPreferences.Editor để có thể chỉnh sửa dữ liệu
-                    SharedPreferences.Editor editor = getSharedPreferences(MY_PREFS_NAME, MODE_PRIVATE).edit();
-
-                    // 2. Đặt dữ liệu vào editor dưới dạng key-value
-                    editor.putString("email", email);
-                    editor.putString("password", password);
-
-                    // 3. Gọi apply() để lưu lại những thay đổi.
-                    // (apply() lưu trong nền, không làm ứng dụng bị đứng)
-                    editor.apply();
-
-                    // Hiển thị thông báo thành công
-                    Toast.makeText(SignupActivity.this, "Đăng ký thành công! Giờ bạn có thể đăng nhập.", Toast.LENGTH_LONG).show();
-
-                    // Sau khi đăng ký thành công, tự động quay lại màn hình đăng nhập
-                    finish();
-                }
+            // Bổ sung phần kiểm tra input đầy đủ
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(SignupActivity.this, "Vui lòng điền đầy đủ thông tin.", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            if (!password.equals(confirmPassword)) {
+                Toast.makeText(SignupActivity.this, "Mật khẩu không khớp.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                            if (firebaseUser != null) {
+                                User newUser = new User(firebaseUser.getEmail());
+                                // GÁN VAI TRÒ MẶC ĐỊNH LÀ "USER"
+                                newUser.setRole("user");
+                                db.collection("users").document(firebaseUser.getUid()).set(newUser);
+                            }
+                            Toast.makeText(SignupActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(SignupActivity.this, LoginActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
+
+        loginTextView.setOnClickListener(v -> finish());
     }
 }
 

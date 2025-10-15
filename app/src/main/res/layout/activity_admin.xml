@@ -1,62 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".AdminActivity">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Thêm Sản Phẩm Mới"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp"/>
-
-    <EditText
-        android:id="@+id/editTextProductName"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tên sản phẩm (ví dụ: Cà Phê Trứng)"
-        android:layout_marginBottom="8dp"/>
+        android:orientation="vertical"
+        android:padding="16dp"
+        tools:context=".AdminActivity">
 
-    <EditText
-        android:id="@+id/editTextProductPrice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Giá (ví dụ: 35000)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="8dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm Sản Phẩm Mới"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
 
-    <EditText
-        android:id="@+id/editTextProductDescription"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Mô tả ngắn"
-        android:layout_marginBottom="8dp"/>
+        <EditText
+            android:id="@+id/editTextProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tên sản phẩm"
+            android:layout_marginBottom="8dp"/>
 
-    <EditText
-        android:id="@+id/editTextProductImageUrl"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="URL Hình ảnh"
-        android:layout_marginBottom="16dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/editTextPriceS"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Giá size S"
+                android:inputType="numberDecimal"
+                android:layout_marginEnd="4dp"/>
+            <EditText
+                android:id="@+id/editTextPriceM"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Giá size M"
+                android:inputType="numberDecimal"
+                android:layout_marginEnd="4dp"
+                android:layout_marginStart="4dp"/>
+            <EditText
+                android:id="@+id/editTextPriceL"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Giá size L"
+                android:inputType="numberDecimal"
+                android:layout_marginStart="4dp"/>
+        </LinearLayout>
 
-    <Button
-        android:id="@+id/buttonAddProduct"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Thêm vào Menu"
-        android:layout_marginBottom="16dp"/>
+        <EditText
+            android:id="@+id/editTextProductDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mô tả ngắn"
+            android:layout_marginTop="8dp"/>
 
-    <!-- NÚT MỚI ĐỂ ĐI ĐẾN TRANG QUẢN LÝ -->
-    <Button
-        android:id="@+id/buttonManageProducts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Quản lý Menu (Sửa/Xoá)" />
+        <EditText
+            android:id="@+id/editTextProductImageUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="URL Hình ảnh" />
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/editTextSalePercent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Phần trăm giảm giá (ví dụ: 10)"
+            android:inputType="number"/>
+
+        <EditText
+            android:id="@+id/editTextCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Danh mục (ví dụ: Cà Phê, Trà)"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/buttonAddProduct"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thêm vào Menu"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/buttonManageProducts"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý Menu (Sửa/Xoá)" />
+
+        <Button
+            android:id="@+id/buttonManageOrders"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quản lý Đơn hàng"
+            android:layout_marginTop="8dp"/>
+
+    </LinearLayout>
+</ScrollView>
 
