@@ -1,7 +1,7 @@
 package com.example.cafe;
 
 import java.io.Serializable;
-import java.util.Date; // <-- THAY ĐỔI IMPORT
+import java.util.Date;
 import java.util.List;
 
 public class Order implements Serializable {
@@ -12,14 +12,19 @@ public class Order implements Serializable {
     private String customerAddress;
     private List<CartItem> items;
     private double totalPrice;
-    private Date orderDate; // <-- THAY ĐỔI KIỂU DỮ LIỆU
+    private Date orderDate;
     private String status;
 
+    // --- CÁC TRƯỜNG MỚI CHO VOUCHER ---
+    private String appliedVoucher;
+    private double discountAmount;
+
     public Order() {
-        // Constructor rỗng cần thiết cho Firebase
+        // Constructor rỗng
     }
 
     // --- Getters & Setters ---
+    // (Giữ nguyên các getters/setters cũ)
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
     public String getUserId() { return userId; }
@@ -34,9 +39,13 @@ public class Order implements Serializable {
     public void setItems(List<CartItem> items) { this.items = items; }
     public double getTotalPrice() { return totalPrice; }
     public void setTotalPrice(double totalPrice) { this.totalPrice = totalPrice; }
-    public Date getOrderDate() { return orderDate; } // <-- CẬP NHẬT GETTER
-    public void setOrderDate(Date orderDate) { this.orderDate = orderDate; } // <-- CẬP NHẬT SETTER
+    public Date getOrderDate() { return orderDate; }
+    public void setOrderDate(Date orderDate) { this.orderDate = orderDate; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getAppliedVoucher() { return appliedVoucher; }
+    public void setAppliedVoucher(String appliedVoucher) { this.appliedVoucher = appliedVoucher; }
+    public double getDiscountAmount() { return discountAmount; }
+    public void setDiscountAmount(double discountAmount) { this.discountAmount = discountAmount; }
 }
 

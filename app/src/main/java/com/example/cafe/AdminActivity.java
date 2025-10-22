@@ -2,6 +2,7 @@ package com.example.cafe;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -13,7 +14,7 @@ import java.util.Map;
 public class AdminActivity extends AppCompatActivity {
 
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent, etCategory;
-    private Button btnAddProduct, btnManageProducts, btnManageOrders;
+    private Button btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers;
     private FirebaseFirestore db;
 
     @Override
@@ -35,10 +36,13 @@ public class AdminActivity extends AppCompatActivity {
         btnAddProduct = findViewById(R.id.buttonAddProduct);
         btnManageProducts = findViewById(R.id.buttonManageProducts);
         btnManageOrders = findViewById(R.id.buttonManageOrders);
+        btnManageVouchers = findViewById(R.id.buttonManageVouchers);
 
+        // Gán sự kiện click cho các nút
         btnAddProduct.setOnClickListener(v -> addProduct());
         btnManageProducts.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class)));
         btnManageOrders.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageOrdersActivity.class)));
+        btnManageVouchers.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageVouchersActivity.class)));
     }
 
     private void addProduct() {
@@ -88,6 +92,7 @@ public class AdminActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(AdminActivity.this, "Thêm sản phẩm thất bại!", Toast.LENGTH_SHORT).show();
+                    Log.e("AdminActivity", "Lỗi khi thêm sản phẩm", e);
                 });
     }
 }

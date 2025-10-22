@@ -12,12 +12,14 @@ public class Product implements Serializable {
     private String hinhAnh;
     private int phanTramGiamGia;
     private String category;
+    private double averageRating;
+    private long reviewCount;
 
     public Product() {
         // Constructor rỗng cần thiết cho Firebase
     }
 
-    // THÊM CONSTRUCTOR MỚI: Dùng để tạo sản phẩm từ màn hình Admin
+    // Constructor mới mà AdminActivity sẽ sử dụng
     public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category) {
         this.id = id;
         this.ten = ten;
@@ -26,6 +28,9 @@ public class Product implements Serializable {
         this.hinhAnh = hinhAnh;
         this.phanTramGiamGia = phanTramGiamGia;
         this.category = category;
+        // Gán giá trị mặc định cho các sản phẩm mới
+        this.averageRating = 0;
+        this.reviewCount = 0;
     }
 
     // --- Getters & Setters ---
@@ -43,8 +48,12 @@ public class Product implements Serializable {
     public void setPhanTramGiamGia(int phanTramGiamGia) { this.phanTramGiamGia = phanTramGiamGia; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+    public double getAverageRating() { return averageRating; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+    public long getReviewCount() { return reviewCount; }
+    public void setReviewCount(long reviewCount) { this.reviewCount = reviewCount; }
 
-    // --- Các hàm tiện ích ---
+    // --- Hàm tiện ích ---
     public double getPriceForSize(String size) {
         if (gia != null && gia.containsKey(size)) {
             Object priceObject = gia.get(size);

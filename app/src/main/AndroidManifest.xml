@@ -59,6 +59,15 @@
         <activity
             android:name=".ManageOrdersActivity"
             android:exported="false" />
+        <activity
+            android:name=".FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AllReviewsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ManageVouchersActivity"
+            android:exported="false" />
 
     </application>
 

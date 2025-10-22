@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ManageVouchersActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quản lý Voucher"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Form tạo voucher (giữ nguyên) -->
+        <EditText
+            android:id="@+id/editTextVoucherCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mã Voucher (ví dụ: GIAM10)"
+            android:textAllCaps="true"/>
+        <EditText
+            android:id="@+id/editTextVoucherDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mô tả"/>
+        <RadioGroup
+            android:id="@+id/radioGroupDiscountType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/radioPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giảm theo %"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/radioFixedAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giảm tiền cố định"/>
+        </RadioGroup>
+        <EditText
+            android:id="@+id/editTextDiscountValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Giá trị (ví dụ: 10 hoặc 20000)"
+            android:inputType="numberDecimal"/>
+        <Button
+            android:id="@+id/buttonAddVoucher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo Voucher"
+            android:layout_gravity="end"
+            android:layout_marginTop="8dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Danh sách Voucher hiện có"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewVouchers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
+
+    </LinearLayout>
+</ScrollView>
+

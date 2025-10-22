@@ -17,18 +17,30 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.cardview.widget.CardView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_margin="16dp"
-                app:cardCornerRadius="16dp">
+                android:layout_height="300dp">
 
                 <ImageView
                     android:id="@+id/imageViewDetail"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop" />
-            </androidx.cardview.widget.CardView>
+
+                <ImageView
+                    android:id="@+id/imageViewFavorite"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_favorite_border"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:contentDescription="Nút yêu thích"/>
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/textViewDetailName"
@@ -70,7 +82,6 @@
                 android:layout_marginEnd="16dp"
                 app:singleSelection="true" />
 
-            <!-- THÊM PHẦN CHỌN SỐ LƯỢNG -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -104,6 +115,70 @@
                     android:layout_height="48dp"
                     android:text="+" />
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/textViewReviewsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đánh giá sản phẩm"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBarAverage"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/textViewReviewsTitle"
+                    android:layout_marginTop="8dp"
+                    android:isIndicator="true"
+                    android:numStars="5" />
+
+                <TextView
+                    android:id="@+id/textViewReviewCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/ratingBarAverage"
+                    android:layout_alignTop="@id/ratingBarAverage"
+                    android:layout_alignBottom="@id/ratingBarAverage"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:text="(0 đánh giá)"/>
+
+                <TextView
+                    android:id="@+id/textViewViewAllReviews"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/ratingBarAverage"
+                    android:layout_marginTop="8dp"
+                    android:text="Xem tất cả đánh giá >"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="4dp"/>
+
+                <Button
+                    android:id="@+id/buttonWriteReview"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Viết đánh giá"/>
+            </RelativeLayout>
 
         </LinearLayout>
     </ScrollView>

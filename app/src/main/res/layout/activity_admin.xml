@@ -14,8 +14,16 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Thêm Sản Phẩm Mới"
+            android:text="Bảng Điều Khiển Admin"
             android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thêm Sản Phẩm Mới"
+            android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
@@ -103,8 +111,16 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Quản lý Đơn hàng"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:text="Quản lý Đơn hàng" />
+
+        <Button
+            android:id="@+id/buttonManageVouchers"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Quản lý Voucher" />
 
     </LinearLayout>
 </ScrollView>
