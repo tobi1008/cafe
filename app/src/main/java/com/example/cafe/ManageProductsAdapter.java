@@ -1,6 +1,4 @@
 package com.example.cafe;
-
-// CÁC IMPORT CẦN THIẾT
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.cafe.Product; // <-- SỬA LẠI IMPORT
+import com.example.cafe.Product;
 
 import java.util.List;
 

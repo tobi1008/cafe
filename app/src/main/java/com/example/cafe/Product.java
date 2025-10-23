@@ -12,6 +12,8 @@ public class Product implements Serializable {
     private String hinhAnh;
     private int phanTramGiamGia;
     private String category;
+
+    // --- CÁC TRƯỜNG MỚI CHO VIỆC ĐÁNH GIÁ ---
     private double averageRating;
     private long reviewCount;
 
@@ -19,7 +21,7 @@ public class Product implements Serializable {
         // Constructor rỗng cần thiết cho Firebase
     }
 
-    // Constructor mới mà AdminActivity sẽ sử dụng
+    // Constructor để tạo đối tượng trong code (ID sẽ do Firestore gán)
     public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category) {
         this.id = id;
         this.ten = ten;
@@ -32,6 +34,7 @@ public class Product implements Serializable {
         this.averageRating = 0;
         this.reviewCount = 0;
     }
+
 
     // --- Getters & Setters ---
     public String getId() { return id; }
@@ -53,7 +56,7 @@ public class Product implements Serializable {
     public long getReviewCount() { return reviewCount; }
     public void setReviewCount(long reviewCount) { this.reviewCount = reviewCount; }
 
-    // --- Hàm tiện ích ---
+    // --- Các hàm tiện ích ---
     public double getPriceForSize(String size) {
         if (gia != null && gia.containsKey(size)) {
             Object priceObject = gia.get(size);

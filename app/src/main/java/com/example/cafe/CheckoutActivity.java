@@ -106,6 +106,11 @@ public class CheckoutActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng chọn hình thức thanh toán", Toast.LENGTH_SHORT).show();
                 return;
             }
+            // Kiểm tra xem đã có địa chỉ giao hàng chưa
+            if(tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
+                Toast.makeText(this, "Vui lòng thêm địa chỉ giao hàng", Toast.LENGTH_SHORT).show();
+                return;
+            }
             placeOrder();
         });
     }
@@ -121,7 +126,12 @@ public class CheckoutActivity extends AppCompatActivity {
         final EditText etNewAddress = dialogView.findViewById(R.id.editTextNewAddress);
         final CheckBox cbSaveNewAddress = dialogView.findViewById(R.id.checkboxSaveNewAddress);
 
-        etNewName.setText(tvDeliveryAddressLine1.getText());
+        // Hiển thị thông tin hiện tại nếu có
+        if (!tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
+            etNewName.setText(tvDeliveryAddressLine1.getText());
+            etNewAddress.setText(tvDeliveryAddressLine2.getText());
+        }
+        // Lấy SĐT từ user profile để hiển thị
         db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 User user = doc.toObject(User.class);
@@ -130,25 +140,31 @@ public class CheckoutActivity extends AppCompatActivity {
                 }
             }
         });
-        etNewAddress.setText(tvDeliveryAddressLine2.getText());
+
 
         builder.setPositiveButton("Lưu", (dialog, which) -> {
             String newName = etNewName.getText().toString().trim();
             String newPhone = etNewPhone.getText().toString().trim();
             String newAddress = etNewAddress.getText().toString().trim();
 
-            if (!newName.isEmpty() && !newAddress.isEmpty()) {
-                tvDeliveryAddressLine1.setText(newName);
-                tvDeliveryAddressLine2.setText(newAddress);
-
-                if (cbSaveNewAddress.isChecked()) {
-                    db.collection("users").document(userId).update(
-                            "name", newName,
-                            "phone", newPhone,
-                            "address", newAddress
-                    );
-                }
+            if (newName.isEmpty() || newPhone.isEmpty() || newAddress.isEmpty()) {
+                Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return; // Không đóng dialog nếu thiếu thông tin
             }
+
+            // Cập nhật lại UI ngay lập tức
+            tvDeliveryAddressLine1.setText(newName);
+            tvDeliveryAddressLine2.setText(newAddress);
+
+            // Nếu người dùng chọn lưu, cập nhật lên Firestore
+            if (cbSaveNewAddress.isChecked()) {
+                db.collection("users").document(userId).update(
+                        "name", newName,
+                        "phone", newPhone,
+                        "address", newAddress
+                );
+            }
+            dialog.dismiss(); // Đóng dialog sau khi lưu
         });
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
 
@@ -166,6 +182,9 @@ public class CheckoutActivity extends AppCompatActivity {
                     tvDeliveryAddressLine1.setText("Chưa có địa chỉ");
                     tvDeliveryAddressLine2.setText("Vui lòng nhấn 'Thay đổi' để thêm");
                 }
+            } else {
+                tvDeliveryAddressLine1.setText("Chưa có địa chỉ");
+                tvDeliveryAddressLine2.setText("Vui lòng nhấn 'Thay đổi' để thêm");
             }
         });
     }
@@ -177,8 +196,9 @@ public class CheckoutActivity extends AppCompatActivity {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                 CartItem item = doc.toObject(CartItem.class);
                 cartItems.add(item);
-                subtotal += item.getPrice() * item.getQuantity();
+                subtotal += item.getTotalItemPrice(); // Sử dụng hàm tính tổng tiền của item
             }
+            calculateDiscount(); // Tính lại discount dựa trên subtotal mới
             updateSummary();
         });
     }
@@ -201,10 +221,22 @@ public class CheckoutActivity extends AppCompatActivity {
                             Toast.makeText(this, "Áp dụng voucher thành công!", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(this, "Voucher đã hết hạn hoặc không hợp lệ.", Toast.LENGTH_SHORT).show();
+                            // Reset voucher nếu không hợp lệ
+                            appliedVoucher = null;
+                            calculateDiscount();
+                            updateSummary();
                         }
                     } else {
                         Toast.makeText(this, "Mã voucher không hợp lệ", Toast.LENGTH_SHORT).show();
+                        appliedVoucher = null;
+                        calculateDiscount();
+                        updateSummary();
                     }
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi kiểm tra voucher: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    appliedVoucher = null;
+                    calculateDiscount();
+                    updateSummary();
                 });
     }
 
@@ -216,8 +248,13 @@ public class CheckoutActivity extends AppCompatActivity {
 
         if ("PERCENT".equals(appliedVoucher.getDiscountType())) {
             discountAmount = subtotal * (appliedVoucher.getDiscountValue() / 100.0);
+            // Có thể thêm giới hạn giảm tối đa ở đây nếu cần
         } else { // FIXED_AMOUNT
             discountAmount = appliedVoucher.getDiscountValue();
+        }
+        // Đảm bảo số tiền giảm không lớn hơn tổng tiền hàng
+        if (discountAmount > subtotal) {
+            discountAmount = subtotal;
         }
     }
 

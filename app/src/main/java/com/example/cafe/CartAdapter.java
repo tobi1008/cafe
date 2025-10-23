@@ -20,7 +20,6 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     private List<CartItem> cartItemList;
     private CartItemListener listener;
 
-    // SỬA LỖI Ở ĐÂY: Định nghĩa interface CartItemListener
     public interface CartItemListener {
         void onQuantityChanged(CartItem item);
         void onItemDeleted(CartItem item);
@@ -47,12 +46,34 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         holder.quantity.setText(String.valueOf(cartItem.getQuantity()));
         holder.size.setText("Size: " + cartItem.getSelectedSize());
 
+        // Hiển thị tùy chọn Đá và Đường
+        String optionsText = "";
+        if (cartItem.getIceOption() != null) {
+            optionsText += cartItem.getIceOption();
+        }
+        if (cartItem.getSugarLevel() != null) {
+            if (!optionsText.isEmpty()) optionsText += ", ";
+            optionsText += cartItem.getSugarLevel();
+        }
+        holder.options.setText(optionsText);
+        holder.options.setVisibility(optionsText.isEmpty() ? View.GONE : View.VISIBLE);
+
+
+        // Hiển thị ghi chú
+        if (cartItem.getNote() != null && !cartItem.getNote().isEmpty()) {
+            holder.note.setText("Ghi chú: " + cartItem.getNote());
+            holder.note.setVisibility(View.VISIBLE);
+        } else {
+            holder.note.setVisibility(View.GONE);
+        }
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         holder.productPrice.setText(formatter.format(cartItem.getPrice()));
 
         Glide.with(context)
                 .load(cartItem.getProductImage())
                 .placeholder(R.drawable.ic_placeholder)
+                .error(R.drawable.ic_placeholder) // Use placeholder also on error
                 .into(holder.productImage);
 
         holder.btnIncrease.setOnClickListener(v -> {
@@ -81,7 +102,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
-        TextView productName, productPrice, quantity, size;
+        TextView productName, productPrice, quantity, size, options, note;
         Button btnIncrease, btnDecrease, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
@@ -91,6 +112,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             productPrice = itemView.findViewById(R.id.textViewCartItemPrice);
             quantity = itemView.findViewById(R.id.textViewQuantity);
             size = itemView.findViewById(R.id.textViewCartItemSize);
+            options = itemView.findViewById(R.id.textViewCartItemOptions);
+            note = itemView.findViewById(R.id.textViewCartItemNote);
             btnIncrease = itemView.findViewById(R.id.buttonIncrease);
             btnDecrease = itemView.findViewById(R.id.buttonDecrease);
             btnDelete = itemView.findViewById(R.id.buttonDelete);

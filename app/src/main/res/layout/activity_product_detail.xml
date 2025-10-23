@@ -25,7 +25,8 @@
                     android:id="@+id/imageViewDetail"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop" />
+                    android:scaleType="centerCrop"
+                    android:contentDescription="Hình ảnh sản phẩm"/>
 
                 <ImageView
                     android:id="@+id/imageViewFavorite"
@@ -47,8 +48,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="Product Name"
+                tools:text="Tên Sản Phẩm Dài Dài Dài"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -60,7 +62,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                android:text="Description goes here..."
+                tools:text="Mô tả sản phẩm rất dài và chi tiết ở đây..."
                 android:textSize="14sp" />
 
             <TextView
@@ -80,13 +82,128 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
-                app:singleSelection="true" />
+                app:singleSelection="true">
+                <!-- Chips sẽ được thêm bằng code -->
+            </com.google.android.material.chip.ChipGroup>
 
+            <!-- LỰA CHỌN ĐÁ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Đá"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <RadioGroup
+                android:id="@+id/radioGroupIce"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp">
+                <RadioButton
+                    android:id="@+id/radioIceTogether"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đá chung"
+                    android:checked="true"/>
+                <RadioButton
+                    android:id="@+id/radioIceSeparate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Đá riêng"/>
+            </RadioGroup>
+
+            <!-- LỰA CHỌN ĐƯỜNG -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Mức đường"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupSugar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                app:singleSelection="true">
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSugar100" style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100%" android:checked="true"/>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSugar70" style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="70%"/>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSugar50" style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%"/>
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipSugar30" style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%"/>
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- GHI CHÚ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Ghi chú thêm"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+            <EditText
+                android:id="@+id/editTextNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:hint="Ví dụ: Ít ngọt, nhiều đá..."
+                android:inputType="textMultiLine"
+                android:minLines="2"
+                android:background="@drawable/edit_text_background"
+                android:padding="12dp"/>
+
+
+            <!-- LỰA CHỌN THÊM (TOPPING) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Lựa chọn thêm"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <CheckBox
+                android:id="@+id/checkboxExtraCoffee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Thêm 1 gói cà phê (+10.000 đ)"/>
+
+            <CheckBox
+                android:id="@+id/checkboxExtraSugar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Thêm 1 gói đường (+2.000 đ)"/>
+
+
+            <!-- CHỌN SỐ LƯỢNG -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -124,6 +241,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"/>
 
+            <!-- KHU VỰC ĐÁNH GIÁ -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

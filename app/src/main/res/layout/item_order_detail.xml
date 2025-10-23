@@ -9,13 +9,16 @@
         android:id="@+id/imageViewItem"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        android:contentDescription="Ảnh sản phẩm trong đơn hàng"/>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@id/imageViewItem"
+        android:layout_toStartOf="@id/textViewItemPrice"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_centerVertical="true"
         android:orientation="vertical">
 
@@ -33,6 +36,23 @@
             android:layout_height="wrap_content"
             android:text="Size M x 2"/>
 
+        <!-- HIỂN THỊ CÁC TÙY CHỌN -->
+        <TextView
+            android:id="@+id/textViewItemOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đá chung, 100% đường"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp"/>
+        <TextView
+            android:id="@+id/textViewItemNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ghi chú: Ít ngọt"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:visibility="gone"/>
+
     </LinearLayout>
 
     <TextView
@@ -45,3 +65,4 @@
         android:textStyle="bold"/>
 
 </RelativeLayout>
+

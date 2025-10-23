@@ -6,8 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,10 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -33,14 +36,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class ProductDetailActivity extends AppCompatActivity {
 
-    // Khai báo biến
+    // --- Khai báo đầy đủ các biến ---
     private ImageView imageViewDetail, imageViewFavorite;
     private TextView textViewDetailName, textViewDetailDescription, textViewDetailPrice, textViewQuantity, textViewNoReviews, textViewReviewCount, textViewViewAllReviews;
     private RatingBar ratingBarAverage;
-    private ChipGroup chipGroupSize;
+    private ChipGroup chipGroupSize, chipGroupSugar;
+    private RadioGroup radioGroupIce;
+    private EditText editTextNote;
+    private CheckBox checkboxExtraCoffee, checkboxExtraSugar; // Thêm biến CheckBox
     private Button buttonAddToCartDetail, btnIncrease, btnDecrease, buttonWriteReview;
     private Product product;
     private String selectedSize = "";
@@ -50,6 +57,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     private String userId;
     private boolean isFavorite = false;
     private User currentUserProfile;
+    private String selectedIceOption = "Đá chung"; // Mặc định
+    private String selectedSugarLevel = "100%"; // Mặc định
+    private boolean addExtraCoffee = false;
+    private boolean addExtraSugar = false;
+    // --- Kết thúc phần khai báo ---
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +72,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Ánh xạ UI
+        // Ánh xạ đầy đủ các UI components
         imageViewDetail = findViewById(R.id.imageViewDetail);
         imageViewFavorite = findViewById(R.id.imageViewFavorite);
         textViewDetailName = findViewById(R.id.textViewDetailName);
@@ -75,6 +87,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         textViewReviewCount = findViewById(R.id.textViewReviewCount);
         textViewViewAllReviews = findViewById(R.id.textViewViewAllReviews);
         buttonWriteReview = findViewById(R.id.buttonWriteReview);
+        radioGroupIce = findViewById(R.id.radioGroupIce);
+        chipGroupSugar = findViewById(R.id.chipGroupSugar);
+        editTextNote = findViewById(R.id.editTextNote);
+        checkboxExtraCoffee = findViewById(R.id.checkboxExtraCoffee);
+        checkboxExtraSugar = findViewById(R.id.checkboxExtraSugar);
 
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -89,6 +106,8 @@ public class ProductDetailActivity extends AppCompatActivity {
             populateUI();
             setupQuantityButtons();
             checkIfFavorite();
+            setupOptionListeners();
+            setupToppingListeners();
         }
 
         // Gán sự kiện click
@@ -96,9 +115,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         imageViewFavorite.setOnClickListener(v -> toggleFavorite());
         buttonWriteReview.setOnClickListener(v -> showWriteReviewDialog());
         textViewViewAllReviews.setOnClickListener(v -> {
-            Intent intent = new Intent(ProductDetailActivity.this, AllReviewsActivity.class);
-            intent.putExtra("PRODUCT_ID", product.getId());
-            startActivity(intent);
+            if (product != null && product.getId() != null) {
+                Intent intent = new Intent(ProductDetailActivity.this, AllReviewsActivity.class);
+                intent.putExtra("PRODUCT_ID", product.getId());
+                startActivity(intent);
+            }
         });
     }
 
@@ -111,7 +132,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             product = documentSnapshot.toObject(Product.class);
-                            updateRatingUI();
+                            updateRatingUI(); // Cập nhật UI rating
                         }
                     });
         }
@@ -129,12 +150,20 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void populateUI() {
         textViewDetailName.setText(product.getTen());
         textViewDetailDescription.setText(product.getMoTa());
-        Glide.with(this).load(product.getHinhAnh()).into(imageViewDetail);
+        Glide.with(this).load(product.getHinhAnh()).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_placeholder).into(imageViewDetail);
 
         chipGroupSize.removeAllViews();
         Map<String, Double> prices = product.getGia();
         if (prices != null) {
-            for (String size : prices.keySet()) {
+            List<String> sortedSizes = new ArrayList<>(prices.keySet());
+            sortedSizes.sort((s1, s2) -> {
+                if (s1.equals("S")) return -1;
+                if (s1.equals("M") && s2.equals("L")) return -1;
+                if (s1.equals("L")) return 1;
+                return 0;
+            });
+
+            for (String size : sortedSizes) {
                 Chip chip = new Chip(this);
                 chip.setText(size);
                 chip.setCheckable(true);
@@ -145,12 +174,12 @@ public class ProductDetailActivity extends AppCompatActivity {
                 chipGroupSize.addView(chip);
             }
             if (chipGroupSize.getChildCount() > 0) {
-                ((Chip)chipGroupSize.getChildAt(0)).setChecked(true);
-                selectedSize = ((Chip)chipGroupSize.getChildAt(0)).getText().toString();
+                ((Chip) chipGroupSize.getChildAt(0)).setChecked(true);
+                selectedSize = ((Chip) chipGroupSize.getChildAt(0)).getText().toString();
                 updatePrice();
             }
         }
-        updateRatingUI();
+        updateRatingUI(); // Hiển thị rating ban đầu
     }
 
     private void updateRatingUI() {
@@ -159,6 +188,41 @@ public class ProductDetailActivity extends AppCompatActivity {
             textViewReviewCount.setText("(" + product.getReviewCount() + " đánh giá)");
         }
     }
+
+    private void setupOptionListeners() {
+        radioGroupIce.setOnCheckedChangeListener((group, checkedId) -> {
+            RadioButton rb = findViewById(checkedId);
+            selectedIceOption = rb.getText().toString();
+        });
+
+        chipGroupSugar.setOnCheckedChangeListener((group, checkedId) -> {
+            Chip chip = findViewById(checkedId);
+            if (chip != null) {
+                selectedSugarLevel = chip.getText().toString();
+            } else {
+                selectedSugarLevel = "100%";
+                Chip defaultChip = findViewById(R.id.chipSugar100);
+                if (defaultChip != null) defaultChip.setChecked(true);
+            }
+        });
+        if (chipGroupSugar.getCheckedChipId() == View.NO_ID) {
+            Chip defaultChip = findViewById(R.id.chipSugar100);
+            if (defaultChip != null) defaultChip.setChecked(true);
+            selectedSugarLevel = "100%";
+        }
+    }
+
+    private void setupToppingListeners() {
+        checkboxExtraCoffee.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            addExtraCoffee = isChecked;
+            updatePrice(); // Tính lại giá khi chọn/bỏ chọn
+        });
+        checkboxExtraSugar.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            addExtraSugar = isChecked;
+            updatePrice(); // Tính lại giá khi chọn/bỏ chọn
+        });
+    }
+
 
     private void setupQuantityButtons() {
         btnIncrease.setOnClickListener(v -> {
@@ -177,9 +241,18 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void updatePrice() {
-        if (!selectedSize.isEmpty()) {
-            double singlePrice = product.getFinalPriceForSize(selectedSize);
-            double totalPrice = singlePrice * quantity;
+        if (!selectedSize.isEmpty() && product != null) {
+            double singlePrice = product.getFinalPriceForSize(selectedSize); // Giá gốc size + % giảm giá
+
+            // Cộng thêm giá topping nếu được chọn
+            if (addExtraCoffee) {
+                singlePrice += CartItem.EXTRA_COFFEE_PRICE;
+            }
+            if (addExtraSugar) {
+                singlePrice += CartItem.EXTRA_SUGAR_PRICE;
+            }
+
+            double totalPrice = singlePrice * quantity; // Nhân với số lượng
             NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             textViewDetailPrice.setText(formatter.format(totalPrice));
         }
@@ -194,18 +267,39 @@ public class ProductDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Vui lòng đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (product == null || product.getId() == null) {
+            Toast.makeText(this, "Lỗi sản phẩm không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        String cartItemId = product.getId() + "_" + selectedSize;
+        String note = editTextNote.getText().toString().trim(); // Lấy ghi chú
+        String cartItemId = product.getId() + "_" + selectedSize; // ID cơ bản
         DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart").document(cartItemId);
 
         db.runTransaction(transaction -> {
             CartItem existingItem = transaction.get(cartItemRef).toObject(CartItem.class);
-            if (existingItem != null) {
+
+            // Kiểm tra xem có item nào giống hệt (cả size và TẤT CẢ tùy chọn) không
+            boolean optionsMatch = existingItem != null &&
+                    Objects.equals(existingItem.getSelectedSize(), selectedSize) && // Check size here too
+                    Objects.equals(existingItem.getIceOption(), selectedIceOption) &&
+                    Objects.equals(existingItem.getSugarLevel(), selectedSugarLevel) &&
+                    Objects.equals(existingItem.getNote(), note) &&
+                    existingItem.isExtraCoffeeShot() == addExtraCoffee &&
+                    existingItem.isExtraSugarPacket() == addExtraSugar;
+
+            if (optionsMatch) {
+                // Nếu giống hệt, cập nhật số lượng
                 transaction.update(cartItemRef, "quantity", existingItem.getQuantity() + quantity);
             } else {
-                double price = product.getFinalPriceForSize(selectedSize);
-                CartItem newItem = new CartItem(product.getId(), product.getTen(), price, product.getHinhAnh(), quantity, selectedSize);
-                transaction.set(cartItemRef, newItem);
+                // Nếu khác (hoặc chưa có), tạo một item mới hoàn toàn
+                // Tạo ID mới để đảm bảo không ghi đè nếu chỉ khác topping
+                String newCartItemId = cartItemId + "_" + selectedIceOption + "_" + selectedSugarLevel + "_" + addExtraCoffee + "_" + addExtraSugar + "_" + note.hashCode() + "_" + System.currentTimeMillis();
+                DocumentReference newCartItemRef = db.collection("users").document(userId).collection("cart").document(newCartItemId);
+
+                double price = product.getFinalPriceForSize(selectedSize); // Chỉ lấy giá gốc size + % giảm giá
+                CartItem newItem = new CartItem(product.getId(), product.getTen(), price, product.getHinhAnh(), quantity, selectedSize, selectedIceOption, selectedSugarLevel, note, addExtraCoffee, addExtraSugar);
+                transaction.set(newCartItemRef, newItem);
             }
             return null;
         }).addOnSuccessListener(aVoid -> {
@@ -263,25 +357,36 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         newReview.setRating(rating);
         newReview.setComment(comment);
-        newReview.setTimestamp(new Date());
+        newReview.setTimestamp(new Date()); // Sử dụng java.util.Date
 
         WriteBatch batch = db.batch();
         batch.set(reviewRef, newReview);
 
-        double newAvgRating = ((product.getAverageRating() * product.getReviewCount()) + rating) / (product.getReviewCount() + 1);
-        long newReviewCount = product.getReviewCount() + 1;
+        // Cần tải lại product để đảm bảo lấy đúng reviewCount và averageRating mới nhất
+        db.runTransaction(transaction -> {
+            DocumentSnapshot productSnapshot = transaction.get(productRef);
+            Product currentProductData = productSnapshot.toObject(Product.class);
+            if (currentProductData == null) {
+                throw new RuntimeException("Không tìm thấy sản phẩm để cập nhật đánh giá.");
+            }
+            double currentAvg = currentProductData.getAverageRating();
+            long currentCount = currentProductData.getReviewCount();
 
-        batch.update(productRef, "averageRating", newAvgRating);
-        batch.update(productRef, "reviewCount", newReviewCount);
+            double newAvgRating = ((currentAvg * currentCount) + rating) / (currentCount + 1);
+            long newReviewCount = currentCount + 1;
 
-        batch.commit().addOnSuccessListener(aVoid -> {
+            transaction.update(productRef, "averageRating", newAvgRating);
+            transaction.update(productRef, "reviewCount", newReviewCount);
+            return newAvgRating; // Trả về giá trị để cập nhật UI
+        }).addOnSuccessListener(newAvgRating -> {
             Toast.makeText(this, "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();
             // Cập nhật lại UI sau khi gửi
             product.setAverageRating(newAvgRating);
-            product.setReviewCount(newReviewCount);
+            product.setReviewCount(product.getReviewCount() + 1); // Cập nhật count cục bộ
             updateRatingUI();
+            // loadReviews(); // Không cần tải lại ở đây nữa
         }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Gửi đánh giá thất bại", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Gửi đánh giá thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -297,7 +402,13 @@ public class ProductDetailActivity extends AppCompatActivity {
                     isFavorite = false;
                     imageViewFavorite.setImageResource(R.drawable.ic_favorite_border);
                 }
+            } else {
+                isFavorite = false;
+                imageViewFavorite.setImageResource(R.drawable.ic_favorite_border);
             }
+        }).addOnFailureListener(e -> {
+            isFavorite = false;
+            imageViewFavorite.setImageResource(R.drawable.ic_favorite_border);
         });
     }
 

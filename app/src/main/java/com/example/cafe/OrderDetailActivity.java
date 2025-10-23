@@ -23,20 +23,27 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
+// Thêm các import còn thiếu
+import java.util.ArrayList;
+import java.util.List;
+import android.content.Intent;
+import android.widget.ImageView; // Cần cho nút Back
+import com.bumptech.glide.Glide; // Cần cho ảnh sản phẩm trong adapter
+import java.util.Date; // Cần cho kiểu Date
+
 public class OrderDetailActivity extends AppCompatActivity {
 
-    // --- SỬA LỖI Ở ĐÂY: Bổ sung các biến còn thiếu ---
+    // Khai báo đầy đủ các biến
     private TextView tvOrderId, tvOrderDate, tvOrderStatus, tvCustomerName, tvCustomerPhone, tvCustomerAddress, tvTotalPrice;
     private RecyclerView recyclerViewItems;
     private OrderDetailAdapter adapter;
     private Order order;
-    // --- Kết thúc phần sửa lỗi ---
-
     private LinearLayout adminActionLayout;
     private Spinner spinnerStatus;
     private Button buttonUpdateStatus;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private ImageView imageViewBack; // Thêm nút Back
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +54,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         // Ánh xạ UI
-        // SỬA LỖI Ở ĐÂY: Bổ sung phần ánh xạ còn thiếu
         tvOrderId = findViewById(R.id.textViewDetailOrderId);
         tvOrderDate = findViewById(R.id.textViewDetailOrderDate);
         tvOrderStatus = findViewById(R.id.textViewDetailOrderStatus);
@@ -57,23 +63,30 @@ public class OrderDetailActivity extends AppCompatActivity {
         tvTotalPrice = findViewById(R.id.textViewDetailTotalPrice);
         recyclerViewItems = findViewById(R.id.recyclerViewOrderDetailItems);
         recyclerViewItems.setLayoutManager(new LinearLayoutManager(this));
-        // --- Kết thúc phần sửa lỗi ---
-
         adminActionLayout = findViewById(R.id.adminActionLayout);
         spinnerStatus = findViewById(R.id.spinnerStatus);
         buttonUpdateStatus = findViewById(R.id.buttonUpdateStatus);
+        // imageViewBack = findViewById(R.id.imageViewBack); // Giao diện activity_order_detail chưa có nút back
 
+        // Nhận đối tượng Order từ Intent
         order = (Order) getIntent().getSerializableExtra("ORDER_DETAIL");
 
         if (order != null) {
             populateUI();
             checkUserRoleAndSetupAdminUI();
         }
+
+        // if (imageViewBack != null) {
+        //     imageViewBack.setOnClickListener(v -> finish());
+        // }
     }
 
     private void populateUI() {
-        // SỬA LỖI Ở ĐÂY: Bổ sung phần hiển thị thông tin còn thiếu
-        tvOrderId.setText("Mã đơn hàng: #" + order.getOrderId().substring(0, 8).toUpperCase());
+        if (order.getOrderId() != null && order.getOrderId().length() >= 8) {
+            tvOrderId.setText("Mã đơn hàng: #" + order.getOrderId().substring(0, 8).toUpperCase());
+        } else {
+            tvOrderId.setText("Mã đơn hàng: N/A");
+        }
 
         if (order.getOrderDate() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
@@ -82,7 +95,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         tvOrderStatus.setText("Trạng thái: " + order.getStatus());
         tvCustomerName.setText(order.getCustomerName());
-        tvCustomerPhone.setText(order.getCustomerPhone());
+        tvCustomerPhone.setText(order.getCustomerPhone() != null ? order.getCustomerPhone() : "Chưa có SĐT");
         tvCustomerAddress.setText(order.getCustomerAddress());
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -93,7 +106,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             adapter = new OrderDetailAdapter(this, order.getItems());
             recyclerViewItems.setAdapter(adapter);
         }
-        // --- Kết thúc phần sửa lỗi ---
     }
 
     private void checkUserRoleAndSetupAdminUI() {
@@ -108,8 +120,15 @@ public class OrderDetailActivity extends AppCompatActivity {
                         if (user != null && "admin".equals(user.getRole())) {
                             adminActionLayout.setVisibility(View.VISIBLE);
                             setupStatusSpinner();
+                        } else {
+                            adminActionLayout.setVisibility(View.GONE);
                         }
+                    } else {
+                        adminActionLayout.setVisibility(View.GONE);
                     }
+                })
+                .addOnFailureListener(e -> {
+                    adminActionLayout.setVisibility(View.GONE); // Ẩn nếu có lỗi
                 });
     }
 
@@ -134,6 +153,10 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void updateOrderStatus() {
         String newStatus = spinnerStatus.getSelectedItem().toString();
+        if (order == null || order.getOrderId() == null) {
+            Toast.makeText(this, "Lỗi: Không tìm thấy ID đơn hàng", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         db.collection("orders").document(order.getOrderId())
                 .update("status", newStatus)
@@ -141,6 +164,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                     Toast.makeText(this, "Cập nhật trạng thái thành công!", Toast.LENGTH_SHORT).show();
                     // Cập nhật lại TextView trạng thái trên màn hình
                     tvOrderStatus.setText("Trạng thái: " + newStatus);
+                    order.setStatus(newStatus); // Cập nhật cả đối tượng order cục bộ
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Cập nhật thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();

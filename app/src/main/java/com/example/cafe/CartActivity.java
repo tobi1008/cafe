@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -41,12 +42,13 @@ public class CartActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        if (mAuth.getCurrentUser() == null) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
             Toast.makeText(this, "Vui lòng đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
-            finish();
+            finish(); // Đóng Activity nếu chưa đăng nhập
             return;
         }
-        userId = mAuth.getCurrentUser().getUid();
+        userId = currentUser.getUid();
 
         textViewTotalPrice = findViewById(R.id.textViewTotalPrice);
         textViewEmptyCart = findViewById(R.id.textViewEmptyCart);
@@ -69,20 +71,25 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadCartItems();
+        loadCartItems(); // Tải lại giỏ hàng mỗi khi quay lại màn hình
     }
 
     private void setupAdapter() {
         cartAdapter = new CartAdapter(this, cartItemList, new CartAdapter.CartItemListener() {
             @Override
             public void onQuantityChanged(CartItem item) {
+                // Cập nhật số lượng item đó trên Firestore
                 updateCartItemInFirestore(item);
+                // Tính lại tổng tiền và cập nhật UI
                 updateTotalPrice();
             }
 
             @Override
             public void onItemDeleted(CartItem item) {
+                // Xóa item đó khỏi Firestore
                 deleteCartItemFromFirestore(item);
+                // Tải lại toàn bộ giỏ hàng để cập nhật UI (đơn giản nhất)
+                // loadCartItems(); // Đã gọi trong deleteCartItemFromFirestore
             }
         });
     }
@@ -93,14 +100,18 @@ public class CartActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     cartItemList.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        // --- SỬA LỖI Ở ĐÂY: Thêm try-catch để bỏ qua dữ liệu không hợp lệ ---
                         try {
                             CartItem item = doc.toObject(CartItem.class);
+                            // Cần gán ID document vào CartItem để biết document nào cần xóa/sửa
+                            // Firestore không tự làm việc này khi dùng toObject()
+                            // ID document của chúng ta có dạng productId_size_optionHash_timestamp
+                            // Không cần lưu ID document ở đây vì logic xóa/sửa dùng ID tự tạo
+
                             cartItemList.add(item);
                         } catch (Exception e) {
                             Log.e("CartActivity", "Lỗi khi chuyển đổi item trong giỏ hàng: " + doc.getId(), e);
                             // Có thể xóa item bị lỗi này đi để dọn dẹp database
-                            // doc.getReference().delete();
+                            doc.getReference().delete(); // Xóa item lỗi
                         }
                     }
                     cartAdapter.notifyDataSetChanged();
@@ -113,7 +124,7 @@ public class CartActivity extends AppCompatActivity {
     private void updateTotalPrice() {
         double total = 0;
         for (CartItem item : cartItemList) {
-            total += item.getPrice() * item.getQuantity();
+            total += item.getTotalItemPrice(); // Sử dụng hàm đã bao gồm topping và số lượng
         }
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         textViewTotalPrice.setText(formatter.format(total));
@@ -129,19 +140,60 @@ public class CartActivity extends AppCompatActivity {
         }
     }
 
+    // Hàm tìm ID document trên Firestore dựa vào CartItem
+    // Vì ID document giờ phức tạp hơn (có thể có timestamp), cần query để tìm
+    private void findDocumentIdAndUpdateQuantity(CartItem item) {
+        db.collection("users").document(userId).collection("cart")
+                .whereEqualTo("productId", item.getProductId())
+                .whereEqualTo("selectedSize", item.getSelectedSize())
+                .whereEqualTo("iceOption", item.getIceOption())
+                .whereEqualTo("sugarLevel", item.getSugarLevel())
+                .whereEqualTo("note", item.getNote())
+                .whereEqualTo("extraCoffeeShot", item.isExtraCoffeeShot())
+                .whereEqualTo("extraSugarPacket", item.isExtraSugarPacket())
+                .limit(1) // Chỉ cần tìm 1 document khớp
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentReference itemRef = queryDocumentSnapshots.getDocuments().get(0).getReference();
+                        itemRef.update("quantity", item.getQuantity());
+                    } else {
+                        Log.w("CartActivity", "Không tìm thấy document để cập nhật số lượng cho: " + item.getProductName());
+                    }
+                });
+    }
+
+    // Hàm tìm ID document trên Firestore dựa vào CartItem để xóa
+    private void findDocumentIdAndDelete(CartItem item) {
+        db.collection("users").document(userId).collection("cart")
+                .whereEqualTo("productId", item.getProductId())
+                .whereEqualTo("selectedSize", item.getSelectedSize())
+                .whereEqualTo("iceOption", item.getIceOption())
+                .whereEqualTo("sugarLevel", item.getSugarLevel())
+                .whereEqualTo("note", item.getNote())
+                .whereEqualTo("extraCoffeeShot", item.isExtraCoffeeShot())
+                .whereEqualTo("extraSugarPacket", item.isExtraSugarPacket())
+                .limit(1) // Chỉ cần tìm 1 document khớp
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentReference itemRef = queryDocumentSnapshots.getDocuments().get(0).getReference();
+                        itemRef.delete().addOnSuccessListener(aVoid -> loadCartItems()); // Tải lại sau khi xóa
+                    } else {
+                        Log.w("CartActivity", "Không tìm thấy document để xóa cho: " + item.getProductName());
+                        // Nếu không tìm thấy, vẫn tải lại list để xóa item khỏi UI
+                        loadCartItems();
+                    }
+                }).addOnFailureListener(e -> loadCartItems()); // Tải lại nếu có lỗi query
+    }
+
+
     private void updateCartItemInFirestore(CartItem item) {
-        String cartItemId = item.getProductId() + "_" + item.getSelectedSize();
-        DocumentReference itemRef = db.collection("users").document(userId).collection("cart").document(cartItemId);
-        itemRef.update("quantity", item.getQuantity());
+        findDocumentIdAndUpdateQuantity(item);
     }
 
     private void deleteCartItemFromFirestore(CartItem item) {
-        String cartItemId = item.getProductId() + "_" + item.getSelectedSize();
-        db.collection("users").document(userId).collection("cart").document(cartItemId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    loadCartItems(); // Tải lại giỏ hàng sau khi xóa thành công
-                });
+        findDocumentIdAndDelete(item);
     }
 }
 
