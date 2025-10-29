@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ public class HomeActivity extends AppCompatActivity {
     private CategoryAdapter categoryAdapter;
     private List<Product> fullProductList = new ArrayList<>();
     private List<Product> currentlyDisplayedList = new ArrayList<>();
+    private List<String> categoryNames = new ArrayList<>();
     private EditText searchEditText;
     private FirebaseFirestore db;
     private ImageView bannerImageView;
@@ -52,11 +54,11 @@ public class HomeActivity extends AppCompatActivity {
         bannerImageView = findViewById(R.id.bannerImageView);
 
         setupBottomNavigationView();
-        setupCategoryRecyclerView();
+
         setupSearch();
         loadBannerImage();
 
-        loadHappyHours();
+        loadCategories();
     }
 
     private void loadBannerImage() {
@@ -65,10 +67,9 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupCategoryRecyclerView() {
-        List<String> categories = new ArrayList<>(Arrays.asList("Tất cả", "Cà Phê", "Trà", "Đá Xay", "Bánh Ngọt"));
-        categoryAdapter = new CategoryAdapter(this, categories, category -> {
+        Log.d(TAG, "Setting up Category RecyclerView with " + categoryNames.size() + " categories.");
+        categoryAdapter = new CategoryAdapter(this, categoryNames, category -> {
             selectedCategory = category;
-            // Chỉ lọc khi adapter đã sẵn sàng
             if (productAdapter != null) {
                 filterProductsByCategory(selectedCategory);
             }
@@ -84,19 +85,49 @@ public class HomeActivity extends AppCompatActivity {
         Log.d(TAG, "Product RecyclerView setup completed.");
     }
 
+    private void loadCategories() {
+        Log.d(TAG, "Bắt đầu tải Categories...");
+        db.collection("Categories")
+                .orderBy("tenDanhMuc", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    categoryNames.clear();
+                    categoryNames.add("Tất cả");
+
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        try {
+                            Category cat = document.toObject(Category.class);
+                            if (cat != null && cat.getTenDanhMuc() != null && !cat.getTenDanhMuc().isEmpty()) {
+                                categoryNames.add(cat.getTenDanhMuc());
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Lỗi khi chuyển đổi Category: " + document.getId(), e);
+                        }
+                    }
+                    Log.d(TAG, "Đã tải " + (categoryNames.size() - 1) + " categories từ Firebase.");
+                    setupCategoryRecyclerView();
+                    loadHappyHours();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi khi tải Categories", e);
+                    categoryNames.clear();
+                    categoryNames.add("Tất cả");
+                    setupCategoryRecyclerView();
+                    loadHappyHours();
+                });
+    }
+
 
     private void loadHappyHours() {
         Log.d(TAG, "Bắt đầu tải Happy Hours...");
         db.collection("HappyHours")
-                // *** SỬA LỖI QUERY: Dùng "dangBat" thay vì "active" ***
                 .whereEqualTo("dangBat", true)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    activeHappyHourMap.clear(); // Xóa map cũ
+                    activeHappyHourMap.clear();
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {
                             HappyHour hh = document.toObject(HappyHour.class);
-                            // *** QUAN TRỌNG: Lấy ID từ document và dùng làm key ***
                             hh.setId(document.getId());
                             activeHappyHourMap.put(hh.getId(), hh);
                         } catch (Exception e) {
@@ -128,10 +159,9 @@ public class HomeActivity extends AppCompatActivity {
                             }
                         }
                         Log.d(TAG, "Đã tải " + fullProductList.size() + " products.");
-                        if (productAdapter == null) { // Chỉ setup lần đầu
+                        if (productAdapter == null) {
                             setupProductRecyclerView();
                         }
-                        // Và lọc lần đầu
                         filterProductsByCategory(selectedCategory);
                     } else {
                         Log.e(TAG, "Lỗi khi tải Products: ", task.getException());
@@ -140,14 +170,14 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 
-    private void filterProductsByCategory(String category) {
-        Log.d(TAG, "Filtering by category: " + category);
+    private void filterProductsByCategory(String categoryNameToFilter) {
+        Log.d(TAG, "Filtering by category: " + categoryNameToFilter);
         List<Product> filteredByCategoryList = new ArrayList<>();
-        if (category.equals("Tất cả")) {
+        if (categoryNameToFilter.equals("Tất cả")) {
             filteredByCategoryList.addAll(fullProductList);
         } else {
             for (Product product : fullProductList) {
-                if (product.getCategory() != null && product.getCategory().equalsIgnoreCase(category)) {
+                if (product.getCategory() != null && product.getCategory().equalsIgnoreCase(categoryNameToFilter)) {
                     filteredByCategoryList.add(product);
                 }
             }
@@ -158,18 +188,19 @@ public class HomeActivity extends AppCompatActivity {
     private void filterProductsBySearch(String searchText, List<Product> sourceList) {
         Log.d(TAG, "Filtering by search: " + searchText);
         List<Product> filteredList = new ArrayList<>();
-        for (Product product : sourceList) {
-            // Kiểm tra null cho tên sản phẩm
-            if (product.getTen() != null && product.getTen().toLowerCase().contains(searchText.toLowerCase())) {
-                filteredList.add(product);
+        if (searchText.isEmpty()) {
+            filteredList.addAll(sourceList);
+        } else {
+            for (Product product : sourceList) {
+                if (product.getTen() != null && product.getTen().toLowerCase().contains(searchText.toLowerCase())) {
+                    filteredList.add(product);
+                }
             }
         }
 
-        // *** CẬP NHẬT TRỰC TIẾP currentlyDisplayedList ***
         currentlyDisplayedList.clear();
         currentlyDisplayedList.addAll(filteredList);
 
-        // *** QUAN TRỌNG: Kiểm tra xem adapter đã được tạo chưa ***
         if (productAdapter != null) {
             productAdapter.notifyDataSetChanged();
             Log.d(TAG, "Adapter notified, displaying " + currentlyDisplayedList.size() + " items.");
@@ -185,8 +216,6 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Lọc lại mỗi khi text thay đổi
-                // Chỉ lọc khi adapter đã sẵn sàng
                 if (productAdapter != null) {
                     filterProductsByCategory(selectedCategory);
                 }

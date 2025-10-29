@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,18 +20,29 @@
             android:layout_marginBottom="24dp"/>
 
         <!-- Tên sản phẩm -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tên sản phẩm"
+            android:textStyle="bold"/>
         <EditText
             android:id="@+id/editProductName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Tên sản phẩm"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Giá Size (Khớp với Product.java và AdminActivity) -->
+        <!-- Giá Size -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giá theo Size"
+            android:textStyle="bold"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
             <EditText
                 android:id="@+id/editPriceS"
                 android:layout_width="0dp"
@@ -61,41 +71,65 @@
         </LinearLayout>
 
         <!-- Mô tả -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mô tả ngắn"
+            android:textStyle="bold"/>
         <EditText
             android:id="@+id/editProductDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Mô tả ngắn"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"/>
 
         <!-- URL Hình ảnh -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="URL Hình ảnh"
+            android:textStyle="bold"/>
         <EditText
             android:id="@+id/editProductImageUrl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="URL Hình ảnh" />
+            android:hint="URL Hình ảnh"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Giảm giá (%) (Khớp với Product.java) -->
+        <!-- Giảm giá (%) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phần trăm giảm giá"
+            android:textStyle="bold"/>
         <EditText
             android:id="@+id/editSalePercent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Phần trăm giảm giá (ví dụ: 10)"
-            android:inputType="number"/>
-
-        <!-- Danh mục (Khớp với Product.java) -->
-        <EditText
-            android:id="@+id/editCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Danh mục (ví dụ: Cà Phê, Trà)"
+            android:inputType="number"
             android:layout_marginBottom="16dp"/>
 
-        <!-- === THÊM MỚI TẠI ĐÂY === -->
+        <!-- THAY EditText BẰNG Spinner CHO CATEGORY -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Áp dụng Giờ Vàng (Happy Hour):"
+            android:text="Chọn Danh Mục"
+            android:textStyle="bold"/>
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
+            android:layout_marginBottom="16dp" />
+
+
+        <!-- === GIỮ NGUYÊN SPINNER HAPPY HOUR === -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Áp dụng Giờ Vàng (Tùy chọn):"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginTop="16dp"/>
@@ -103,13 +137,10 @@
         <Spinner
             android:id="@+id/spinnerHappyHour"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Spinner.Underlined"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:padding="8dp"
-            android:background="@android:drawable/btn_dropdown" />
-        <!-- === KẾT THÚC THÊM MỚI === -->
-
+            android:layout_marginBottom="24dp" />
 
         <!-- Nút Lưu -->
         <Button

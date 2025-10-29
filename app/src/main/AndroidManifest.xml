@@ -69,7 +69,13 @@
             android:name=".ManageVouchersActivity"
             android:exported="false" />
         <activity
-            android:name=".ManageHappyHourActivity" />
+            android:name=".ManageHappyHourActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ManageCategoriesActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
