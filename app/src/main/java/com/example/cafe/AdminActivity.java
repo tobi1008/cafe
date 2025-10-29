@@ -14,7 +14,7 @@ import java.util.Map;
 public class AdminActivity extends AppCompatActivity {
 
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent, etCategory;
-    private Button btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers;
+    private Button btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers, btnManageHappyHour;
     private FirebaseFirestore db;
 
     @Override
@@ -37,12 +37,14 @@ public class AdminActivity extends AppCompatActivity {
         btnManageProducts = findViewById(R.id.buttonManageProducts);
         btnManageOrders = findViewById(R.id.buttonManageOrders);
         btnManageVouchers = findViewById(R.id.buttonManageVouchers);
+        btnManageHappyHour = findViewById(R.id.buttonManageHappyHour);
 
         // Gán sự kiện click cho các nút
         btnAddProduct.setOnClickListener(v -> addProduct());
         btnManageProducts.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class)));
         btnManageOrders.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageOrdersActivity.class)));
         btnManageVouchers.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageVouchersActivity.class)));
+        btnManageHappyHour.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageHappyHourActivity.class)));
     }
 
     private void addProduct() {
@@ -70,15 +72,15 @@ public class AdminActivity extends AppCompatActivity {
 
         int phanTramGiamGia = salePercentStr.isEmpty() ? 0 : Integer.parseInt(salePercentStr);
 
-        // Tạo đối tượng Product mới
+
         Product newProduct = new Product(null, ten, gia, moTa, hinhAnh, phanTramGiamGia, category);
 
-        // Thêm sản phẩm lên Firestore
+
         db.collection("cafe")
                 .add(newProduct)
                 .addOnSuccessListener(documentReference -> {
                     String docId = documentReference.getId();
-                    documentReference.update("id", docId); // Cập nhật lại ID cho sản phẩm
+                    documentReference.update("id", docId);
                     Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
                     // Xóa trống các ô nhập liệu
                     etName.setText("");
@@ -96,4 +98,3 @@ public class AdminActivity extends AppCompatActivity {
                 });
     }
 }
-

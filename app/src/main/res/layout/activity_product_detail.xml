@@ -15,7 +15,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -64,6 +65,22 @@
                 android:layout_marginEnd="16dp"
                 tools:text="Mô tả sản phẩm rất dài và chi tiết ở đây..."
                 android:textSize="14sp" />
+
+            <!-- *** TAG GIỜ VÀNG MỚI *** -->
+            <TextView
+                android:id="@+id/textViewHappyHourTag"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/discount_background"
+                android:padding="8dp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:visibility="visible"
+                tools:text="🔥 Đang giảm giá Giờ Vàng 20%" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -316,8 +333,24 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:text="Price"
+            android:text="Tổng cộng"
             android:textSize="14sp" />
+
+        <!-- *** GIÁ GỐC GẠCH NGANG (MỚI) *** -->
+        <TextView
+            android:id="@+id/textViewOriginalPriceDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/textViewPriceLabel"
+            android:layout_alignTop="@id/textViewPriceLabel"
+            android:layout_alignBottom="@id/textViewPriceLabel"
+            android:layout_marginStart="8dp"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="100.000 đ" />
 
         <TextView
             android:id="@+id/textViewDetailPrice"
@@ -341,4 +374,3 @@
     </RelativeLayout>
 
 </RelativeLayout>
-

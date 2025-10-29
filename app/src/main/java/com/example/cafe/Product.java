@@ -12,17 +12,24 @@ public class Product implements Serializable {
     private String hinhAnh;
     private int phanTramGiamGia;
     private String category;
-
-    // --- CÁC TRƯỜNG MỚI CHO VIỆC ĐÁNH GIÁ ---
     private double averageRating;
     private long reviewCount;
+
+    // --- TRƯỜNG MỚI ĐÃ THÊM ---
+    private String happyHourId; // <-- Thêm trường này
 
     public Product() {
         // Constructor rỗng cần thiết cho Firebase
     }
 
-    // Constructor để tạo đối tượng trong code (ID sẽ do Firestore gán)
+    // Constructor 7 tham số (Gốc của bạn - Đã cập nhật để gọi hàm 8)
     public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category) {
+        // Gọi hàm khởi tạo 8 tham số với happyHourId là null
+        this(id, ten, gia, moTa, hinhAnh, phanTramGiamGia, category, null);
+    }
+
+    // --- HÀM KHỞI TẠO 8 THAM SỐ MỚI ---
+    public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category, String happyHourId) {
         this.id = id;
         this.ten = ten;
         this.gia = gia;
@@ -30,11 +37,10 @@ public class Product implements Serializable {
         this.hinhAnh = hinhAnh;
         this.phanTramGiamGia = phanTramGiamGia;
         this.category = category;
-        // Gán giá trị mặc định cho các sản phẩm mới
         this.averageRating = 0;
         this.reviewCount = 0;
+        this.happyHourId = happyHourId; // <-- Thêm dòng này
     }
-
 
     // --- Getters & Setters ---
     public String getId() { return id; }
@@ -56,6 +62,11 @@ public class Product implements Serializable {
     public long getReviewCount() { return reviewCount; }
     public void setReviewCount(long reviewCount) { this.reviewCount = reviewCount; }
 
+    // --- GETTER & SETTER MỚI CHO HAPPY HOUR ---
+    public String getHappyHourId() { return happyHourId; }
+    public void setHappyHourId(String happyHourId) { this.happyHourId = happyHourId; }
+
+
     // --- Các hàm tiện ích ---
     public double getPriceForSize(String size) {
         if (gia != null && gia.containsKey(size)) {
@@ -75,4 +86,3 @@ public class Product implements Serializable {
         return originalPrice;
     }
 }
-

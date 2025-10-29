@@ -7,23 +7,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import java.text.NumberFormat;
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
     private Context context;
     private List<Product> productList;
+    private Map<String, HappyHour> happyHourMap;
 
-    public ProductAdapter(Context context, List<Product> productList) {
+    public ProductAdapter(Context context, List<Product> productList, Map<String, HappyHour> happyHourMap) {
         this.context = context;
         this.productList = productList;
+        this.happyHourMap = happyHourMap;
     }
 
     @NonNull
@@ -37,33 +43,92 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
 
-        holder.productName.setText(product.getTen());
-
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-
-        // Logic hiển thị giá
-        if (product.getPhanTramGiamGia() > 0) {
-            holder.productPrice.setText(formatter.format(product.getFinalPriceForSize("M"))); // Hiển thị giá size M làm mặc định
-            holder.originalPrice.setText(formatter.format(product.getPriceForSize("M")));
-            holder.originalPrice.setPaintFlags(holder.originalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.originalPrice.setVisibility(View.VISIBLE);
-        } else {
-            holder.productPrice.setText(formatter.format(product.getPriceForSize("M")));
-            holder.originalPrice.setVisibility(View.GONE);
+        if (product == null) {
+            return;
         }
 
+
+        if (product.getTen() != null) {
+            holder.productName.setText(product.getTen());
+        } else {
+            holder.productName.setText("N/A");
+        }
+
+        // Hiển thị Rating
+        holder.ratingBar.setRating((float) product.getAverageRating());
+        holder.tvRating.setText(String.format(Locale.US, "%.1f", product.getAverageRating()));
+
+        // Tải ảnh
         Glide.with(context)
                 .load(product.getHinhAnh())
-                .placeholder(R.drawable.ic_placeholder)
-                .error(R.drawable.ic_placeholder)
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(holder.productImage);
 
-        // THAY ĐỔI LOGIC: Nhấn vào toàn bộ item để mở trang chi tiết
+        calculateAndDisplayPrice(holder, product);
+
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ProductDetailActivity.class);
-            intent.putExtra("PRODUCT_DETAIL", product); // Truyền cả đối tượng product đi
-            context.startActivity(intent);
+            if (context instanceof AppCompatActivity) {
+                AppCompatActivity activity = (AppCompatActivity) context;
+                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+
+                ProductDetailBottomSheetFragment bottomSheetFragment = ProductDetailBottomSheetFragment.newInstance(product);
+
+                bottomSheetFragment.show(fragmentManager, bottomSheetFragment.getTag());
+            } else {
+                Intent intent = new Intent(context, ProductDetailActivity.class);
+                intent.putExtra("PRODUCT_DETAIL", product);
+                context.startActivity(intent);
+            }
         });
+    }
+
+    // Hàm "thông minh" tính toán giá
+    private void calculateAndDisplayPrice(ViewHolder holder, Product product) {
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+
+        double basePriceM = product.getPriceForSize("M");
+        String formattedOriginalPrice = formatter.format(basePriceM);
+
+        int currentHour = getCurrentHour();
+        boolean isHappyHourActive = false;
+        HappyHour activeHappyHour = null;
+
+        if (product.getHappyHourId() != null && happyHourMap != null && happyHourMap.containsKey(product.getHappyHourId())) {
+            HappyHour hh = happyHourMap.get(product.getHappyHourId());
+            if (hh != null && hh.isDangBat() && currentHour >= hh.getGioBatDau() && currentHour < hh.getGioKetThuc()) {
+                isHappyHourActive = true;
+                activeHappyHour = hh;
+            }
+        }
+
+        if (isHappyHourActive) {
+            double happyHourPrice = basePriceM * (1 - (activeHappyHour.getPhanTramGiamGia() / 100.0));
+            holder.productPrice.setText(formatter.format(happyHourPrice));
+            holder.tvProductOriginalPrice.setText(formattedOriginalPrice);
+            holder.tvProductOriginalPrice.setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvSaleTag.setText(String.format(Locale.US, "-%d %% sale giờ vàng", activeHappyHour.getPhanTramGiamGia()));
+            holder.tvProductOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvSaleTag.setVisibility(View.VISIBLE);
+
+        } else if (product.getPhanTramGiamGia() > 0) {
+            double salePrice = product.getFinalPriceForSize("M");
+            holder.productPrice.setText(formatter.format(salePrice));
+            holder.tvProductOriginalPrice.setText(formattedOriginalPrice);
+            holder.tvProductOriginalPrice.setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvSaleTag.setText(String.format(Locale.US, "-%d%%", product.getPhanTramGiamGia()));
+            holder.tvProductOriginalPrice.setVisibility(View.VISIBLE);
+            holder.tvSaleTag.setVisibility(View.VISIBLE);
+
+        } else {
+            holder.productPrice.setText(formattedOriginalPrice);
+            holder.tvProductOriginalPrice.setVisibility(View.GONE);
+            holder.tvSaleTag.setVisibility(View.GONE);
+        }
+    }
+
+    private int getCurrentHour() {
+        return Calendar.getInstance().get(Calendar.HOUR_OF_DAY); // 0-23
     }
 
     @Override
@@ -71,28 +136,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return productList.size();
     }
 
-    public void filterList(List<Product> filteredList) {
-        this.productList = filteredList;
-        notifyDataSetChanged();
-    }
-
-    public List<Product> getCurrentList() {
-        // Cần copy list để tránh lỗi ConcurrentModificationException
-        return new ArrayList<>(this.productList);
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
-        TextView productName, productPrice, originalPrice;
-        // Đã xóa Button addButton
+        TextView productName, productPrice, tvProductOriginalPrice, tvSaleTag, tvRating;
+        RatingBar ratingBar;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             productImage = itemView.findViewById(R.id.imageViewProduct);
             productName = itemView.findViewById(R.id.textViewProductName);
             productPrice = itemView.findViewById(R.id.textViewProductPrice);
-            originalPrice = itemView.findViewById(R.id.textViewOriginalPrice);
-            // Đã xóa ánh xạ cho buttonAdd
+            tvProductOriginalPrice = itemView.findViewById(R.id.textViewOriginalPrice);
+            tvSaleTag = itemView.findViewById(R.id.textViewSaleTag);
+            ratingBar = itemView.findViewById(R.id.ratingBarProduct);
+            tvRating = itemView.findViewById(R.id.textViewRating);
         }
     }
 }

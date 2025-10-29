@@ -1,6 +1,7 @@
 package com.example.cafe;
 
 import android.content.Intent;
+import android.graphics.Paint; // *** THÊM IMPORT NÀY ***
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,8 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.content.ContextCompat; // *** THÊM IMPORT NÀY ***
 import com.bumptech.glide.Glide;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -27,11 +27,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar; // *** THÊM IMPORT NÀY ***
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -42,12 +41,12 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     // --- Khai báo đầy đủ các biến ---
     private ImageView imageViewDetail, imageViewFavorite;
-    private TextView textViewDetailName, textViewDetailDescription, textViewDetailPrice, textViewQuantity, textViewNoReviews, textViewReviewCount, textViewViewAllReviews;
+    private TextView textViewDetailName, textViewDetailDescription, textViewDetailPrice, textViewQuantityDetail, textViewNoReviews, textViewReviewCount, textViewViewAllReviews;
     private RatingBar ratingBarAverage;
     private ChipGroup chipGroupSize, chipGroupSugar;
     private RadioGroup radioGroupIce;
     private EditText editTextNote;
-    private CheckBox checkboxExtraCoffee, checkboxExtraSugar; // Thêm biến CheckBox
+    private CheckBox checkboxExtraCoffee, checkboxExtraSugar;
     private Button buttonAddToCartDetail, btnIncrease, btnDecrease, buttonWriteReview;
     private Product product;
     private String selectedSize = "";
@@ -61,6 +60,13 @@ public class ProductDetailActivity extends AppCompatActivity {
     private String selectedSugarLevel = "100%"; // Mặc định
     private boolean addExtraCoffee = false;
     private boolean addExtraSugar = false;
+
+    // --- BIẾN MỚI CHO GIỜ VÀNG (HAPPY HOUR) ---
+    private TextView textViewHappyHourTag, textViewOriginalPriceDetail;
+    private HappyHour activeHappyHour = null;
+    private boolean isHappyHourActive = false;
+    private int happyHourDiscountPercent = 0;
+    private double finalUnitPrice = 0; // Giá cuối cùng của 1 item (bao gồm topping, giảm giá)
     // --- Kết thúc phần khai báo ---
 
     @Override
@@ -80,7 +86,10 @@ public class ProductDetailActivity extends AppCompatActivity {
         textViewDetailPrice = findViewById(R.id.textViewDetailPrice);
         chipGroupSize = findViewById(R.id.chipGroupSize);
         buttonAddToCartDetail = findViewById(R.id.buttonAddToCartDetail);
-        textViewQuantity = findViewById(R.id.textViewQuantityDetail);
+
+        // *** SỬA LỖI ID: ID ĐÚNG LÀ textViewQuantityDetail ***
+        textViewQuantityDetail = findViewById(R.id.textViewQuantityDetail);
+
         btnIncrease = findViewById(R.id.buttonIncreaseQuantity);
         btnDecrease = findViewById(R.id.buttonDecreaseQuantity);
         ratingBarAverage = findViewById(R.id.ratingBarAverage);
@@ -92,6 +101,10 @@ public class ProductDetailActivity extends AppCompatActivity {
         editTextNote = findViewById(R.id.editTextNote);
         checkboxExtraCoffee = findViewById(R.id.checkboxExtraCoffee);
         checkboxExtraSugar = findViewById(R.id.checkboxExtraSugar);
+
+        // *** ÁNH XẠ UI MỚI CHO GIỜ VÀNG ***
+        textViewHappyHourTag = findViewById(R.id.textViewHappyHourTag);
+        textViewOriginalPriceDetail = findViewById(R.id.textViewOriginalPriceDetail);
 
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -108,6 +121,8 @@ public class ProductDetailActivity extends AppCompatActivity {
             checkIfFavorite();
             setupOptionListeners();
             setupToppingListeners();
+            // *** TẢI THÔNG TIN GIỜ VÀNG ***
+            fetchHappyHourInfo();
         }
 
         // Gán sự kiện click
@@ -150,33 +165,51 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void populateUI() {
         textViewDetailName.setText(product.getTen());
         textViewDetailDescription.setText(product.getMoTa());
-        Glide.with(this).load(product.getHinhAnh()).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_placeholder).into(imageViewDetail);
+        Glide.with(this).load(product.getHinhAnh()).placeholder(R.drawable.placeholder_image).error(R.drawable.placeholder_image).into(imageViewDetail);
 
         chipGroupSize.removeAllViews();
         Map<String, Double> prices = product.getGia();
         if (prices != null) {
             List<String> sortedSizes = new ArrayList<>(prices.keySet());
-            sortedSizes.sort((s1, s2) -> {
+            sortedSizes.sort((s1, s2) -> { // Sắp xếp S -> M -> L
                 if (s1.equals("S")) return -1;
                 if (s1.equals("M") && s2.equals("L")) return -1;
                 if (s1.equals("L")) return 1;
                 return 0;
             });
 
+            String defaultSize = "M"; // Ưu tiên chọn size M
+            if (!sortedSizes.contains("M") && !sortedSizes.isEmpty()) {
+                defaultSize = sortedSizes.get(0); // Nếu không có M, chọn size đầu tiên
+            }
+
             for (String size : sortedSizes) {
+                // *** SỬA LỖI: Quay lại dùng new Chip(this) ***
                 Chip chip = new Chip(this);
                 chip.setText(size);
                 chip.setCheckable(true);
+                chip.setClickable(true);
+                chip.setCheckedIconVisible(true);
+
+                // (Tùy chọn) Thêm style nếu bạn muốn (Cần tạo file color/chip_selector)
+                // chip.setChipBackgroundColorResource(R.color.chip_selector);
+                // chip.setTextColor(ContextCompat.getColorStateList(this, R.color.chip_text_selector));
+
                 chip.setOnClickListener(v -> {
                     selectedSize = chip.getText().toString();
                     updatePrice();
                 });
                 chipGroupSize.addView(chip);
+
+                if (size.equals(defaultSize)) {
+                    chip.setChecked(true);
+                    selectedSize = size;
+                }
             }
-            if (chipGroupSize.getChildCount() > 0) {
-                ((Chip) chipGroupSize.getChildAt(0)).setChecked(true);
-                selectedSize = ((Chip) chipGroupSize.getChildAt(0)).getText().toString();
-                updatePrice();
+
+            // Nếu không có size nào, selectedSize sẽ rỗng, updatePrice() sẽ không chạy
+            if (!selectedSize.isEmpty()) {
+                updatePrice(); // Cập nhật giá lần đầu
             }
         }
         updateRatingUI(); // Hiển thị rating ban đầu
@@ -227,37 +260,83 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void setupQuantityButtons() {
         btnIncrease.setOnClickListener(v -> {
             quantity++;
-            textViewQuantity.setText(String.valueOf(quantity));
+            textViewQuantityDetail.setText(String.valueOf(quantity));
             updatePrice();
         });
 
         btnDecrease.setOnClickListener(v -> {
             if (quantity > 1) {
                 quantity--;
-                textViewQuantity.setText(String.valueOf(quantity));
+                textViewQuantityDetail.setText(String.valueOf(quantity));
                 updatePrice();
             }
         });
     }
 
+    // *** HÀM UPDATEPRICE ĐÃ ĐƯỢC NÂNG CẤP VỚI LOGIC GIỜ VÀNG ***
     private void updatePrice() {
-        if (!selectedSize.isEmpty() && product != null) {
-            double singlePrice = product.getFinalPriceForSize(selectedSize); // Giá gốc size + % giảm giá
+        if (selectedSize.isEmpty() || product == null) return;
 
-            // Cộng thêm giá topping nếu được chọn
-            if (addExtraCoffee) {
-                singlePrice += CartItem.EXTRA_COFFEE_PRICE;
-            }
-            if (addExtraSugar) {
-                singlePrice += CartItem.EXTRA_SUGAR_PRICE;
-            }
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
 
-            double totalPrice = singlePrice * quantity; // Nhân với số lượng
-            NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-            textViewDetailPrice.setText(formatter.format(totalPrice));
+        // 1. Lấy giá gốc của size (chưa giảm giá)
+        double basePrice = product.getPriceForSize(selectedSize);
+
+        // 2. Quyết định giá bán (Ưu tiên Giờ Vàng -> Giảm giá thường -> Giá gốc)
+        double singleItemPrice;
+        boolean isDiscounted = false;
+
+        if (isHappyHourActive) {
+            // ƯU TIÊN 1: GIỜ VÀNG (tính trên giá gốc, bỏ qua sale thường)
+            singleItemPrice = basePrice * (1 - (happyHourDiscountPercent / 100.0));
+            isDiscounted = true;
+
+        } else if (product.getPhanTramGiamGia() > 0) {
+            // ƯU TIÊN 2: GIẢM GIÁ THƯỜNG
+            // Dùng hàm có sẵn của Product (chỉ tính % giảm giá thường)
+            singleItemPrice = product.getFinalPriceForSize(selectedSize);
+            isDiscounted = true;
+
+        } else {
+            // ƯU TIÊN 3: GIÁ GỐC
+            singleItemPrice = basePrice;
+            isDiscounted = false;
+        }
+
+        // 3. Cộng thêm giá topping (Logic này từ code gốc của bạn)
+        // *** Đảm bảo CartItem.java có 2 hằng số này ***
+        if (addExtraCoffee) {
+            singleItemPrice += CartItem.EXTRA_COFFEE_PRICE;
+        }
+        if (addExtraSugar) {
+            singleItemPrice += CartItem.EXTRA_SUGAR_PRICE;
+        }
+
+        // 4. Lưu lại giá của 1 unit để dùng cho giỏ hàng
+        finalUnitPrice = singleItemPrice; // GIÁ CUỐI CÙNG CỦA 1 SẢN PHẨM
+
+        // 5. Tính tổng giá (Nhân với số lượng)
+        double totalPrice = finalUnitPrice * quantity;
+        textViewDetailPrice.setText(formatter.format(totalPrice));
+
+        // 6. Cập nhật UI giá gốc (nếu có giảm giá)
+        if (isDiscounted) {
+            // Giá gốc (của size) + topping
+            double originalSingleItemPrice = basePrice; // Giá gốc size
+            if (addExtraCoffee) originalSingleItemPrice += CartItem.EXTRA_COFFEE_PRICE;
+            if (addExtraSugar) originalSingleItemPrice += CartItem.EXTRA_SUGAR_PRICE;
+
+            double originalTotalPrice = originalSingleItemPrice * quantity;
+
+            textViewOriginalPriceDetail.setText(formatter.format(originalTotalPrice));
+            textViewOriginalPriceDetail.setPaintFlags(textViewOriginalPriceDetail.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            textViewOriginalPriceDetail.setVisibility(View.VISIBLE);
+        } else {
+            textViewOriginalPriceDetail.setVisibility(View.GONE);
         }
     }
 
+    // *** HÀM ADDTOCART ĐÃ ĐƯỢC CẬP NHẬT ĐỂ DÙNG GIÁ CUỐI CÙNG (finalUnitPrice) ***
     private void addToCart() {
         if (selectedSize.isEmpty()) {
             Toast.makeText(this, "Vui lòng chọn size", Toast.LENGTH_SHORT).show();
@@ -288,6 +367,10 @@ public class ProductDetailActivity extends AppCompatActivity {
                     existingItem.isExtraCoffeeShot() == addExtraCoffee &&
                     existingItem.isExtraSugarPacket() == addExtraSugar;
 
+            // *** SỬA LỖI LOGIC: Giá trong giỏ hàng phải là giá cuối cùng (finalUnitPrice) ***
+            // double price = product.getFinalPriceForSize(selectedSize); // LỖI: Giá này chưa có topping + HH
+            // Thay "price" bằng "finalUnitPrice" đã được tính toán ở hàm updatePrice()
+
             if (optionsMatch) {
                 // Nếu giống hệt, cập nhật số lượng
                 transaction.update(cartItemRef, "quantity", existingItem.getQuantity() + quantity);
@@ -297,8 +380,8 @@ public class ProductDetailActivity extends AppCompatActivity {
                 String newCartItemId = cartItemId + "_" + selectedIceOption + "_" + selectedSugarLevel + "_" + addExtraCoffee + "_" + addExtraSugar + "_" + note.hashCode() + "_" + System.currentTimeMillis();
                 DocumentReference newCartItemRef = db.collection("users").document(userId).collection("cart").document(newCartItemId);
 
-                double price = product.getFinalPriceForSize(selectedSize); // Chỉ lấy giá gốc size + % giảm giá
-                CartItem newItem = new CartItem(product.getId(), product.getTen(), price, product.getHinhAnh(), quantity, selectedSize, selectedIceOption, selectedSugarLevel, note, addExtraCoffee, addExtraSugar);
+                // *** ĐẢM BẢO CartItem.java KHỚP VỚI HÀM TẠO NÀY ***
+                CartItem newItem = new CartItem(product.getId(), product.getTen(), finalUnitPrice, product.getHinhAnh(), quantity, selectedSize, selectedIceOption, selectedSugarLevel, note, addExtraCoffee, addExtraSugar);
                 transaction.set(newCartItemRef, newItem);
             }
             return null;
@@ -384,7 +467,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             product.setAverageRating(newAvgRating);
             product.setReviewCount(product.getReviewCount() + 1); // Cập nhật count cục bộ
             updateRatingUI();
-            // loadReviews(); // Không cần tải lại ở đây nữa
         }).addOnFailureListener(e -> {
             Toast.makeText(this, "Gửi đánh giá thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
@@ -430,5 +512,47 @@ public class ProductDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Đã thêm vào yêu thích", Toast.LENGTH_SHORT).show();
         }
     }
-}
 
+    // *** CÁC HÀM MỚI CHO LOGIC GIỜ VÀNG ***
+
+    private void fetchHappyHourInfo() {
+        if (product.getHappyHourId() == null || product.getHappyHourId().isEmpty()) {
+            // Sản phẩm này không áp dụng Giờ Vàng, chỉ cần cập nhật giá (đã gọi trong populateUI)
+            updatePrice();
+            return;
+        }
+
+        db.collection("HappyHours").document(product.getHappyHourId())
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        HappyHour hh = documentSnapshot.toObject(HappyHour.class);
+                        // ĐỔI TÊN HÀM CHO KHỚP VỚI HappyHour.java
+                        if (hh != null && hh.isDangBat()) {
+                            // Kiểm tra xem có trong khung giờ không
+                            int currentHour = getCurrentHour();
+                            // ĐỔI TÊN HÀM CHO KHỚP
+                            if (currentHour >= hh.getGioBatDau() && currentHour < hh.getGioKetThuc()) {
+                                isHappyHourActive = true;
+                                happyHourDiscountPercent = hh.getPhanTramGiamGia(); // ĐỔI TÊN HÀM
+                                // Hiển thị tag
+                                textViewHappyHourTag.setText("🔥 Đang giảm giá Giờ Vàng " + happyHourDiscountPercent + "%");
+                                textViewHappyHourTag.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w("ProductDetail", "Lỗi khi tải HappyHour", e);
+                })
+                .addOnCompleteListener(task -> {
+                    // Dù thành công hay thất bại, cũng phải cập nhật giá lần cuối
+                    // để đảm bảo hiển thị đúng (có thể là giá sale thường hoặc giá gốc)
+                    updatePrice();
+                });
+    }
+
+    private int getCurrentHour() {
+        return Calendar.getInstance().get(Calendar.HOUR_OF_DAY); // 0-23
+    }
+}

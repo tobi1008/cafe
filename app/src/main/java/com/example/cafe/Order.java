@@ -15,16 +15,12 @@ public class Order implements Serializable {
     private Date orderDate;
     private String status;
 
-    // --- CÁC TRƯỜNG MỚI CHO VOUCHER ---
     private String appliedVoucher;
     private double discountAmount;
 
     public Order() {
-        // Constructor rỗng
     }
 
-    // --- Getters & Setters ---
-    // (Giữ nguyên các getters/setters cũ)
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
     public String getUserId() { return userId; }

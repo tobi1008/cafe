@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Tên Khung Giờ -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tên Khung Giờ"
+        android:textStyle="bold"/>
+    <EditText
+        android:id="@+id/etHappyHourName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ví dụ: Sale Trưa"
+        android:inputType="textCapWords"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Giờ Bắt Đầu -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Giờ Bắt Đầu (0-23)"
+        android:textStyle="bold"/>
+    <EditText
+        android:id="@+id/etStartHour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ví dụ: 14"
+        android:inputType="number"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Giờ Kết Thúc -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Giờ Kết Thúc (0-23)"
+        android:textStyle="bold"/>
+    <EditText
+        android:id="@+id/etEndHour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ví dụ: 16"
+        android:inputType="number"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- % Giảm Giá -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phần Trăm Giảm Giá"
+        android:textStyle="bold"/>
+    <EditText
+        android:id="@+id/etDiscountPercent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ví dụ: 20"
+        android:inputType="number"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Trạng Thái -->
+    <Switch
+        android:id="@+id/switchStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trạng thái (Bật)"
+        android:checked="true"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Nút Lưu -->
+    <Button
+        android:id="@+id/btnSaveHappyHour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Lưu lại"/>
+
+</LinearLayout>
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- File này là giao diện cho MỘT RadioButton trong danh sách chọn -->
+<RadioButton xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:textSize="16sp"
+    android:textColor="@android:color/black"
+    android:button="@null"
+    android:background="?attr/selectableItemBackground"
+    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+    android:drawablePadding="16dp"
+    android:layoutDirection="rtl"
+    android:textAlignment="textStart"/>

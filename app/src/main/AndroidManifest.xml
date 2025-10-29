@@ -68,7 +68,8 @@
         <activity
             android:name=".ManageVouchersActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".ManageHappyHourActivity" />
     </application>
 
 </manifest>
