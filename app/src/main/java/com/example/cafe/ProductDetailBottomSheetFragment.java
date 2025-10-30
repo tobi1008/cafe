@@ -50,8 +50,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private RadioGroup rgSizeSheet, rgIceSheet, rgSugarSheet;
     private Button btnContinueSheet;
     private TextView tvHappyHourTagSheet, tvOriginalPriceSheet, tvOriginalPriceHeaderSheet;
-    // *** VIEW MỚI CHO GHI CHÚ ***
     private EditText etNoteSheet;
+
+    private TextView tvSizeLabelSheet;
+    private TextView tvIceLabelSheet;
+    private TextView tvSugarLabelSheet;
 
     // Data
     private Product product;
@@ -147,8 +150,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         tvHappyHourTagSheet = view.findViewById(R.id.tvHappyHourTagSheet);
         tvOriginalPriceSheet = view.findViewById(R.id.tvOriginalPriceSheet);
         tvOriginalPriceHeaderSheet = view.findViewById(R.id.tvOriginalPriceHeaderSheet);
-        // *** ÁNH XẠ EditText GHI CHÚ ***
         etNoteSheet = view.findViewById(R.id.etNoteSheet);
+
+        tvSizeLabelSheet = view.findViewById(R.id.tvSizeLabelSheet);
+        tvIceLabelSheet = view.findViewById(R.id.tvIceLabelSheet);
+        tvSugarLabelSheet = view.findViewById(R.id.tvSugarLabelSheet);
     }
 
     private void populateInitialData() {
@@ -159,22 +165,27 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         tvProductDescriptionSheet.setText(product.getMoTa());
 
         Map<String, Double> prices = product.getGia();
+
         if (prices != null && prices.containsKey("M")) {
             basePrice = product.getPriceForSize("M");
             selectedSizeName = "M";
+        } else if (prices != null && prices.containsKey("S")) {
+            basePrice = product.getPriceForSize("S");
+            selectedSizeName = "S";
         } else if (prices != null && !prices.isEmpty()) {
-            String firstSize = "";
-            if (prices.containsKey("S")) {
-                firstSize = "S";
-            } else {
-                firstSize = new ArrayList<>(prices.keySet()).get(0);
-            }
-            basePrice = product.getPriceForSize(firstSize);
-            selectedSizeName = firstSize;
+            Map.Entry<String, Double> entry = prices.entrySet().iterator().next();
+            selectedSizeName = entry.getKey();
+            basePrice = product.getPriceForSize(selectedSizeName);
         } else {
             basePrice = 0;
-            selectedSizeName = "";
+            selectedSizeName = "M";
         }
+
+        if (prices != null && prices.size() == 1) {
+            selectedSizeName = prices.keySet().iterator().next();
+            basePrice = product.getPriceForSize(selectedSizeName);
+        }
+
         currentSelectedSizePrice = basePrice;
 
         tvProductPriceSheet.setText(formatter.format(basePrice));
@@ -185,7 +196,25 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         // --- Size Options ---
         rgSizeSheet.removeAllViews();
         Map<String, Double> sizes = product.getGia();
-        if (sizes != null && !sizes.isEmpty()) {
+
+        String categoryName = (product.getCategory() != null) ? product.getCategory() : "";
+
+        boolean isFoodItem = categoryName.equalsIgnoreCase("Bánh & Đồ ăn nhẹ");
+
+        if (isFoodItem || sizes == null || sizes.size() <= 1) {
+            tvSizeLabelSheet.setVisibility(View.GONE);
+            rgSizeSheet.setVisibility(View.GONE);
+
+            if (sizes != null && sizes.size() == 1) {
+                selectedSizeName = sizes.keySet().iterator().next();
+                // *** SỬA LỖI 2: Dùng hàm getPriceForSize() an toàn ***
+                currentSelectedSizePrice = product.getPriceForSize(selectedSizeName);
+            }
+
+        } else {
+            tvSizeLabelSheet.setVisibility(View.VISIBLE);
+            rgSizeSheet.setVisibility(View.VISIBLE);
+
             List<String> sortedSizes = new ArrayList<>(sizes.keySet());
             sortedSizes.sort((s1, s2) -> {
                 if (s1.equals("S")) return -1;
@@ -201,18 +230,33 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             }
         }
 
-        // --- Ice Options ---
-        rgIceSheet.removeAllViews();
-        addRadioButton(rgIceSheet, "Đá chung", 0, true);
-        addRadioButton(rgIceSheet, "Đá riêng", 0, false);
+        if (isFoodItem) {
+            tvIceLabelSheet.setVisibility(View.GONE);
+            rgIceSheet.setVisibility(View.GONE);
+            tvSugarLabelSheet.setVisibility(View.GONE);
+            rgSugarSheet.setVisibility(View.GONE);
 
-        // --- Sugar Options ---
-        rgSugarSheet.removeAllViews();
-        List<String> sugarLevels = Arrays.asList("100%", "80%", "50%");
-        for (String level : sugarLevels) {
-            addRadioButton(rgSugarSheet, level, 0, level.equals(selectedSugarName));
+            selectedIceName = "";
+            selectedSugarName = "";
+            currentIcePrice = 0;
+            currentSugarPrice = 0;
+
+        } else {
+            tvIceLabelSheet.setVisibility(View.VISIBLE);
+            rgIceSheet.setVisibility(View.VISIBLE);
+            tvSugarLabelSheet.setVisibility(View.VISIBLE);
+            rgSugarSheet.setVisibility(View.VISIBLE);
+
+            rgIceSheet.removeAllViews();
+            addRadioButton(rgIceSheet, "Đá chung", 0, true);
+            addRadioButton(rgIceSheet, "Đá riêng", 0, false);
+
+            rgSugarSheet.removeAllViews();
+            List<String> sugarLevels = Arrays.asList("100%", "80%", "50%");
+            for (String level : sugarLevels) {
+                addRadioButton(rgSugarSheet, level, 0, level.equals(selectedSugarName));
+            }
         }
-
     }
 
     private void addRadioButton(RadioGroup radioGroup, String text, double priceDifference, boolean isChecked) {
@@ -221,7 +265,7 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         RadioButton radioButton = (RadioButton) LayoutInflater.from(getContext()).inflate(R.layout.radio_button_option, radioGroup, false);
 
         String displayText = text;
-        if (radioGroup.getId() == R.id.rgSizeSheet) {
+        if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null && product.getGia().size() > 1) {
             if (priceDifference > 0) {
                 displayText += " (+" + formatPrice(priceDifference) + ")";
             } else if (priceDifference < 0) {
@@ -229,7 +273,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             }
             radioButton.setTag(product.getPriceForSize(text));
         } else {
-            radioButton.setTag(0.0);
+            if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null && product.getGia().containsKey(text)) {
+                radioButton.setTag(product.getPriceForSize(text));
+            } else {
+                radioButton.setTag(0.0);
+            }
         }
 
         radioButton.setText(displayText);
@@ -263,7 +311,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             RadioButton checkedRadioButton = group.findViewById(checkedId);
             if (checkedRadioButton != null && checkedRadioButton.getTag() instanceof Double) {
                 String sizeName = (String) checkedRadioButton.getTag(R.id.tag_option_name);
-                // Lấy giá gốc size trực tiếp từ tag (đã lưu ở addRadioButton)
                 currentSelectedSizePrice = (double) checkedRadioButton.getTag();
                 selectedSizeName = sizeName;
                 updateTotalPrice();
@@ -347,23 +394,27 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         return formatter.format(price);
     }
 
-    // *** HÀM ADDTOCART ĐÃ CẬP NHẬT ĐỂ LẤY GHI CHÚ ***
     private void addToCart() {
         if (userId == null) {
             Toast.makeText(getContext(), "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
             return;
         }
         if (selectedSizeName.isEmpty()) {
-            Toast.makeText(getContext(), "Lỗi: Size chưa được chọn", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Lỗi: Không thể xác định size sản phẩm", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Lấy ghi chú từ EditText
         String note = etNoteSheet.getText().toString().trim();
 
         String options = selectedIceName + ", " + selectedSugarName;
 
-        // *** ĐẢM BẢO CartItem.java KHỚP VỚI HÀM TẠO NÀY (có thêm note) ***
+        boolean isFoodItem = (product.getCategory() != null && product.getCategory().equalsIgnoreCase("Bánh & Đồ ăn nhẹ"));
+        if (isFoodItem) {
+            options = "";
+            selectedIceName = "";
+            selectedSugarName = "";
+        }
+
         CartItem newItem = new CartItem(
                 product.getId(),
                 product.getTen(),
@@ -373,17 +424,15 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 selectedSizeName,
                 selectedIceName,
                 selectedSugarName,
-                note, // <--- Truyền ghi chú vào đây
+                note,
                 false,
                 false
         );
 
         String cartItemIdBase = product.getId() + "_" + selectedSizeName;
-        // Thêm note.hashCode() vào ID để phân biệt item nếu chỉ khác ghi chú
         String finalCartItemId = cartItemIdBase + "_" + selectedIceName + "_" + selectedSugarName + "_" + note.hashCode() + "_" + System.currentTimeMillis();
         DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart").document(finalCartItemId);
 
-        // Luôn tạo item mới (bao gồm cả note) thay vì kiểm tra trùng lặp phức tạp
         cartItemRef.set(newItem)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();

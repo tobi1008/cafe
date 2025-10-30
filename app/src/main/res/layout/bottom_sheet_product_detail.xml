@@ -175,6 +175,7 @@
 
                 <!-- Chọn Size -->
                 <TextView
+                    android:id="@+id/tvSizeLabelSheet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Chọn size"
@@ -193,6 +194,7 @@
 
                 <!-- Lựa chọn (Đá) -->
                 <TextView
+                    android:id="@+id/tvIceLabelSheet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Lựa chọn"
@@ -212,6 +214,7 @@
 
                 <!-- Đường -->
                 <TextView
+                    android:id="@+id/tvSugarLabelSheet"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Đường"
@@ -248,16 +251,19 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="16dp"
                     android:hint="Ví dụ: Ít ngọt, nhiều đá..."
-                    android:inputType="textMultiLine"
+                    android:inputType="textCapSentences|textNoSuggestions"
                     android:minLines="2"
                     android:background="@drawable/edit_text_background"
                     android:padding="12dp"/>
 
             </LinearLayout>
+            <!-- Kết thúc LinearLayout chứa các lựa chọn -->
 
         </LinearLayout>
+        <!-- Kết thúc LinearLayout bên trong NestedScrollView -->
 
     </androidx.core.widget.NestedScrollView>
+    <!-- Kết thúc NestedScrollView -->
 
     <View
         android:layout_width="match_parent"
