@@ -47,7 +47,6 @@ public class AdminActivity extends AppCompatActivity {
         etImageUrl = findViewById(R.id.editTextProductImageUrl);
         etSalePercent = findViewById(R.id.editTextSalePercent);
         btnAddProduct = findViewById(R.id.buttonAddProduct);
-        // *** ÁNH XẠ SPINNER CATEGORY ***
         spinnerCategoryAdmin = findViewById(R.id.spinnerCategoryAdmin);
 
         // Ánh xạ Nút Quản Lý
@@ -62,7 +61,6 @@ public class AdminActivity extends AppCompatActivity {
         categoryAdapterAdmin.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategoryAdmin.setAdapter(categoryAdapterAdmin);
 
-        // *** TẢI DANH SÁCH CATEGORY ***
         loadCategoriesAdmin();
 
         // Gán sự kiện click cho các nút
@@ -80,7 +78,8 @@ public class AdminActivity extends AppCompatActivity {
     private void loadCategoriesAdmin() {
         Log.d(TAG, "Bắt đầu tải Categories cho Admin Spinner...");
         db.collection("Categories")
-                .orderBy("tenDanhMuc", Query.Direction.ASCENDING)
+                // SẮP XẾP theo thuTuUuTien
+                .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     categoryListAdmin.clear();
@@ -93,12 +92,10 @@ public class AdminActivity extends AppCompatActivity {
                             categoryListAdmin.add(cat);
                             categoryNamesAdmin.add(cat.getTenDanhMuc());
                         } catch (Exception e) {
-                            Log.e(TAG, "Lỗi chuyển đổi Category: " + document.getId(), e);
+                            Log.e(TAG, "Lỗi khi chuyển đổi Category: " + document.getId(), e);
                         }
                     }
-                    // Thêm lựa chọn "Chọn danh mục" vào đầu nếu cần (tùy giao diện)
-                    // categoryNamesAdmin.add(0, "--- Chọn danh mục ---");
-                    categoryAdapterAdmin.notifyDataSetChanged(); // Cập nhật Spinner Category
+                    categoryAdapterAdmin.notifyDataSetChanged();
                     Log.d(TAG, "Đã tải " + categoryNamesAdmin.size() + " categories vào Admin Spinner.");
                     if(categoryNamesAdmin.isEmpty()){
                         Toast.makeText(this, "Chưa có danh mục nào. Vui lòng vào 'Quản lý Danh mục' để thêm.", Toast.LENGTH_LONG).show();
@@ -107,7 +104,6 @@ public class AdminActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Lỗi khi tải Categories cho Admin Spinner", e);
                     Toast.makeText(this, "Lỗi tải danh mục", Toast.LENGTH_SHORT).show();
-                    // Để Spinner trống nếu lỗi
                     categoryListAdmin.clear();
                     categoryNamesAdmin.clear();
                     categoryAdapterAdmin.notifyDataSetChanged();
@@ -124,12 +120,10 @@ public class AdminActivity extends AppCompatActivity {
         String hinhAnh = etImageUrl.getText().toString().trim();
         String salePercentStr = etSalePercent.getText().toString().trim();
 
-        // *** Lấy TÊN Category đã chọn từ Spinner ***
         String selectedCategoryName = null;
         int selectedCategoryPosition = spinnerCategoryAdmin.getSelectedItemPosition();
 
         if (spinnerCategoryAdmin.getCount() > 0 && selectedCategoryPosition != Spinner.INVALID_POSITION) {
-            // Lấy tên trực tiếp từ Adapter của Spinner
             selectedCategoryName = categoryAdapterAdmin.getItem(selectedCategoryPosition);
         }
 

@@ -2,35 +2,44 @@ package com.example.cafe;
 
 import java.io.Serializable;
 
-
 public class Category implements Serializable {
     private String id;
     private String tenDanhMuc;
 
-    // Constructor rỗng cần thiết cho Firebase
+    // *** TRƯỜNG MỚI ĐỂ SẮP XẾP ***
+    private int thuTuUuTien; // Ví dụ: 1, 2, 3...
+
     public Category() {
+        // Constructor rỗng
     }
 
-    // Constructor để tạo đối tượng trong code
-    public Category(String id, String tenDanhMuc) {
+    // *** CẬP NHẬT HÀM TẠO (3 THAM SỐ) ***
+    public Category(String id, String tenDanhMuc, int thuTuUuTien) {
         this.id = id;
         this.tenDanhMuc = tenDanhMuc;
+        this.thuTuUuTien = thuTuUuTien;
     }
 
-    // Getters and Setters
+    // --- Getters & Setters ---
     public String getId() {
         return id;
     }
-
     public void setId(String id) {
         this.id = id;
     }
-
     public String getTenDanhMuc() {
         return tenDanhMuc;
     }
-
     public void setTenDanhMuc(String tenDanhMuc) {
         this.tenDanhMuc = tenDanhMuc;
     }
+
+    // *** GETTER & SETTER MỚI ***
+    public int getThuTuUuTien() {
+        return thuTuUuTien;
+    }
+    public void setThuTuUuTien(int thuTuUuTien) {
+        this.thuTuUuTien = thuTuUuTien;
+    }
 }
+

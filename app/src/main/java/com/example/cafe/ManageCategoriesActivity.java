@@ -30,7 +30,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     private CategoryManageAdapter adapter;
     private List<Category> categoryList = new ArrayList<>();
     private FirebaseFirestore db;
-    private static final String TAG = "ManageCategoriesAct";
+    private static final String TAG = "ManageCategoriesActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,15 +41,14 @@ public class ManageCategoriesActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbarManageCategories);
         setSupportActionBar(toolbar);
-        // getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Bật nút back nếu cần
-        // toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         recyclerView = findViewById(R.id.recyclerViewCategoriesManage);
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new CategoryManageAdapter(this, categoryList, new CategoryManageAdapter.OnCategoryManageListener() {
             @Override
-            public void onEditCategoryClick(Category category) {
+            public void onEditClick(Category category) {
                 if (category == null || category.getId() == null || category.getId().isEmpty()) {
                     Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để sửa", Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onEditCategoryClick: Category ID is null or empty");
@@ -59,7 +58,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDeleteCategoryClick(Category category) {
+            public void onDeleteClick(Category category) {
                 if (category == null || category.getId() == null || category.getId().isEmpty()) {
                     Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để xóa", Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onDeleteCategoryClick: Category ID is null or empty");
@@ -77,8 +76,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     }
 
     private void loadCategories() {
-        db.collection("Categories") // *** Tên collection mới là "Categories" ***
-                .orderBy("tenDanhMuc", Query.Direction.ASCENDING) // Sắp xếp theo tên
+        db.collection("Categories")
+                .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
                         Log.e(TAG, "Lỗi khi tải Categories", error);
@@ -90,7 +89,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                         for (QueryDocumentSnapshot doc : value) {
                             try {
                                 Category cat = doc.toObject(Category.class);
-                                cat.setId(doc.getId()); // Gán ID từ DocumentSnapshot
+                                cat.setId(doc.getId());
                                 categoryList.add(cat);
                             } catch (Exception e) {
                                 Log.e(TAG, "Lỗi chuyển đổi category: " + doc.getId(), e);
@@ -132,30 +131,42 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         builder.setView(dialogView);
 
         EditText etName = dialogView.findViewById(R.id.etCategoryName);
+        EditText etPriority = dialogView.findViewById(R.id.etCategoryPriority);
         Button btnSave = dialogView.findViewById(R.id.btnSaveCategory);
 
         AlertDialog dialog = builder.create();
         if (categoryToEdit != null) {
             dialog.setTitle("Sửa Danh Mục");
             etName.setText(categoryToEdit.getTenDanhMuc());
+            etPriority.setText(String.valueOf(categoryToEdit.getThuTuUuTien()));
         } else {
             dialog.setTitle("Thêm Danh Mục Mới");
+            etPriority.setText(String.valueOf(categoryList.size() + 1));
         }
 
         btnSave.setOnClickListener(v -> {
             String name = etName.getText().toString().trim();
+            String priorityStr = etPriority.getText().toString().trim();
 
-            if (TextUtils.isEmpty(name)) {
-                Toast.makeText(this, "Vui lòng nhập tên danh mục", Toast.LENGTH_SHORT).show();
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(priorityStr)) {
+                Toast.makeText(this, "Vui lòng nhập Tên và Thứ tự", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int priority;
+            try {
+                priority = Integer.parseInt(priorityStr);
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Thứ tự ưu tiên phải là số", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             if (categoryToEdit != null) {
                 // --- CHẾ ĐỘ SỬA ---
-                Category updatedCategory = new Category(categoryToEdit.getId(), name);
+                Category updatedCategory = new Category(categoryToEdit.getId(), name, priority);
                 Log.d(TAG, "Đang cập nhật Category ID: " + categoryToEdit.getId());
                 db.collection("Categories").document(categoryToEdit.getId())
-                        .set(updatedCategory) // Dùng set để ghi đè
+                        .set(updatedCategory)
                         .addOnSuccessListener(aVoid -> {
                             Log.d(TAG, "Cập nhật thành công ID: " + categoryToEdit.getId());
                             Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
@@ -169,7 +180,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                 // --- CHẾ ĐỘ THÊM MỚI ---
                 DocumentReference newDocRef = db.collection("Categories").document();
                 String newId = newDocRef.getId();
-                Category newCategory = new Category(newId, name);
+                Category newCategory = new Category(newId, name, priority);
                 Log.d(TAG, "Đang thêm Category mới với ID: " + newId);
                 newDocRef.set(newCategory)
                         .addOnSuccessListener(aVoid -> {

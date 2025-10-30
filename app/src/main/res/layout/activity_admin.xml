@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-    <!-- fillViewport=true để nội dung có thể giãn ra hết ScrollView -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,7 +50,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Tên sản phẩm (*)"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:inputType="textCapSentences|textNoSuggestions"
+                    android:imeOptions="actionNext"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -65,7 +66,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Giá S"
                         android:inputType="numberDecimal"
-                        android:layout_marginEnd="4dp"/>
+                        android:layout_marginEnd="4dp"
+                        android:imeOptions="actionNext"/>
                     <EditText
                         android:id="@+id/editTextPriceM"
                         android:layout_width="0dp"
@@ -74,7 +76,8 @@
                         android:hint="Giá M (*)"
                         android:inputType="numberDecimal"
                         android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"/>
+                        android:layout_marginEnd="4dp"
+                        android:imeOptions="actionNext"/>
                     <EditText
                         android:id="@+id/editTextPriceL"
                         android:layout_width="0dp"
@@ -82,7 +85,8 @@
                         android:layout_height="wrap_content"
                         android:hint="Giá L"
                         android:inputType="numberDecimal"
-                        android:layout_marginStart="4dp"/>
+                        android:layout_marginStart="4dp"
+                        android:imeOptions="actionNext"/>
                 </LinearLayout>
 
                 <EditText
@@ -90,14 +94,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Mô tả ngắn"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
+                    android:imeOptions="actionNext"/>
 
                 <EditText
                     android:id="@+id/editTextProductImageUrl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="URL Hình ảnh"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:inputType="textUri"
+                    android:imeOptions="actionNext"/>
 
                 <EditText
                     android:id="@+id/editTextSalePercent"
@@ -105,9 +113,9 @@
                     android:layout_height="wrap_content"
                     android:hint="Phần trăm giảm giá (0-100)"
                     android:inputType="number"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginBottom="8dp"
+                    android:imeOptions="actionNext"/>
 
-                <!-- *** ĐÃ THAY BẰNG SPINNER *** -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -163,7 +171,6 @@
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"/>
 
-                <!-- === NÚT QUẢN LÝ DANH MỤC === -->
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.OutlinedButton.Icon"
                     android:id="@+id/buttonManageCategories"

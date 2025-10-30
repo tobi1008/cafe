@@ -71,9 +71,7 @@ public class EditProductActivity extends AppCompatActivity {
         etSalePercent = findViewById(R.id.editSalePercent);
         btnUpdateProduct = findViewById(R.id.buttonUpdateProduct);
 
-        // *** ÁNH XẠ SPINNER CATEGORY ***
         spinnerCategory = findViewById(R.id.spinnerCategory);
-
         spinnerHappyHour = findViewById(R.id.spinnerHappyHour);
 
         categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryNames);
@@ -81,19 +79,16 @@ public class EditProductActivity extends AppCompatActivity {
         spinnerCategory.setAdapter(categoryAdapter);
 
 
-        // Thiết lập Adapter cho Spinner Happy Hour
         happyHourNames.add("Không áp dụng");
         happyHourList.add(null);
         happyHourAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, happyHourNames);
         happyHourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerHappyHour.setAdapter(happyHourAdapter);
 
-        // *** TẢI CẢ 3 DỮ LIỆU CÙNG LÚC ***
         loadHappyHours();
         loadCategories();
         loadProductDetails();
 
-        // Gán sự kiện cho nút Cập nhật
         btnUpdateProduct.setOnClickListener(v -> updateProduct());
     }
 
@@ -112,7 +107,7 @@ public class EditProductActivity extends AppCompatActivity {
                             happyHourList.add(hh);
                             happyHourNames.add(hh.getTenKhungGio());
                         } catch (Exception e) {
-                            Log.e(TAG, "Lỗi chuyển đổi HappyHour: " + document.getId(), e);
+                            Log.e(TAG, "Lỗi khi chuyển đổi HappyHour: " + document.getId(), e);
                         }
                     }
                     happyHourAdapter.notifyDataSetChanged();
@@ -130,20 +125,21 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void loadCategories() {
         db.collection("Categories")
-                .orderBy("tenDanhMuc", Query.Direction.ASCENDING)
+                // *** THAY ĐỔI SẮP XẾP: Theo "thuTuUuTien" thay vì "tenDanhMuc" ***
+                .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     categoryList.clear();
                     categoryNames.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        try { // Thêm try-catch
+                        try {
                             Category cat = document.toObject(Category.class);
                             cat.setId(document.getId());
                             categoryList.add(cat);
                             categoryNames.add(cat.getTenDanhMuc());
                         } catch (Exception e) {
-                            Log.e(TAG, "Lỗi chuyển đổi Category: " + document.getId(), e);
+                            Log.e(TAG, "Lỗi khi chuyển đổi Category: " + document.getId(), e);
                         }
                     }
                     categoryAdapter.notifyDataSetChanged();
@@ -166,7 +162,7 @@ public class EditProductActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        try { // Thêm try-catch
+                        try {
                             currentProduct = documentSnapshot.toObject(Product.class);
                             if (currentProduct != null) {
                                 isProductLoaded = true;
@@ -201,21 +197,17 @@ public class EditProductActivity extends AppCompatActivity {
     private void populateProductData() {
         if (currentProduct == null) return;
 
-        // Điền thông tin sản phẩm
         etName.setText(currentProduct.getTen());
         etDescription.setText(currentProduct.getMoTa());
         etImageUrl.setText(currentProduct.getHinhAnh());
         etSalePercent.setText(String.valueOf(currentProduct.getPhanTramGiamGia()));
 
-        // Điền giá
         if (currentProduct.getGia() != null) {
-            // Dùng getOrDefault hoặc kiểm tra key tồn tại
             etPriceS.setText(String.valueOf(currentProduct.getPriceForSize("S")));
             etPriceM.setText(String.valueOf(currentProduct.getPriceForSize("M")));
             etPriceL.setText(String.valueOf(currentProduct.getPriceForSize("L")));
         }
 
-        // *** Tự động chọn Category trong Spinner ***
         String productCategoryName = currentProduct.getCategory();
         int categorySpinnerPosition = 0;
         if (productCategoryName != null && !productCategoryName.isEmpty() && !categoryNames.isEmpty()) {
@@ -233,10 +225,9 @@ public class EditProductActivity extends AppCompatActivity {
         spinnerCategory.setSelection(categorySpinnerPosition);
 
 
-        // Tự động chọn Happy Hour trong Spinner
         String productHappyHourId = currentProduct.getHappyHourId();
         int happyHourSpinnerPosition = 0;
-        if (productHappyHourId != null && !productHappyHourId.isEmpty() && happyHourList.size() > 1) { // Kiểm tra size > 1
+        if (productHappyHourId != null && !productHappyHourId.isEmpty() && happyHourList.size() > 1) {
             Log.d(TAG, "Searching for Happy Hour ID: " + productHappyHourId);
             for (int i = 1; i < happyHourList.size(); i++) {
                 HappyHour hh = happyHourList.get(i);
@@ -259,7 +250,6 @@ public class EditProductActivity extends AppCompatActivity {
             return;
         }
 
-        // Lấy dữ liệu đã sửa
         String ten = etName.getText().toString().trim();
         String priceSStr = etPriceS.getText().toString().trim();
         String priceMStr = etPriceM.getText().toString().trim();
@@ -273,7 +263,6 @@ public class EditProductActivity extends AppCompatActivity {
             return;
         }
 
-        // Tạo Map giá
         Map<String, Double> gia = new HashMap<>();
         try {
             if (!priceSStr.isEmpty()) gia.put("S", Double.parseDouble(priceSStr));
@@ -298,24 +287,19 @@ public class EditProductActivity extends AppCompatActivity {
             }
         }
 
-        // *** Lấy TÊN Category đã chọn từ Spinner ***
         String selectedCategoryName = null;
         int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
 
-        // Kiểm tra xem Spinner có item nào không VÀ người dùng có chọn không
         if (spinnerCategory.getCount() > 0 && selectedCategoryPosition != Spinner.INVALID_POSITION) {
-            // Lấy tên trực tiếp từ Adapter của Spinner
             selectedCategoryName = categoryAdapter.getItem(selectedCategoryPosition);
         }
 
-        // Kiểm tra nếu không chọn được category
         if (selectedCategoryName == null || selectedCategoryName.isEmpty()){
             Toast.makeText(this, "Vui lòng chọn Danh mục", Toast.LENGTH_SHORT).show();
             return;
         }
 
 
-        // Lấy ID của Happy Hour được chọn
         int selectedHappyHourPosition = spinnerHappyHour.getSelectedItemPosition();
         String selectedHappyHourId = null;
         if (selectedHappyHourPosition > 0) {
@@ -325,16 +309,14 @@ public class EditProductActivity extends AppCompatActivity {
             }
         }
 
-        // Cập nhật đối tượng Product
         currentProduct.setTen(ten);
         currentProduct.setGia(gia);
         currentProduct.setMoTa(moTa);
         currentProduct.setHinhAnh(hinhAnh);
         currentProduct.setPhanTramGiamGia(phanTramGiamGia);
-        currentProduct.setCategory(selectedCategoryName); // *** Lưu TÊN String vào trường cũ ***
+        currentProduct.setCategory(selectedCategoryName);
         currentProduct.setHappyHourId(selectedHappyHourId);
 
-        // Đẩy lên Firestore
         db.collection("cafe").document(currentProductId)
                 .set(currentProduct)
                 .addOnSuccessListener(aVoid -> {

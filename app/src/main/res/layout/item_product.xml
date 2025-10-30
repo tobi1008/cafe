@@ -38,11 +38,13 @@
             android:id="@+id/imageViewProduct"
             android:layout_width="0dp"
             android:layout_height="120dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/placeholder_image"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+
+        android:scaleType="fitCenter"
+
+        android:src="@drawable/placeholder_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/textViewProductName"
@@ -74,10 +76,12 @@
             android:progressTint="@color/purple_500"
             android:rating="4.5"
             android:stepSize="0.1"
-            android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
+
+        android:visibility="gone"
+
+        tools:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
 
         <TextView
             android:id="@+id/textViewRating"
@@ -86,13 +90,14 @@
             android:layout_marginStart="4dp"
             android:text="4.5"
             android:textSize="12sp"
-            android:visibility="gone"
-            tools:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@id/ratingBarProduct"
-            app:layout_constraintStart_toEndOf="@id/ratingBarProduct"
-            app:layout_constraintTop_toTopOf="@id/ratingBarProduct" />
 
-        <!-- Giá cuối cùng (Sau khi giảm) -->
+        android:visibility="gone"
+
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="@id/ratingBarProduct"
+        app:layout_constraintStart_toEndOf="@id/ratingBarProduct"
+        app:layout_constraintTop_toTopOf="@id/ratingBarProduct" />
+
         <TextView
             android:id="@+id/textViewProductPrice"
             android:layout_width="wrap_content"

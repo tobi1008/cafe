@@ -88,7 +88,8 @@ public class HomeActivity extends AppCompatActivity {
     private void loadCategories() {
         Log.d(TAG, "Bắt đầu tải Categories...");
         db.collection("Categories")
-                .orderBy("tenDanhMuc", Query.Direction.ASCENDING)
+                // Sap xep theo thuTuUuTien
+                .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     categoryNames.clear();

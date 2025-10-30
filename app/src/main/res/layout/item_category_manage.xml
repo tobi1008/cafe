@@ -23,10 +23,22 @@
             android:text="Tên Danh Mục"
             android:textColor="@android:color/black"
             android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/ivEditCategory"/>
+
+        <!-- *** THÊM: TextView cho Thứ Tự *** -->
+        <TextView
+            android:id="@+id/tvCategoryManagePriority"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ưu tiên: 1"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvCategoryManageName" />
+
 
         <!-- Nút Sửa -->
         <ImageView
@@ -35,10 +47,10 @@
             android:layout_height="32dp"
             android:src="@drawable/ic_edit"
             android:padding="4dp"
-            android:layout_marginEnd="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toStartOf="@id/ivDeleteCategory"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="8dp"
             android:contentDescription="Sửa" />
 
         <!-- Nút Xóa -->
@@ -48,12 +60,11 @@
             android:layout_height="32dp"
             android:src="@drawable/ic_delete"
             android:padding="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:contentDescription="Xóa" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
 
-    
