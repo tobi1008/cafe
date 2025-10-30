@@ -41,6 +41,21 @@
                 android:paddingBottom="16dp"
                 android:paddingTop="0dp">
 
+                <!-- ***  NÚT YÊU THÍCH  *** -->
+                <ImageView
+                    android:id="@+id/ivFavoriteSheet"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:src="@drawable/ic_favorite_border"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:layout_marginTop="-12dp"
+                    android:layout_marginEnd="-4dp"
+                    android:contentDescription="Nút yêu thích"/>
+                <!-- Cần có icon ic_favorite_border.xml -->
+
                 <ImageView
                     android:id="@+id/ivProductImageSheet"
                     android:layout_width="80dp"
@@ -167,8 +182,18 @@
                 android:layout_height="1dp"
                 android:background="#E0E0E0"/>
 
-            <!-- Phần Lựa Chọn (Size, Đá, Đường) -->
+            <!-- *** CONTAINER MỚI CHO CÁC LỰA CHỌN COMBO *** -->
             <LinearLayout
+                android:id="@+id/llComboOptionsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone" /> <!-- Ẩn theo mặc định -->
+
+
+            <!-- *** BỌC CÁC LỰA CHỌN CŨ VÀO 1 LAYOUT *** -->
+            <LinearLayout
+                android:id="@+id/llStandardOptionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -232,7 +257,7 @@
                     <!-- RadioButtons sẽ được thêm bằng code -->
                 </RadioGroup>
 
-                <!-- *** PHẦN GHI CHÚ THÊM MỚI *** -->
+                <!-- PHẦN GHI CHÚ (vẫn dùng chung cho cả 2 loại) -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -257,7 +282,61 @@
                     android:padding="12dp"/>
 
             </LinearLayout>
-            <!-- Kết thúc LinearLayout chứa các lựa chọn -->
+            <!-- Kết thúc llStandardOptionsContainer -->
+
+            <!-- *** KHU VỰC ĐÁNH GIÁ *** -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="8dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/textViewReviewsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Đánh giá sản phẩm"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBarAverageSheet"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/textViewReviewsTitle"
+                    android:layout_marginTop="8dp"
+                    android:isIndicator="true"
+                    android:numStars="5" />
+
+                <TextView
+                    android:id="@+id/tvReviewCountSheet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/ratingBarAverageSheet"
+                    android:layout_alignTop="@id/ratingBarAverageSheet"
+                    android:layout_alignBottom="@id/ratingBarAverageSheet"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:text="(0 đánh giá)"/>
+
+                <Button
+                    android:id="@+id/btnWriteReviewSheet"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/textViewReviewsTitle"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="-8dp"
+                    android:text="Viết đánh giá"/>
+            </RelativeLayout>
+
 
         </LinearLayout>
         <!-- Kết thúc LinearLayout bên trong NestedScrollView -->
@@ -270,7 +349,7 @@
         android:layout_height="1dp"
         android:background="#E0E0E0"/>
 
-    <!-- Phần Tổng tiền và Nút -->
+    <!-- Phần Tổng tiền và Nút (Nằm ngoài ScrollView) -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

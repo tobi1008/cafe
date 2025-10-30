@@ -1,6 +1,7 @@
 package com.example.cafe;
 
 import java.io.Serializable;
+// *** ĐÃ XÓA: import java.util.List; ***
 import java.util.Map;
 
 public class Product implements Serializable {
@@ -14,21 +15,21 @@ public class Product implements Serializable {
     private String category;
     private double averageRating;
     private long reviewCount;
+    private String happyHourId;
 
-    // --- TRƯỜNG MỚI ĐÃ THÊM ---
-    private String happyHourId; // <-- Thêm trường này
+    // --- ĐÃ XÓA: TRƯỜNG MỚI CHO COMBO ---
+    // private List<Map<String, Object>> optionGroups;
 
     public Product() {
         // Constructor rỗng cần thiết cho Firebase
     }
 
-    // Constructor 7 tham số (Gốc của bạn - Đã cập nhật để gọi hàm 8)
+    // Constructor 7 tham số
     public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category) {
-        // Gọi hàm khởi tạo 8 tham số với happyHourId là null
         this(id, ten, gia, moTa, hinhAnh, phanTramGiamGia, category, null);
     }
 
-    // --- HÀM KHỞI TẠO 8 THAM SỐ MỚI ---
+    // Constructor 8 tham số
     public Product(String id, String ten, Map<String, Double> gia, String moTa, String hinhAnh, int phanTramGiamGia, String category, String happyHourId) {
         this.id = id;
         this.ten = ten;
@@ -39,7 +40,8 @@ public class Product implements Serializable {
         this.category = category;
         this.averageRating = 0;
         this.reviewCount = 0;
-        this.happyHourId = happyHourId; // <-- Thêm dòng này
+        this.happyHourId = happyHourId;
+        // this.optionGroups = null; // *** ĐÃ XÓA ***
     }
 
     // --- Getters & Setters ---
@@ -61,10 +63,12 @@ public class Product implements Serializable {
     public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
     public long getReviewCount() { return reviewCount; }
     public void setReviewCount(long reviewCount) { this.reviewCount = reviewCount; }
-
-    // --- GETTER & SETTER MỚI CHO HAPPY HOUR ---
     public String getHappyHourId() { return happyHourId; }
     public void setHappyHourId(String happyHourId) { this.happyHourId = happyHourId; }
+
+    // --- ĐÃ XÓA: GETTER & SETTER MỚI CHO COMBO ---
+    // public List<Map<String, Object>> getOptionGroups() { return optionGroups; }
+    // public void setOptionGroups(List<Map<String, Object>> optionGroups) { this.optionGroups = optionGroups; }
 
 
     // --- Các hàm tiện ích ---
@@ -86,3 +90,4 @@ public class Product implements Serializable {
         return originalPrice;
     }
 }
+
