@@ -5,38 +5,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FAFAFA"
+    android:background="#F7F7F7"
     tools:context=".ProfileActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Thông tin cá nhân"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimary"
-        android:layout_gravity="center_horizontal"
-        android:padding="16dp"/>
+    <!-- Thanh tiêu đề (Giống trong ảnh mẫu) -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thông tin cá nhân"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimary"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
 
-    <!-- Phần thông tin user -->
+
+    <!-- Phần thông tin user (Giống trong ảnh mẫu) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
+        android:padding="20dp"
         android:gravity="center_vertical">
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="80dp"
             android:layout_height="80dp"
-            app:cardCornerRadius="40dp">
+            app:cardCornerRadius="40dp"
+            app:cardElevation="0dp">
             <ImageView
                 android:id="@+id/imageViewAvatar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_coffee_logo"
                 android:scaleType="centerCrop"/>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -47,7 +55,7 @@
                 android:id="@+id/textViewUserName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tên Người Dùng"
+                tools:text="Admin Tebi"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
@@ -55,128 +63,153 @@
                 android:id="@+id/textViewUserEmailPhone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="user@example.com"
+                tools:text="admin@quyenlt.com"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"/>
         </LinearLayout>
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
-
-    <!-- Menu chức năng -->
-    <LinearLayout
+    <!-- Menu chức năng (Bọc trong CardView cho đẹp) -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
 
-        <!-- Sản phẩm yêu thích -->
-        <RelativeLayout
-            android:id="@+id/layoutFavorites"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:background="?attr/selectableItemBackground">
-            <ImageView
-                android:id="@+id/iconFavorites"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_favorite_border"
-                app:tint="@color/colorPrimary"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Sản phẩm yêu thích"
-                android:layout_toEndOf="@id/iconFavorites"
-                android:layout_marginStart="16dp"
-                android:layout_centerVertical="true"
-                android:textSize="16sp"/>
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
-        </RelativeLayout>
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <!-- Lịch sử đơn hàng -->
-        <RelativeLayout
-            android:id="@+id/layoutOrderHistory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:background="?attr/selectableItemBackground">
-            <ImageView
-                android:id="@+id/iconOrderHistory"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_history" />
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Sản phẩm yêu thích (ID layoutFavorites) -->
+            <RelativeLayout
+                android:id="@+id/layoutFavorites"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lịch sử Đơn hàng"
-                android:layout_toEndOf="@id/iconOrderHistory"
-                android:layout_marginStart="16dp"
-                android:layout_centerVertical="true"
-                android:textSize="16sp"/>
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
-        </RelativeLayout>
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/iconFavorites"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_favorite_border"
+                    android:layout_centerVertical="true"
+                    app:tint="@color/colorPrimary"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sản phẩm yêu thích"
+                    android:layout_toEndOf="@id/iconFavorites"
+                    android:layout_marginStart="16dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"/>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:tint="?android:attr/textColorSecondary"/>
+            </RelativeLayout>
 
-        <!-- Bảng điều khiển Admin -->
-        <RelativeLayout
-            android:id="@+id/layoutAdminPanel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:background="?attr/selectableItemBackground"
-            android:visibility="gone"
-            tools:visibility="visible">
-            <ImageView
-                android:id="@+id/iconAdminPanel"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_admin_panel" />
-            <TextView
-                android:layout_width="wrap_content"
+            <!-- Lịch sử đơn hàng (ID layoutOrderHistory) -->
+            <RelativeLayout
+                android:id="@+id/layoutOrderHistory"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Bảng điều khiển Admin"
-                android:layout_toEndOf="@id/iconAdminPanel"
-                android:layout_marginStart="16dp"
-                android:layout_centerVertical="true"
-                android:textSize="16sp"/>
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_chevron_right"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"/>
-        </RelativeLayout>
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:id="@+id/iconOrderHistory"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_history"
+                    android:layout_centerVertical="true"
+                    app:tint="@color/colorPrimary"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lịch sử Đơn hàng"
+                    android:layout_toEndOf="@id/iconOrderHistory"
+                    android:layout_marginStart="16dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"/>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:tint="?android:attr/textColorSecondary"/>
+            </RelativeLayout>
 
-        <!-- Đăng xuất -->
+            <!-- Bảng điều khiển Admin (ID layoutAdminPanel) -->
+            <RelativeLayout
+                android:id="@+id/layoutAdminPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:background="?attr/selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
+                <ImageView
+                    android:id="@+id/iconAdminPanel"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_admin_panel"
+                    android:layout_centerVertical="true"
+                    app:tint="@color/colorPrimary"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bảng điều khiển Admin"
+                    android:layout_toEndOf="@id/iconAdminPanel"
+                    android:layout_marginStart="16dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"/>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    app:tint="?android:attr/textColorSecondary"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Đăng xuất (ID layoutLogout) -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
+
         <RelativeLayout
             android:id="@+id/layoutLogout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
+            android:padding="16dp"
             android:background="?attr/selectableItemBackground">
             <ImageView
                 android:id="@+id/iconLogout"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_logout"
+                android:layout_centerVertical="true"
                 app:tint="@color/colorDelete"/>
             <TextView
                 android:layout_width="wrap_content"
@@ -186,10 +219,10 @@
                 android:layout_marginStart="16dp"
                 android:layout_centerVertical="true"
                 android:textSize="16sp"
-                android:textColor="@color/colorDelete"/>
+                android:textColor="@color/colorDelete"
+                android:textStyle="bold"/>
         </RelativeLayout>
 
-    </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
-

@@ -4,14 +4,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -26,26 +26,34 @@ public class EditProductActivity extends AppCompatActivity {
 
     private static final String TAG = "EditProductActivity";
 
+    // UI Sản Phẩm
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent;
-    private Button btnUpdateProduct;
+    private MaterialButton btnUpdateProduct; // Dùng MaterialButton
 
-    private Spinner spinnerCategory;
+    private AutoCompleteTextView spinnerCategory;
     private ArrayAdapter<String> categoryAdapter;
     private List<Category> categoryList = new ArrayList<>();
     private List<String> categoryNames = new ArrayList<>();
 
-    private Spinner spinnerHappyHour;
+    private AutoCompleteTextView spinnerHappyHour;
     private ArrayAdapter<String> happyHourAdapter;
     private List<HappyHour> happyHourList = new ArrayList<>();
     private List<String> happyHourNames = new ArrayList<>();
 
+    // Firebase
     private FirebaseFirestore db;
     private Product currentProduct;
     private String currentProductId;
 
+    // Biến cờ
     private boolean isHappyHoursLoaded = false;
     private boolean isCategoriesLoaded = false;
     private boolean isProductLoaded = false;
+
+    // Lưu lại tên category cũ để set text cho AutoCompleteTextView
+    private String productCategoryName = "";
+    private String productHappyHourName = "Không áp dụng"; // Mặc định
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +70,7 @@ public class EditProductActivity extends AppCompatActivity {
             return;
         }
 
+        // Ánh xạ UI
         etName = findViewById(R.id.editProductName);
         etPriceS = findViewById(R.id.editPriceS);
         etPriceM = findViewById(R.id.editPriceM);
@@ -71,20 +80,20 @@ public class EditProductActivity extends AppCompatActivity {
         etSalePercent = findViewById(R.id.editSalePercent);
         btnUpdateProduct = findViewById(R.id.buttonUpdateProduct);
 
+        // *** ÁNH XẠ AutoCompleteTextView ***
         spinnerCategory = findViewById(R.id.spinnerCategory);
         spinnerHappyHour = findViewById(R.id.spinnerHappyHour);
 
-        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryNames);
-        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNames);
         spinnerCategory.setAdapter(categoryAdapter);
 
 
         happyHourNames.add("Không áp dụng");
         happyHourList.add(null);
-        happyHourAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, happyHourNames);
-        happyHourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        happyHourAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, happyHourNames);
         spinnerHappyHour.setAdapter(happyHourAdapter);
 
+        // Tải dữ liệu
         loadHappyHours();
         loadCategories();
         loadProductDetails();
@@ -95,6 +104,7 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void loadHappyHours() {
         db.collection("HappyHours")
+                .orderBy("thuTuUuTien", Query.Direction.ASCENDING) // Sắp xếp theo thứ tự
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     happyHourList.subList(1, happyHourList.size()).clear();
@@ -125,7 +135,6 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void loadCategories() {
         db.collection("Categories")
-                // *** THAY ĐỔI SẮP XẾP: Theo "thuTuUuTien" thay vì "tenDanhMuc" ***
                 .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -208,39 +217,27 @@ public class EditProductActivity extends AppCompatActivity {
             etPriceL.setText(String.valueOf(currentProduct.getPriceForSize("L")));
         }
 
-        String productCategoryName = currentProduct.getCategory();
-        int categorySpinnerPosition = 0;
-        if (productCategoryName != null && !productCategoryName.isEmpty() && !categoryNames.isEmpty()) {
-            Log.d(TAG, "Searching for category: " + productCategoryName);
-            for (int i = 0; i < categoryNames.size(); i++) {
-                if (productCategoryName.equalsIgnoreCase(categoryNames.get(i))) {
-                    categorySpinnerPosition = i;
-                    Log.d(TAG, "Category found at position: " + i);
-                    break;
-                }
-            }
-        } else {
-            Log.d(TAG, "Product category is null/empty or categoryNames list is empty.");
+        // ***  Tự động chọn Category ***
+        productCategoryName = currentProduct.getCategory();
+        if (productCategoryName != null && !productCategoryName.isEmpty() && categoryNames.contains(productCategoryName)) {
+            // Đặt text cho AutoCompleteTextView
+            spinnerCategory.setText(productCategoryName, false);
         }
-        spinnerCategory.setSelection(categorySpinnerPosition);
 
-
+        // *** THAY ĐỔI: Tự động chọn Happy Hour ***
         String productHappyHourId = currentProduct.getHappyHourId();
-        int happyHourSpinnerPosition = 0;
+        productHappyHourName = "Không áp dụng"; // Mặc định
         if (productHappyHourId != null && !productHappyHourId.isEmpty() && happyHourList.size() > 1) {
-            Log.d(TAG, "Searching for Happy Hour ID: " + productHappyHourId);
             for (int i = 1; i < happyHourList.size(); i++) {
                 HappyHour hh = happyHourList.get(i);
                 if (hh != null && productHappyHourId.equals(hh.getId())) {
-                    happyHourSpinnerPosition = i;
-                    Log.d(TAG, "Happy Hour found at position: " + i);
+                    productHappyHourName = hh.getTenKhungGio(); // Lưu tên
                     break;
                 }
             }
-        } else {
-            Log.d(TAG, "Product Happy Hour ID is null/empty or happyHourList is too small.");
         }
-        spinnerHappyHour.setSelection(happyHourSpinnerPosition);
+        // Đặt text cho AutoCompleteTextView
+        spinnerHappyHour.setText(productHappyHourName, false);
     }
 
 
@@ -287,25 +284,19 @@ public class EditProductActivity extends AppCompatActivity {
             }
         }
 
-        String selectedCategoryName = null;
-        int selectedCategoryPosition = spinnerCategory.getSelectedItemPosition();
-
-        if (spinnerCategory.getCount() > 0 && selectedCategoryPosition != Spinner.INVALID_POSITION) {
-            selectedCategoryName = categoryAdapter.getItem(selectedCategoryPosition);
-        }
-
-        if (selectedCategoryName == null || selectedCategoryName.isEmpty()){
-            Toast.makeText(this, "Vui lòng chọn Danh mục", Toast.LENGTH_SHORT).show();
+        String selectedCategoryName = spinnerCategory.getText().toString();
+        if (selectedCategoryName.isEmpty() || !categoryNames.contains(selectedCategoryName)){
+            Toast.makeText(this, "Vui lòng chọn Danh mục hợp lệ", Toast.LENGTH_SHORT).show();
             return;
         }
 
-
-        int selectedHappyHourPosition = spinnerHappyHour.getSelectedItemPosition();
+        String selectedHappyHourName = spinnerHappyHour.getText().toString();
         String selectedHappyHourId = null;
-        if (selectedHappyHourPosition > 0) {
-            HappyHour selectedHH = happyHourList.get(selectedHappyHourPosition);
-            if (selectedHH != null) {
-                selectedHappyHourId = selectedHH.getId();
+        for (int i = 1; i < happyHourList.size(); i++) {
+            HappyHour hh = happyHourList.get(i);
+            if(hh != null && hh.getTenKhungGio().equals(selectedHappyHourName)){
+                selectedHappyHourId = hh.getId();
+                break;
             }
         }
 

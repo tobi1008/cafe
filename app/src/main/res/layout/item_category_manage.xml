@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
@@ -20,49 +21,57 @@
             android:id="@+id/tvCategoryManageName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Tên Danh Mục"
+            tools:text="Tên Danh Mục"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivEditCategory"/>
+            app:layout_constraintEnd_toStartOf="@id/ivEditCategory"
+            app:layout_constraintBottom_toTopOf="@id/tvCategoryManagePriority"/>
+        <!-- Căn lề cho đẹp hơn -->
 
-        <!-- *** THÊM: TextView cho Thứ Tự *** -->
+        <!-- TextView cho Thứ Tự -->
         <TextView
             android:id="@+id/tvCategoryManagePriority"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ưu tiên: 1"
+            tools:text="Ưu tiên: 1"
             android:textSize="14sp"
             android:layout_marginTop="4dp"
+            android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvCategoryManageName" />
+            app:layout_constraintTop_toBottomOf="@id/tvCategoryManageName"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-        <!-- Nút Sửa -->
+        <!-- Nút Sửa (Thêm Tint màu) -->
         <ImageView
             android:id="@+id/ivEditCategory"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_edit"
-            android:padding="4dp"
+            android:padding="6dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toStartOf="@id/ivDeleteCategory"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="8dp"
+            app:tint="@color/colorPrimary"
             android:contentDescription="Sửa" />
 
-        <!-- Nút Xóa -->
+        <!-- Nút Xóa (Thêm Tint màu) -->
         <ImageView
             android:id="@+id/ivDeleteCategory"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_delete"
-            android:padding="4dp"
+            android:padding="6dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/colorDelete"
             android:contentDescription="Xóa" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

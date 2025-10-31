@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="#F5F5F5">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +28,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             android:layout_marginBottom="24dp">
 
@@ -45,88 +46,131 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="16dp"/>
 
-                <EditText
-                    android:id="@+id/editTextProductName"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Tên sản phẩm (*)"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
-                    android:inputType="textCapSentences|textNoSuggestions"
-                    android:imeOptions="actionNext"/>
+                    android:hint="Tên sản phẩm (*)">
 
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextProductName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences|textNoSuggestions"
+                        android:imeOptions="actionNext"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Giá S, M, L trong TextInputLayout -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="8dp">
-                    <EditText
-                        android:id="@+id/editTextPriceS"
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:hint="Giá S"
-                        android:inputType="numberDecimal"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_marginEnd="4dp"
-                        android:imeOptions="actionNext"/>
-                    <EditText
-                        android:id="@+id/editTextPriceM"
+                        android:hint="Giá S">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextPriceS"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionNext"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:hint="Giá M (*)"
-                        android:inputType="numberDecimal"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
-                        android:imeOptions="actionNext"/>
-                    <EditText
-                        android:id="@+id/editTextPriceL"
+                        android:hint="Giá M (*)">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextPriceM"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionNext"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:hint="Giá L"
-                        android:inputType="numberDecimal"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_marginStart="4dp"
-                        android:imeOptions="actionNext"/>
+                        android:hint="Giá L">
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextPriceL"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionNext"/>
+                    </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <EditText
-                    android:id="@+id/editTextProductDescription"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Mô tả ngắn"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
-                    android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
-                    android:imeOptions="actionNext"/>
+                    android:hint="Mô tả ngắn">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextProductDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
+                        android:imeOptions="actionNext"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/editTextProductImageUrl"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="URL Hình ảnh"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
-                    android:inputType="textUri"
-                    android:imeOptions="actionNext"/>
+                    android:hint="URL Hình ảnh">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextProductImageUrl"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textUri"
+                        android:imeOptions="actionNext"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <EditText
-                    android:id="@+id/editTextSalePercent"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Phần trăm giảm giá (0-100)"
-                    android:inputType="number"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
-                    android:imeOptions="actionNext"/>
+                    android:hint="Phần trăm giảm giá (0-100)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextSalePercent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:imeOptions="actionNext"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Chọn Danh Mục (*)"
-                    android:textStyle="bold"/>
-                <Spinner
-                    android:id="@+id/spinnerCategoryAdmin"
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.AppCompat.Spinner.Underlined"
-                    android:layout_marginBottom="16dp"/>
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Chọn Danh Mục (*)">
+                    <AutoCompleteTextView
+                        android:id="@+id/spinnerCategoryAdmin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
+                </com.google.android.material.textfield.TextInputLayout>
+
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonAddProduct"
@@ -134,7 +178,9 @@
                     android:layout_height="wrap_content"
                     android:text="Thêm vào Menu"
                     app:icon="@drawable/ic_add"
-                    app:iconGravity="textStart"/>
+                    app:iconGravity="textStart"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -143,7 +189,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
 
             <LinearLayout
@@ -161,7 +207,7 @@
                     android:layout_marginBottom="16dp"/>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageProducts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -172,7 +218,7 @@
                     android:textAlignment="textStart"/>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageCategories"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -183,7 +229,7 @@
                     android:layout_marginBottom="8dp"/>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageHappyHour"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -194,7 +240,7 @@
                     android:textAlignment="textStart"/>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageOrders"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -205,7 +251,7 @@
                     android:textAlignment="textStart"/>
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageVouchers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -1,6 +1,6 @@
 package com.example.cafe;
 
-import android.content.Intent; // Thêm import này
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class ManageProductsActivity extends AppCompatActivity {
     private ManageProductsAdapter adapter;
     private List<Product> productList;
     private FirebaseFirestore db;
+    private static final String TAG = "ManageProductsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,13 +63,21 @@ public class ManageProductsActivity extends AppCompatActivity {
 
     private void fetchProducts() {
         db.collection("cafe")
+                // ***  SẮP XẾP Theo "ten" (tên), thứ tự Tăng dần (A-Z) ***
+                .orderBy("ten", Query.Direction.ASCENDING)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         productList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Product product = document.toObject(Product.class);
-                            productList.add(product);
+                            try { // Thêm try-catch
+                                Product product = document.toObject(Product.class);
+                                // (Quan trọng: Đảm bảo sản phẩm có ID, nếu không Sửa/Xoá sẽ lỗi)
+                                // ID đã được cập nhật khi thêm mới, nên ở đây OK
+                                productList.add(product);
+                            } catch (Exception e) {
+                                Log.e(TAG, "Lỗi khi chuyển đổi Product: " + document.getId(), e);
+                            }
                         }
                         adapter.notifyDataSetChanged();
                     } else {
@@ -86,7 +96,14 @@ public class ManageProductsActivity extends AppCompatActivity {
                 .delete()
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Đã xoá sản phẩm: " + product.getTen(), Toast.LENGTH_SHORT).show();
-                    fetchProducts(); // Tải lại danh sách sau khi xoá
+
+                    int position = productList.indexOf(product);
+                    if (position != -1) {
+                        productList.remove(position);
+                        adapter.notifyItemRemoved(position);
+                    } else {
+                        fetchProducts(); // Nếu không tìm thấy, tải lại
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi khi xoá sản phẩm", Toast.LENGTH_SHORT).show();
@@ -94,4 +111,3 @@ public class ManageProductsActivity extends AppCompatActivity {
                 });
     }
 }
-

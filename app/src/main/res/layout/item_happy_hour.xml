@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="4dp"
     app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,13 +21,14 @@
             android:id="@+id/tvHappyHourName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Sale Trưa"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/ivEditHappyHour" />
+            app:layout_constraintEnd_toStartOf="@id/ivEditHappyHour"
+            app:layout_constraintBottom_toTopOf="@id/tvHappyHourTime"
+            tools:text="Sale Trưa" />
 
         <!-- Thời Gian -->
         <TextView
@@ -31,10 +36,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="14:00 - 16:00"
             android:textSize="16sp"
+            android:textColor="?android:attr/textColorSecondary"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvHappyHourName" />
+            app:layout_constraintTop_toBottomOf="@id/tvHappyHourName"
+            app:layout_constraintBottom_toTopOf="@id/tvHappyHourStatus"
+            tools:text="14:00 – 16:00" />
 
         <!-- Phần Trăm Giảm Giá -->
         <TextView
@@ -47,12 +54,12 @@
             android:paddingEnd="8dp"
             android:paddingTop="2dp"
             android:paddingBottom="2dp"
-            android:text="-20%"
             android:textColor="@android:color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@id/tvHappyHourTime"
             app:layout_constraintStart_toEndOf="@id/tvHappyHourTime"
-            app:layout_constraintTop_toTopOf="@id/tvHappyHourTime" />
+            app:layout_constraintTop_toTopOf="@id/tvHappyHourTime"
+            tools:text="-20%" />
 
         <!-- Trạng Thái (Bật/Tắt) -->
         <TextView
@@ -60,34 +67,43 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Đang Bật"
             android:textSize="16sp"
-            android:textStyle="italic"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvHappyHourTime" />
+            app:layout_constraintTop_toBottomOf="@id/tvHappyHourTime"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Đang Bật"
+            tools:textColor="@android:color/holo_green_dark"/>
 
         <!-- Nút Sửa -->
         <ImageView
             android:id="@+id/ivEditHappyHour"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_edit"
-            android:padding="4dp"
+            android:padding="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/colorPrimary"
             app:layout_constraintEnd_toStartOf="@id/ivDeleteHappyHour"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_marginEnd="8dp"
             android:contentDescription="Sửa" />
 
         <!-- Nút Xóa -->
         <ImageView
             android:id="@+id/ivDeleteHappyHour"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/ic_delete"
-            android:padding="4dp"
+            android:padding="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/colorDelete"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             android:contentDescription="Xóa" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
+

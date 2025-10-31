@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,7 +21,10 @@ import java.util.Map;
 public class AdminActivity extends AppCompatActivity {
 
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent;
-    private Spinner spinnerCategoryAdmin;
+
+    // *** Dùng AutoCompleteTextView ***
+    private AutoCompleteTextView spinnerCategoryAdmin;
+
     private ArrayAdapter<String> categoryAdapterAdmin;
     private List<Category> categoryListAdmin = new ArrayList<>();
     private List<String> categoryNamesAdmin = new ArrayList<>();
@@ -47,6 +50,8 @@ public class AdminActivity extends AppCompatActivity {
         etImageUrl = findViewById(R.id.editTextProductImageUrl);
         etSalePercent = findViewById(R.id.editTextSalePercent);
         btnAddProduct = findViewById(R.id.buttonAddProduct);
+
+        // *** Ánh xạ AutoCompleteTextView ***
         spinnerCategoryAdmin = findViewById(R.id.spinnerCategoryAdmin);
 
         // Ánh xạ Nút Quản Lý
@@ -56,9 +61,7 @@ public class AdminActivity extends AppCompatActivity {
         btnManageHappyHour = findViewById(R.id.buttonManageHappyHour);
         btnManageCategories = findViewById(R.id.buttonManageCategories);
 
-        // Thiết lập Adapter cho Spinner Category
-        categoryAdapterAdmin = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categoryNamesAdmin);
-        categoryAdapterAdmin.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoryAdapterAdmin = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNamesAdmin);
         spinnerCategoryAdmin.setAdapter(categoryAdapterAdmin);
 
         loadCategoriesAdmin();
@@ -78,7 +81,6 @@ public class AdminActivity extends AppCompatActivity {
     private void loadCategoriesAdmin() {
         Log.d(TAG, "Bắt đầu tải Categories cho Admin Spinner...");
         db.collection("Categories")
-                // SẮP XẾP theo thuTuUuTien
                 .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -120,12 +122,8 @@ public class AdminActivity extends AppCompatActivity {
         String hinhAnh = etImageUrl.getText().toString().trim();
         String salePercentStr = etSalePercent.getText().toString().trim();
 
-        String selectedCategoryName = null;
-        int selectedCategoryPosition = spinnerCategoryAdmin.getSelectedItemPosition();
+        String selectedCategoryName = spinnerCategoryAdmin.getText().toString();
 
-        if (spinnerCategoryAdmin.getCount() > 0 && selectedCategoryPosition != Spinner.INVALID_POSITION) {
-            selectedCategoryName = categoryAdapterAdmin.getItem(selectedCategoryPosition);
-        }
 
         if (ten.isEmpty() || priceMStr.isEmpty() || selectedCategoryName == null || selectedCategoryName.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập tên, giá size M và chọn danh mục", Toast.LENGTH_SHORT).show();
@@ -175,6 +173,8 @@ public class AdminActivity extends AppCompatActivity {
                                 etDescription.setText("");
                                 etImageUrl.setText("");
                                 etSalePercent.setText("");
+                                // *** SỬA: Xóa text trong AutoCompleteTextView ***
+                                spinnerCategoryAdmin.setText("", false);
 
                             })
                             .addOnFailureListener(e -> {

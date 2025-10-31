@@ -3,10 +3,13 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
+
 import com.example.cafe.Product;
 
 import java.util.List;
@@ -36,6 +39,7 @@ public class ManageProductsAdapter extends RecyclerView.Adapter<ManageProductsAd
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // *** Đảm bảo file layout này khớp (item_manage_product.xml) ***
         View view = LayoutInflater.from(context).inflate(R.layout.item_manage_product, parent, false);
         return new ViewHolder(view);
     }
@@ -43,8 +47,23 @@ public class ManageProductsAdapter extends RecyclerView.Adapter<ManageProductsAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Product product = productList.get(position);
-        holder.productName.setText(product.getTen());
 
+        // *** Hiển thị Tên và Danh mục ***
+        holder.productName.setText(product.getTen());
+        if (product.getCategory() != null && !product.getCategory().isEmpty()) {
+            holder.tvProductManageCategory.setText(product.getCategory());
+        } else {
+            holder.tvProductManageCategory.setText("Không có danh mục");
+        }
+
+        Glide.with(context)
+                .load(product.getHinhAnh())
+                .placeholder(R.drawable.placeholder_image) // Ảnh giữ chỗ
+                .error(R.drawable.placeholder_image) // Ảnh khi lỗi
+                .into(holder.ivProductManageImage);
+
+
+        // Gán sự kiện (vẫn như cũ)
         holder.editButton.setOnClickListener(v -> {
             if (onEditClickListener != null) {
                 onEditClickListener.onEditClick(product);
@@ -64,15 +83,21 @@ public class ManageProductsAdapter extends RecyclerView.Adapter<ManageProductsAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView productName;
-        Button editButton, deleteButton;
+        // *** Ảnh và Danh mục ***
+        ImageView ivProductManageImage;
+        TextView productName, tvProductManageCategory;
+
+        ImageButton editButton, deleteButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Ánh xạ các views mới
+            ivProductManageImage = itemView.findViewById(R.id.ivProductManageImage);
             productName = itemView.findViewById(R.id.textViewProductName);
+            tvProductManageCategory = itemView.findViewById(R.id.tvProductManageCategory);
+
             editButton = itemView.findViewById(R.id.buttonEditProduct);
             deleteButton = itemView.findViewById(R.id.buttonDeleteProduct);
         }
     }
 }
-
