@@ -8,12 +8,14 @@
     android:background="#F7F7F7"
     tools:context=".ProfileActivity">
 
-    <!-- Thanh tiêu đề (Giống trong ảnh mẫu) -->
+    <!-- Thanh tiêu đề -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingEnd="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,19 +27,21 @@
     </RelativeLayout>
 
 
-    <!-- Phần thông tin user (Giống trong ảnh mẫu) -->
-    <LinearLayout
+    <!-- Phần thông tin user -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:padding="20dp"
         android:gravity="center_vertical">
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAvatar"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:cardCornerRadius="40dp"
-            app:cardElevation="0dp">
+            app:cardElevation="0dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true">
             <ImageView
                 android:id="@+id/imageViewAvatar"
                 android:layout_width="match_parent"
@@ -47,10 +51,14 @@
         </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toEndOf="@id/cardAvatar"
+            android:layout_toStartOf="@+id/btnEditProfile"
+            android:layout_centerVertical="true">
             <TextView
                 android:id="@+id/textViewUserName"
                 android:layout_width="wrap_content"
@@ -67,16 +75,30 @@
                 android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"/>
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Menu chức năng (Bọc trong CardView cho đẹp) -->
+        <!-- Nút Chỉnh sửa -->
+        <ImageButton
+            android:id="@+id/btnEditProfile"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_edit"
+            app:tint="@color/colorPrimary"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:contentDescription="Chỉnh sửa thông tin"/>
+
+    </RelativeLayout>
+
+    <!-- *** KHU VỰC THÔNG TIN (GOM VÀO CARDVIEW MỚI) *** -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -84,7 +106,71 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Sản phẩm yêu thích (ID layoutFavorites) -->
+            <!-- Hạng thành viên -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hạng thành viên"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tvMemberTier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Vàng"
+                android:textSize="16sp"
+                android:textColor="@color/colorWarning"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Số điện thoại -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số điện thoại"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tvUserPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="0987654321"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorSecondary"
+                android:layout_marginBottom="12dp"/>
+
+            <!-- Địa chỉ -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Địa chỉ giao hàng"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tvUserAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="123 Đường ABC, Phường X, Quận Y, TP. Z"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorSecondary"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+
+    <!-- Menu chức năng -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Sản phẩm yêu thích -->
             <RelativeLayout
                 android:id="@+id/layoutFavorites"
                 android:layout_width="match_parent"
@@ -117,7 +203,7 @@
                     app:tint="?android:attr/textColorSecondary"/>
             </RelativeLayout>
 
-            <!-- Lịch sử đơn hàng (ID layoutOrderHistory) -->
+            <!-- Lịch sử đơn hàng -->
             <RelativeLayout
                 android:id="@+id/layoutOrderHistory"
                 android:layout_width="match_parent"
@@ -150,7 +236,7 @@
                     app:tint="?android:attr/textColorSecondary"/>
             </RelativeLayout>
 
-            <!-- Bảng điều khiển Admin (ID layoutAdminPanel) -->
+            <!-- Bảng điều khiển Admin -->
             <RelativeLayout
                 android:id="@+id/layoutAdminPanel"
                 android:layout_width="match_parent"
@@ -188,7 +274,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Đăng xuất (ID layoutLogout) -->
+    <!-- Đăng xuất -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -196,7 +282,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginTop="24dp"
         app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFF1F0">
+        <!-- Thêm màu nền đỏ nhạt -->
 
         <RelativeLayout
             android:id="@+id/layoutLogout"
@@ -226,3 +314,4 @@
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
+

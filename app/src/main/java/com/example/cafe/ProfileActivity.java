@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -14,9 +15,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private TextView tvUserName, tvUserEmailPhone;
+    // *** THÊM CÁC BIẾN UI MỚI ***
+    private TextView tvUserName, tvUserEmailPhone, tvUserPhone, tvUserAddress, tvMemberTier;
     private RelativeLayout layoutFavorites, layoutOrderHistory, layoutAdminPanel, layoutLogout;
     private ImageView imageViewAvatar;
+    private ImageButton btnEditProfile; // Nút Sửa
+
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private static final String TAG = "ProfileActivity";
@@ -38,6 +42,13 @@ public class ProfileActivity extends AppCompatActivity {
         layoutLogout = findViewById(R.id.layoutLogout);
         imageViewAvatar = findViewById(R.id.imageViewAvatar);
 
+        // *** ÁNH XẠ CÁC UI MỚI ***
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+        tvUserPhone = findViewById(R.id.tvUserPhone);
+        tvUserAddress = findViewById(R.id.tvUserAddress);
+        tvMemberTier = findViewById(R.id.tvMemberTier);
+
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             loadUserInfo(currentUser.getUid(), currentUser.getEmail());
@@ -48,7 +59,7 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
         }
 
-        // Gán sự kiện click cho các menu item
+        //  sự kiện click cho các menu item
         layoutFavorites.setOnClickListener(v ->
                 startActivity(new Intent(ProfileActivity.this, FavoritesActivity.class)));
 
@@ -65,8 +76,12 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+        btnEditProfile.setOnClickListener(v ->
+                startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class)));
     }
 
+    // *** HÀM  CẬP NHẬT ĐỂ TẢI THÊM THÔNG TIN ***
     private void loadUserInfo(String userId, String email) {
         final String userEmail = (email == null) ? "N/A" : email;
 
@@ -74,22 +89,53 @@ public class ProfileActivity extends AppCompatActivity {
             Log.w(TAG, "Email is null for user: " + userId);
         }
 
-        // 2. Dùng biến final mới
         tvUserEmailPhone.setText(userEmail);
 
-        db.collection("users").document(userId).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
+        db.collection("users").document(userId)
+                .addSnapshotListener((documentSnapshot, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Listen failed.", error);
+                        // Hiển thị thông tin cơ bản nếu lỗi
+                        tvUserName.setText(userEmail.split("@")[0]);
+                        layoutAdminPanel.setVisibility(View.GONE);
+                        tvUserPhone.setText("Chưa cập nhật");
+                        tvUserAddress.setText("Chưa cập nhật");
+                        tvMemberTier.setText("Đồng");
+                        return;
+                    }
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         if (user != null) {
-                            // Hiển thị tên nếu có
+                            // Hiển thị Tên
                             if (user.getName() != null && !user.getName().isEmpty()) {
                                 tvUserName.setText(user.getName());
                             } else {
                                 tvUserName.setText(userEmail.split("@")[0]);
                             }
 
-                            // Kiểm tra vai trò để ẩn/hiện nút Admin
+                            // Hiển thị SĐT
+                            if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+                                tvUserPhone.setText(user.getPhone());
+                            } else {
+                                tvUserPhone.setText("Chưa cập nhật");
+                            }
+
+                            // Hiển thị Địa chỉ
+                            if (user.getAddress() != null && !user.getAddress().isEmpty()) {
+                                tvUserAddress.setText(user.getAddress());
+                            } else {
+                                tvUserAddress.setText("Chưa cập nhật");
+                            }
+
+                            // Hiển thị Hạng
+                            if (user.getMemberTier() != null && !user.getMemberTier().isEmpty()) {
+                                tvMemberTier.setText(user.getMemberTier());
+                            } else {
+                                tvMemberTier.setText("Đồng"); // Mặc định
+                            }
+
+                            // Ẩn/Hiện nút Admin
                             if ("admin".equals(user.getRole())) {
                                 layoutAdminPanel.setVisibility(View.VISIBLE);
                             } else {
@@ -101,16 +147,10 @@ public class ProfileActivity extends AppCompatActivity {
                             layoutAdminPanel.setVisibility(View.GONE);
                         }
                     } else {
-                        // Nếu không có document user, mặc định là user thường
                         Log.d(TAG, "No user document found for ID: " + userId);
                         tvUserName.setText(userEmail.split("@")[0]);
                         layoutAdminPanel.setVisibility(View.GONE);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to load user info", e);
-                    tvUserName.setText(userEmail.split("@")[0]);
-                    layoutAdminPanel.setVisibility(View.GONE);
                 });
     }
 }
