@@ -1,5 +1,6 @@
 package com.example.cafe;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,21 +13,28 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class CheckoutActivity extends AppCompatActivity {
 
@@ -38,14 +46,20 @@ public class CheckoutActivity extends AppCompatActivity {
     private LinearLayout layoutDiscount;
     private TextView tvDiscountAmount;
 
+    private TextView tvSelectUserVoucher;
+    private List<Voucher> availableVouchers = new ArrayList<>();
+    private String appliedUserVoucherId = null;
+    private static final String TAG = "CheckoutActivity";
+
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String userId;
     private List<CartItem> cartItems = new ArrayList<>();
     private double subtotal = 0;
-    private double shippingFee = 15000; // Phí vận chuyển cố định
+    private double shippingFee = 15000;
     private Voucher appliedVoucher = null;
     private double discountAmount = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +77,6 @@ public class CheckoutActivity extends AppCompatActivity {
         }
         userId = currentUser.getUid();
 
-        // Ánh xạ UI
         imageViewBack = findViewById(R.id.imageViewBack);
         tvDeliveryAddressLine1 = findViewById(R.id.tvDeliveryAddressLine1);
         tvDeliveryAddressLine2 = findViewById(R.id.tvDeliveryAddressLine2);
@@ -78,10 +91,12 @@ public class CheckoutActivity extends AppCompatActivity {
         btnApplyVoucher = findViewById(R.id.buttonApplyVoucher);
         layoutDiscount = findViewById(R.id.layoutDiscount);
         tvDiscountAmount = findViewById(R.id.tvDiscountAmount);
+        tvSelectUserVoucher = findViewById(R.id.tvSelectUserVoucher);
 
         setupListeners();
         loadUserData();
         loadCartData();
+        loadUserVouchers();
     }
 
     private void setupListeners() {
@@ -93,20 +108,24 @@ public class CheckoutActivity extends AppCompatActivity {
                 checkboxPaymentCash.setChecked(false);
             }
         });
-
         checkboxPaymentCash.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 checkboxPaymentCard.setChecked(false);
             }
         });
 
-        btnApplyVoucher.setOnClickListener(v -> applyVoucher());
+        tvSelectUserVoucher.setOnClickListener(v -> showVoucherSelectionDialog());
+
+        btnApplyVoucher.setOnClickListener(v -> {
+            appliedUserVoucherId = null;
+            applyVoucher();
+        });
+
         buttonPlaceOrder.setOnClickListener(v -> {
             if (!checkboxPaymentCard.isChecked() && !checkboxPaymentCash.isChecked()) {
                 Toast.makeText(this, "Vui lòng chọn hình thức thanh toán", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // Kiểm tra xem đã có địa chỉ giao hàng chưa
             if(tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
                 Toast.makeText(this, "Vui lòng thêm địa chỉ giao hàng", Toast.LENGTH_SHORT).show();
                 return;
@@ -126,12 +145,10 @@ public class CheckoutActivity extends AppCompatActivity {
         final EditText etNewAddress = dialogView.findViewById(R.id.editTextNewAddress);
         final CheckBox cbSaveNewAddress = dialogView.findViewById(R.id.checkboxSaveNewAddress);
 
-        // Hiển thị thông tin hiện tại nếu có
         if (!tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
             etNewName.setText(tvDeliveryAddressLine1.getText());
             etNewAddress.setText(tvDeliveryAddressLine2.getText());
         }
-        // Lấy SĐT từ user profile để hiển thị
         db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 User user = doc.toObject(User.class);
@@ -149,14 +166,12 @@ public class CheckoutActivity extends AppCompatActivity {
 
             if (newName.isEmpty() || newPhone.isEmpty() || newAddress.isEmpty()) {
                 Toast.makeText(this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-                return; // Không đóng dialog nếu thiếu thông tin
+                return;
             }
 
-            // Cập nhật lại UI ngay lập tức
             tvDeliveryAddressLine1.setText(newName);
             tvDeliveryAddressLine2.setText(newAddress);
 
-            // Nếu người dùng chọn lưu, cập nhật lên Firestore
             if (cbSaveNewAddress.isChecked()) {
                 db.collection("users").document(userId).update(
                         "name", newName,
@@ -164,7 +179,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         "address", newAddress
                 );
             }
-            dialog.dismiss(); // Đóng dialog sau khi lưu
+            dialog.dismiss();
         });
         builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
 
@@ -196,11 +211,60 @@ public class CheckoutActivity extends AppCompatActivity {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                 CartItem item = doc.toObject(CartItem.class);
                 cartItems.add(item);
-                subtotal += item.getTotalItemPrice(); // Sử dụng hàm tính tổng tiền của item
+                subtotal += item.getTotalItemPrice();
             }
-            calculateDiscount(); // Tính lại discount dựa trên subtotal mới
+            calculateDiscount();
             updateSummary();
         });
+    }
+
+    private void loadUserVouchers() {
+        db.collection("users").document(userId).collection("userVouchers")
+                .whereEqualTo("used", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    availableVouchers.clear();
+                    Date now = new Date();
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Voucher voucher = doc.toObject(Voucher.class);
+                        if (voucher != null && voucher.getExpiryDate() != null && voucher.getExpiryDate().after(now)) {
+                            voucher.setDocId(doc.getId());
+                            availableVouchers.add(voucher);
+                        }
+                    }
+                    Log.d(TAG, "Đã tải " + availableVouchers.size() + " voucher hợp lệ.");
+                    tvSelectUserVoucher.setText("Kho voucher của bạn (" + availableVouchers.size() + ") (Nhấn để chọn)");
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Lỗi khi tải userVouchers", e);
+                });
+    }
+
+    private void showVoucherSelectionDialog() {
+        if (availableVouchers.isEmpty()) {
+            Toast.makeText(this, "Bạn không có voucher nào hợp lệ.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CharSequence[] voucherDisplayList = new CharSequence[availableVouchers.size()];
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy", Locale.US);
+
+        for (int i = 0; i < availableVouchers.size(); i++) {
+            Voucher v = availableVouchers.get(i);
+            String expiry = (v.getExpiryDate() != null) ? sdf.format(v.getExpiryDate()) : "N/A";
+            voucherDisplayList[i] = v.getCode() + ": " + v.getDescription() + " (Hết hạn: " + expiry + ")";
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Chọn voucher của bạn");
+        builder.setItems(voucherDisplayList, (dialog, which) -> {
+            Voucher selectedVoucher = availableVouchers.get(which);
+            etVoucher.setText(selectedVoucher.getCode());
+            appliedUserVoucherId = selectedVoucher.getDocId();
+            applyVoucher();
+        });
+        builder.setNegativeButton("Hủy", null);
+        builder.show();
     }
 
     private void applyVoucher() {
@@ -210,34 +274,88 @@ public class CheckoutActivity extends AppCompatActivity {
             return;
         }
 
+        if (appliedUserVoucherId != null) {
+            Voucher selectedFromList = null;
+            for (Voucher v : availableVouchers) {
+                if (v.getDocId().equals(appliedUserVoucherId)) {
+                    selectedFromList = v;
+                    break;
+                }
+            }
+
+            if (selectedFromList != null && selectedFromList.getCode().equals(code)) {
+                appliedVoucher = selectedFromList;
+                calculateDiscount();
+                updateSummary();
+                Toast.makeText(this, "Áp dụng voucher thành công!", Toast.LENGTH_SHORT).show();
+                etVoucher.setError(null);
+                return;
+            } else {
+                appliedUserVoucherId = null;
+            }
+        }
+
+        db.collection("users").document(userId).collection("userVouchers")
+                .whereEqualTo("code", code)
+                .whereEqualTo("used", false)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot userVoucherDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        Voucher userVoucher = userVoucherDoc.toObject(Voucher.class);
+
+                        if (userVoucher != null && userVoucher.getExpiryDate() != null && userVoucher.getExpiryDate().after(new Date())) {
+                            appliedVoucher = userVoucher;
+                            appliedUserVoucherId = userVoucherDoc.getId();
+                            calculateDiscount();
+                            updateSummary();
+                            Toast.makeText(this, "Áp dụng voucher (của bạn) thành công!", Toast.LENGTH_SHORT).show();
+                            etVoucher.setError(null);
+                        } else {
+                            Toast.makeText(this, "Voucher này (của bạn) đã hết hạn.", Toast.LENGTH_SHORT).show();
+                            resetVoucher();
+                        }
+                    } else {
+                        checkGlobalVoucher(code);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Lỗi khi kiểm tra userVouchers", e);
+                    checkGlobalVoucher(code);
+                });
+    }
+
+    private void checkGlobalVoucher(String code) {
         db.collection("vouchers").document(code).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         Voucher voucher = documentSnapshot.toObject(Voucher.class);
-                        if (voucher != null && voucher.getExpiryDate().after(new Date())) {
+                        if (voucher != null && voucher.getExpiryDate() != null && voucher.getExpiryDate().after(new Date())) {
                             appliedVoucher = voucher;
+                            appliedUserVoucherId = null;
                             calculateDiscount();
                             updateSummary();
                             Toast.makeText(this, "Áp dụng voucher thành công!", Toast.LENGTH_SHORT).show();
+                            etVoucher.setError(null);
                         } else {
                             Toast.makeText(this, "Voucher đã hết hạn hoặc không hợp lệ.", Toast.LENGTH_SHORT).show();
-                            // Reset voucher nếu không hợp lệ
-                            appliedVoucher = null;
-                            calculateDiscount();
-                            updateSummary();
+                            resetVoucher();
                         }
                     } else {
                         Toast.makeText(this, "Mã voucher không hợp lệ", Toast.LENGTH_SHORT).show();
-                        appliedVoucher = null;
-                        calculateDiscount();
-                        updateSummary();
+                        resetVoucher();
                     }
                 }).addOnFailureListener(e -> {
                     Toast.makeText(this, "Lỗi khi kiểm tra voucher: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    appliedVoucher = null;
-                    calculateDiscount();
-                    updateSummary();
+                    resetVoucher();
                 });
+    }
+
+    private void resetVoucher() {
+        appliedVoucher = null;
+        appliedUserVoucherId = null;
+        calculateDiscount();
+        updateSummary();
     }
 
     private void calculateDiscount() {
@@ -245,14 +363,11 @@ public class CheckoutActivity extends AppCompatActivity {
             discountAmount = 0;
             return;
         }
-
         if ("PERCENT".equals(appliedVoucher.getDiscountType())) {
             discountAmount = subtotal * (appliedVoucher.getDiscountValue() / 100.0);
-            // Có thể thêm giới hạn giảm tối đa ở đây nếu cần
-        } else { // FIXED_AMOUNT
+        } else {
             discountAmount = appliedVoucher.getDiscountValue();
         }
-        // Đảm bảo số tiền giảm không lớn hơn tổng tiền hàng
         if (discountAmount > subtotal) {
             discountAmount = subtotal;
         }
@@ -262,14 +377,12 @@ public class CheckoutActivity extends AppCompatActivity {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         tvSubtotal.setText(formatter.format(subtotal));
         tvShippingFee.setText(formatter.format(shippingFee));
-
         if (discountAmount > 0) {
             layoutDiscount.setVisibility(View.VISIBLE);
             tvDiscountAmount.setText("- " + formatter.format(discountAmount));
         } else {
             layoutDiscount.setVisibility(View.GONE);
         }
-
         double finalTotal = subtotal + shippingFee - discountAmount;
         if (finalTotal < 0) finalTotal = 0;
         tvTotalAmount.setText(formatter.format(finalTotal));
@@ -280,7 +393,6 @@ public class CheckoutActivity extends AppCompatActivity {
             Toast.makeText(this, "Giỏ hàng của bạn trống.", Toast.LENGTH_SHORT).show();
             return;
         }
-
         DocumentReference orderRef = db.collection("orders").document();
         Order newOrder = new Order();
         newOrder.setOrderId(orderRef.getId());
@@ -288,19 +400,15 @@ public class CheckoutActivity extends AppCompatActivity {
         newOrder.setCustomerName(tvDeliveryAddressLine1.getText().toString());
         newOrder.setCustomerAddress(tvDeliveryAddressLine2.getText().toString());
         newOrder.setItems(cartItems);
-
         double finalTotal = subtotal + shippingFee - discountAmount;
         newOrder.setTotalPrice(finalTotal < 0 ? 0 : finalTotal);
-
         if (appliedVoucher != null) {
             newOrder.setAppliedVoucher(appliedVoucher.getCode());
             newOrder.setDiscountAmount(discountAmount);
         }
-
         newOrder.setOrderDate(new Date());
         newOrder.setStatus("Đang chờ xử lý");
 
-        // Lấy SĐT từ hồ sơ user để lưu vào đơn hàng
         db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 User user = doc.toObject(User.class);
@@ -308,13 +416,25 @@ public class CheckoutActivity extends AppCompatActivity {
                     newOrder.setCustomerPhone(user.getPhone());
                 }
             }
-            // Lưu đơn hàng
             orderRef.set(newOrder).addOnSuccessListener(aVoid -> {
+
+                if (appliedUserVoucherId != null) {
+                    markVoucherAsUsed(appliedUserVoucherId);
+                }
+
                 clearCart();
             }).addOnFailureListener(e -> {
                 Toast.makeText(this, "Đặt hàng thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
         });
+    }
+
+    private void markVoucherAsUsed(String userVoucherDocId) {
+        db.collection("users").document(userId).collection("userVouchers")
+                .document(userVoucherDocId)
+                .update("used", true)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã đánh dấu voucher " + userVoucherDocId + " là đã sử dụng."))
+                .addOnFailureListener(e -> Log.w(TAG, "Lỗi khi đánh dấu voucher " + userVoucherDocId, e));
     }
 
     private void clearCart() {

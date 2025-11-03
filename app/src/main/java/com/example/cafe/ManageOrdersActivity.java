@@ -10,13 +10,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ManageOrdersActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
-    private OrderAdapter adapter; // Tái sử dụng OrderAdapter
+    private OrderAdapter adapter;
     private List<Order> orderList = new ArrayList<>();
     private TextView textViewNoOrders;
     private FirebaseFirestore db;
@@ -35,35 +38,43 @@ public class ManageOrdersActivity extends AppCompatActivity {
         adapter = new OrderAdapter(this, orderList);
         recyclerView.setAdapter(adapter);
 
-        loadAllOrders();
+        listenForOrders();
     }
 
-    private void loadAllOrders() {
+    private void listenForOrders() {
         db.collection("orders")
                 .orderBy("orderDate", Query.Direction.DESCENDING) // Sắp xếp mới nhất lên đầu
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    orderList.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        try {
-                            Order order = doc.toObject(Order.class);
-                            orderList.add(order);
-                        } catch (Exception e) {
-                            Log.e("ManageOrders", "Lỗi khi chuyển đổi đơn hàng: " + doc.getId(), e);
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(QuerySnapshot queryDocumentSnapshots, FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.e("ManageOrders", "Listen failed.", error);
+                            return;
+                        }
+
+                        if (queryDocumentSnapshots != null) {
+                            orderList.clear();
+                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                try {
+                                    Order order = doc.toObject(Order.class);
+                                    orderList.add(order);
+                                } catch (Exception e) {
+                                    Log.e("ManageOrders", "Lỗi khi chuyển đổi đơn hàng: " + doc.getId(), e);
+                                }
+                            }
+
+                            if (orderList.isEmpty()) {
+                                textViewNoOrders.setVisibility(View.VISIBLE);
+                                recyclerView.setVisibility(View.GONE);
+                            } else {
+                                textViewNoOrders.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                adapter.notifyDataSetChanged();
+                            }
+                        } else {
+                            Log.d("ManageOrders", "Dữ liệu null");
                         }
                     }
-
-                    if (orderList.isEmpty()) {
-                        textViewNoOrders.setVisibility(View.VISIBLE);
-                        recyclerView.setVisibility(View.GONE);
-                    } else {
-                        textViewNoOrders.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        adapter.notifyDataSetChanged();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("ManageOrders", "Lỗi khi tải tất cả đơn hàng", e);
                 });
     }
 }

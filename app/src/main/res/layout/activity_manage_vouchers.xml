@@ -19,7 +19,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Form tạo voucher (giữ nguyên) -->
+        <!-- Form tạo voucher -->
         <EditText
             android:id="@+id/editTextVoucherCode"
             android:layout_width="match_parent"
@@ -54,13 +54,28 @@
             android:layout_height="wrap_content"
             android:hint="Giá trị (ví dụ: 10 hoặc 20000)"
             android:inputType="numberDecimal"/>
+
+        <!--  TRƯỜNG CHỌN NGÀY  -->
+        <TextView
+            android:id="@+id/tvSelectExpiryDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Chọn ngày hết hạn"
+            android:textSize="18sp"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@android:drawable/edit_text"
+            android:drawableEnd="@android:drawable/ic_menu_my_calendar"
+            android:drawablePadding="12dp"
+            android:gravity="center_vertical"/>
+
         <Button
             android:id="@+id/buttonAddVoucher"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tạo Voucher"
             android:layout_gravity="end"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="16dp"/>
 
         <View
             android:layout_width="match_parent"
@@ -69,6 +84,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="16dp"/>
 
+        <!--  RecyclerView -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -85,4 +101,3 @@
 
     </LinearLayout>
 </ScrollView>
-

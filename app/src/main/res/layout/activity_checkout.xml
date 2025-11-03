@@ -207,6 +207,18 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="12dp"/>
 
+            <TextView
+                android:id="@+id/tvSelectUserVoucher"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Kho voucher của bạn (0)"
+                android:textColor="@color/colorPrimary"
+                android:gravity="end"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:layout_marginBottom="8dp"/>
+            <!-- KẾT THÚC THAY ĐỔI -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -10,30 +10,37 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
-
-// Thêm các import còn thiếu
 import java.util.ArrayList;
 import java.util.List;
 import android.content.Intent;
-import android.widget.ImageView; // Cần cho nút Back
-import com.bumptech.glide.Glide; // Cần cho ảnh sản phẩm trong adapter
-import java.util.Date; // Cần cho kiểu Date
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
+import java.util.Date;
+import java.util.Map;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
-    // Khai báo đầy đủ các biến
     private TextView tvOrderId, tvOrderDate, tvOrderStatus, tvCustomerName, tvCustomerPhone, tvCustomerAddress, tvTotalPrice;
     private RecyclerView recyclerViewItems;
     private OrderDetailAdapter adapter;
@@ -43,7 +50,9 @@ public class OrderDetailActivity extends AppCompatActivity {
     private Button buttonUpdateStatus;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private ImageView imageViewBack; // Thêm nút Back
+    private ImageView imageViewBack;
+
+    private static final String TAG = "OrderDetailActivity"; // Thêm TAG để debug
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +62,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        // Ánh xạ UI
         tvOrderId = findViewById(R.id.textViewDetailOrderId);
         tvOrderDate = findViewById(R.id.textViewDetailOrderDate);
         tvOrderStatus = findViewById(R.id.textViewDetailOrderStatus);
@@ -66,9 +74,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         adminActionLayout = findViewById(R.id.adminActionLayout);
         spinnerStatus = findViewById(R.id.spinnerStatus);
         buttonUpdateStatus = findViewById(R.id.buttonUpdateStatus);
-        // imageViewBack = findViewById(R.id.imageViewBack); // Giao diện activity_order_detail chưa có nút back
 
-        // Nhận đối tượng Order từ Intent
         order = (Order) getIntent().getSerializableExtra("ORDER_DETAIL");
 
         if (order != null) {
@@ -76,9 +82,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             checkUserRoleAndSetupAdminUI();
         }
 
-        // if (imageViewBack != null) {
-        //     imageViewBack.setOnClickListener(v -> finish());
-        // }
     }
 
     private void populateUI() {
@@ -101,7 +104,6 @@ public class OrderDetailActivity extends AppCompatActivity {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         tvTotalPrice.setText("Tổng Cộng: " + formatter.format(order.getTotalPrice()));
 
-        // Hiển thị danh sách sản phẩm
         if (order.getItems() != null) {
             adapter = new OrderDetailAdapter(this, order.getItems());
             recyclerViewItems.setAdapter(adapter);
@@ -116,7 +118,6 @@ public class OrderDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
-                        // Nếu người dùng có vai trò là "admin", hiển thị khu vực admin
                         if (user != null && "admin".equals(user.getRole())) {
                             adminActionLayout.setVisibility(View.VISIBLE);
                             setupStatusSpinner();
@@ -128,18 +129,16 @@ public class OrderDetailActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    adminActionLayout.setVisibility(View.GONE); // Ẩn nếu có lỗi
+                    adminActionLayout.setVisibility(View.GONE);
                 });
     }
 
     private void setupStatusSpinner() {
-        // Tạo adapter cho Spinner từ mảng string trong strings.xml
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.order_status_options, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(adapter);
 
-        // Đặt giá trị mặc định cho Spinner là trạng thái hiện tại của đơn hàng
         if (order.getStatus() != null) {
             String[] statuses = getResources().getStringArray(R.array.order_status_options);
             int currentStatusPosition = Arrays.asList(statuses).indexOf(order.getStatus());
@@ -153,22 +152,131 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void updateOrderStatus() {
         String newStatus = spinnerStatus.getSelectedItem().toString();
+        String oldStatus = order.getStatus();
+
         if (order == null || order.getOrderId() == null) {
             Toast.makeText(this, "Lỗi: Không tìm thấy ID đơn hàng", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        // Chỉ cộng điểm khi trạng thái cũ KHÔNG PHẢI là "Đã hoàn thành" VÀ trạng thái mới LÀ "Đã hoàn thành"
+        boolean shouldAwardPoints = !oldStatus.equals("Đã hoàn thành") && newStatus.equals("Đã hoàn thành");
+
         db.collection("orders").document(order.getOrderId())
                 .update("status", newStatus)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Cập nhật trạng thái thành công!", Toast.LENGTH_SHORT).show();
-                    // Cập nhật lại TextView trạng thái trên màn hình
                     tvOrderStatus.setText("Trạng thái: " + newStatus);
-                    order.setStatus(newStatus); // Cập nhật cả đối tượng order cục bộ
+                    order.setStatus(newStatus); // Cập nhật đối tượng order cục bộ
+
+                    // Kích hoạt logic cộng điểm NẾU cờ shouldAwardPoints là true
+                    if (shouldAwardPoints) {
+                        if(order.getUserId() != null && order.getTotalPrice() > 0) {
+                            awardLoyaltyPoints(order.getUserId(), order.getTotalPrice());
+                        } else {
+                            Log.w(TAG, "Không thể cộng điểm: userId rỗng hoặc totalPrice = 0");
+                        }
+                    }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Cập nhật thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
-}
 
+    // CỘNG ĐIỂM VÀ THĂNG HẠNG
+    private void awardLoyaltyPoints(String userId, double orderTotal) {
+        Log.d(TAG, "Bắt đầu cộng điểm cho user: " + userId + " với số tiền: " + orderTotal);
+        final DocumentReference userRef = db.collection("users").document(userId);
+
+        final long TIER_SILVER_START = 1000000;
+        final long TIER_GOLD_START = 4000000;
+
+        db.runTransaction((Transaction.Function<String>) transaction -> {
+            DocumentSnapshot userSnapshot = transaction.get(userRef);
+            double currentSpending = 0;
+            String currentTier = "Đồng";
+
+            if (userSnapshot.contains("totalSpending")) {
+                currentSpending = userSnapshot.getDouble("totalSpending");
+            }
+            if (userSnapshot.contains("memberTier")) {
+                currentTier = userSnapshot.getString("memberTier");
+            }
+
+            double newTotalSpending = currentSpending + orderTotal;
+            String newTier = "Đồng";
+
+            if (newTotalSpending >= TIER_GOLD_START) {
+                newTier = "Vàng";
+            } else if (newTotalSpending >= TIER_SILVER_START) {
+                newTier = "Bạc";
+            }
+
+            transaction.update(userRef, "totalSpending", newTotalSpending);
+
+            if (!currentTier.equals(newTier)) {
+                transaction.update(userRef, "memberTier", newTier);
+                return newTier; // Trả về hạng mới nếu có thăng hạng
+            }
+
+            return null; // Trả về null nếu không thăng hạng
+        }).addOnSuccessListener(newTier -> {
+            if (newTier != null) {
+                Log.d(TAG, "Cộng điểm và thăng hạng thành công lên: " + newTier);
+                Toast.makeText(this, "Đã cộng điểm cho user. Thăng hạng: " + newTier, Toast.LENGTH_LONG).show();
+                grantTierUpVoucher(userId, newTier); // Tặng voucher khi thăng hạng
+            } else {
+                Log.d(TAG, "Cộng điểm thành công, không thăng hạng.");
+                Toast.makeText(this, "Đã cộng điểm cho user.", Toast.LENGTH_SHORT).show();
+            }
+        }).addOnFailureListener(e -> {
+            Log.w(TAG, "Lỗi khi cộng điểm/thăng hạng", e);
+            Toast.makeText(this, "Lỗi khi cộng điểm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // TẶNG VOUCHER KHI THĂNG HẠNG
+    private void grantTierUpVoucher(String userId, String newTier) {
+        String voucherCode = null;
+        if (newTier.equals("Bạc")) {
+            voucherCode = "SILVERUP";
+        } else if (newTier.equals("Vàng")) {
+            voucherCode = "GOLDUP";
+        }
+
+        if (voucherCode == null) return;
+
+        final String finalVoucherCode = voucherCode;
+        DocumentReference templateVoucherRef = db.collection("vouchers").document(finalVoucherCode);
+
+        templateVoucherRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Voucher templateVoucher = documentSnapshot.toObject(Voucher.class);
+                if (templateVoucher == null || templateVoucher.getExpiryDate() == null || !templateVoucher.getExpiryDate().after(new Date())) {
+                    Log.w(TAG, "Voucher mẫu " + finalVoucherCode + " không hợp lệ hoặc đã hết hạn.");
+                    return;
+                }
+
+                // Tạo một bản sao voucher mới để tặng user
+                Map<String, Object> newVoucherData = new HashMap<>();
+                newVoucherData.put("code", templateVoucher.getCode());
+                newVoucherData.put("description", templateVoucher.getDescription());
+                newVoucherData.put("discountType", templateVoucher.getDiscountType());
+                newVoucherData.put("discountValue", templateVoucher.getDiscountValue());
+                newVoucherData.put("expiryDate", templateVoucher.getExpiryDate());
+                newVoucherData.put("used", false);
+
+                // Thêm vào sub-collection của user
+                db.collection("users").document(userId).collection("userVouchers")
+                        .add(newVoucherData)
+                        .addOnSuccessListener(documentReference -> {
+                            Log.d(TAG, "Đã tặng voucher thăng hạng: " + finalVoucherCode + " cho user " + userId);
+                            Toast.makeText(OrderDetailActivity.this, "Đã tặng voucher " + finalVoucherCode, Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> Log.w(TAG, "Lỗi khi tặng voucher thăng hạng", e));
+            } else {
+                Log.w(TAG, "Không tìm thấy voucher mẫu: " + finalVoucherCode + " trong /vouchers");
+            }
+        });
+    }
+}

@@ -27,7 +27,7 @@
     </RelativeLayout>
 
 
-    <!-- Phần thông tin user -->
+    <!-- Thông tin user -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -76,7 +76,7 @@
                 android:textSize="14sp"/>
         </LinearLayout>
 
-        <!-- Nút Chỉnh sửa -->
+        <!-- Chỉnh sửa -->
         <ImageButton
             android:id="@+id/btnEditProfile"
             android:layout_width="48dp"
@@ -90,7 +90,7 @@
 
     </RelativeLayout>
 
-    <!-- *** KHU VỰC THÔNG TIN (GOM VÀO CARDVIEW MỚI) *** -->
+    <!-- *** THÔNG TIN *** -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -119,7 +119,29 @@
                 tools:text="Vàng"
                 android:textSize="16sp"
                 android:textColor="@color/colorWarning"
+                android:textStyle="bold"
+                android:layout_marginBottom="0dp"/>
+
+            <ProgressBar
+                android:id="@+id/progressMembership"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:tint="@color/colorPrimary"
+                android:max="1000000"
+                tools:progress="300000"/>
+
+            <TextView
+                android:id="@+id/tvMembershipProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                android:textColor="?android:attr/textColorSecondary"
+                tools:text="Chi tiêu: 300.000đ / 1.000.000đ"
                 android:layout_marginBottom="12dp"/>
+
 
             <!-- Số điện thoại -->
             <TextView
@@ -153,7 +175,7 @@
     </com.google.android.material.card.MaterialCardView>
 
 
-    <!-- Menu chức năng -->
+    <!--  Menu chức năng -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -274,7 +296,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Đăng xuất -->
+    <!-- code Đăng xuất -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -284,7 +306,6 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
         app:cardBackgroundColor="#FFF1F0">
-        <!-- Thêm màu nền đỏ nhạt -->
 
         <RelativeLayout
             android:id="@+id/layoutLogout"
@@ -314,4 +335,3 @@
     </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
-
