@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Phần Header -->
+            <!-- Code phần Header: Ảnh, Tên, Giá, Nút... -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -41,7 +41,6 @@
                 android:paddingBottom="16dp"
                 android:paddingTop="0dp">
 
-                <!-- ***  NÚT YÊU THÍCH  *** -->
                 <ImageView
                     android:id="@+id/ivFavoriteSheet"
                     android:layout_width="48dp"
@@ -54,7 +53,6 @@
                     android:layout_marginTop="-12dp"
                     android:layout_marginEnd="-4dp"
                     android:contentDescription="Nút yêu thích"/>
-                <!-- Cần có icon ic_favorite_border.xml -->
 
                 <ImageView
                     android:id="@+id/ivProductImageSheet"
@@ -84,7 +82,6 @@
                         android:textStyle="bold"
                         android:textColor="@android:color/black"/>
 
-                    <!-- Giá Gốc Header -->
                     <TextView
                         android:id="@+id/tvOriginalPriceHeaderSheet"
                         android:layout_width="wrap_content"
@@ -95,7 +92,6 @@
                         android:visibility="gone"
                         tools:visibility="visible"/>
 
-                    <!-- Giá Bán Header -->
                     <TextView
                         android:id="@+id/tvProductPriceSheet"
                         android:layout_width="wrap_content"
@@ -106,7 +102,6 @@
 
                 </LinearLayout>
 
-                <!-- Nút Số lượng -->
                 <LinearLayout
                     android:id="@+id/llQuantityControlSheet"
                     android:layout_width="wrap_content"
@@ -116,7 +111,6 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <!-- Nút Tăng (+) -->
                     <ImageButton
                         android:id="@+id/btnIncreaseQuantitySheet"
                         android:layout_width="36dp"
@@ -139,7 +133,6 @@
                         android:layout_marginStart="12dp"
                         android:layout_marginEnd="12dp"/>
 
-                    <!-- Nút Giảm (-) -->
                     <ImageButton
                         android:id="@+id/btnDecreaseQuantitySheet"
                         android:layout_width="36dp"
@@ -153,6 +146,7 @@
                 </LinearLayout>
             </RelativeLayout>
 
+            <!-- Code Mô tả, Tag Giảm Giá -->
             <TextView
                 android:id="@+id/tvProductDescriptionSheet"
                 android:layout_width="match_parent"
@@ -162,7 +156,6 @@
                 android:paddingEnd="16dp"
                 android:paddingBottom="8dp"/>
 
-            <!-- Tag Giảm Giá -->
             <TextView
                 android:id="@+id/tvHappyHourTagSheet"
                 android:layout_width="match_parent"
@@ -182,23 +175,18 @@
                 android:layout_height="1dp"
                 android:background="#E0E0E0"/>
 
-            <!-- *** CONTAINER MỚI CHO CÁC LỰA CHỌN COMBO *** -->
             <LinearLayout
                 android:id="@+id/llComboOptionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone" /> <!-- Ẩn theo mặc định -->
+                android:visibility="gone" />
 
-
-            <!-- *** BỌC CÁC LỰA CHỌN CŨ VÀO 1 LAYOUT *** -->
             <LinearLayout
                 android:id="@+id/llStandardOptionsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
-                <!-- Chọn Size -->
                 <TextView
                     android:id="@+id/tvSizeLabelSheet"
                     android:layout_width="match_parent"
@@ -213,11 +201,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-                    <!-- RadioButtons sẽ được thêm bằng code -->
-                </RadioGroup>
-
-                <!-- Lựa chọn (Đá) -->
+                    android:paddingEnd="16dp"/>
                 <TextView
                     android:id="@+id/tvIceLabelSheet"
                     android:layout_width="match_parent"
@@ -233,11 +217,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-                    <!-- RadioButtons sẽ được thêm bằng code -->
-                </RadioGroup>
-
-                <!-- Đường -->
+                    android:paddingEnd="16dp"/>
                 <TextView
                     android:id="@+id/tvSugarLabelSheet"
                     android:layout_width="match_parent"
@@ -253,11 +233,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingStart="16dp"
-                    android:paddingEnd="16dp">
-                    <!-- RadioButtons sẽ được thêm bằng code -->
-                </RadioGroup>
-
-                <!-- PHẦN GHI CHÚ (vẫn dùng chung cho cả 2 loại) -->
+                    android:paddingEnd="16dp"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -275,16 +251,15 @@
                     android:layout_marginEnd="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="16dp"
-                    android:hint="Ví dụ: Ít ngọt, nhiều đá..."
+                    android:hint="Ví dụ: nhiều đá..."
                     android:inputType="textCapSentences|textNoSuggestions"
                     android:minLines="2"
                     android:background="@drawable/edit_text_background"
                     android:padding="12dp"/>
-
             </LinearLayout>
-            <!-- Kết thúc llStandardOptionsContainer -->
 
-            <!-- *** KHU VỰC ĐÁNH GIÁ *** -->
+
+            <!-- KHU VỰC ĐÁNH GIÁ -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -326,6 +301,21 @@
                     android:layout_marginStart="8dp"
                     android:text="(0 đánh giá)"/>
 
+                <!-- XEM TẤT CẢ-->
+                <TextView
+                    android:id="@+id/textViewViewAllReviewsSheet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/ratingBarAverageSheet"
+                    android:layout_marginTop="8dp"
+                    android:text="Xem tất cả đánh giá >"
+                    android:textColor="@color/colorPrimary"
+                    android:textStyle="bold"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="4dp"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
                 <Button
                     android:id="@+id/btnWriteReviewSheet"
                     style="@style/Widget.Material3.Button.TextButton"
@@ -337,25 +327,18 @@
                     android:text="Viết đánh giá"/>
             </RelativeLayout>
 
-
         </LinearLayout>
-        <!-- Kết thúc LinearLayout bên trong NestedScrollView -->
-
     </androidx.core.widget.NestedScrollView>
-    <!-- Kết thúc NestedScrollView -->
 
+    <!-- Nút Thêm vào giỏ hàng -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#E0E0E0"/>
-
-    <!-- Phần Tổng tiền và Nút (Nằm ngoài ScrollView) -->
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp">
-
-        <!-- Nhóm các TextView giá vào LinearLayout -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -364,22 +347,17 @@
             android:layout_centerVertical="true"
             android:layout_toStartOf="@id/btnContinueSheet"
             android:layout_marginEnd="8dp">
-
-            <!-- Hàng trên: "Tổng tiền:" và Giá gốc (nếu có) -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
-
                 <TextView
                     android:id="@+id/tvTotalPriceLabelSheet"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tổng tiền:"
                     android:textSize="16sp"/>
-
-                <!-- Giá Gốc Tổng -->
                 <TextView
                     android:id="@+id/tvOriginalPriceSheet"
                     android:layout_width="wrap_content"
@@ -391,8 +369,6 @@
                     tools:visibility="visible"
                     tools:text="100.000 đ" />
             </LinearLayout>
-
-            <!-- Hàng dưới: Giá Bán Tổng -->
             <TextView
                 android:id="@+id/tvTotalPriceSheet"
                 android:layout_width="wrap_content"
@@ -401,9 +377,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 tools:text="200.000đ" />
-
         </LinearLayout>
-
         <Button
             android:id="@+id/btnContinueSheet"
             android:layout_width="wrap_content"
@@ -413,8 +387,6 @@
             android:layout_centerVertical="true"
             android:backgroundTint="@color/colorPrimary"
             android:textColor="@android:color/white"/>
-
     </RelativeLayout>
 
 </LinearLayout>
-

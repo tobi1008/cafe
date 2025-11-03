@@ -66,11 +66,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private RatingBar ratingBarAverageSheet;
     private TextView tvReviewCountSheet;
     private Button btnWriteReviewSheet;
+    private TextView textViewViewAllReviewsSheet;
 
     // Container Views
     private LinearLayout llStandardOptionsContainer;
     private LinearLayout llComboOptionsContainer;
-
 
     // Views Lựa chọn Thường
     private TextView tvSizeLabelSheet, tvIceLabelSheet, tvSugarLabelSheet;
@@ -85,19 +85,22 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private String selectedSugarName = "100%";
     private boolean isFoodItem = false;
 
-
+    // Data Chung
     private Product product;
     private int quantity = 1;
     private double basePrice = 0;
 
+    // Biến giảm giá
     private HappyHour activeHappyHour = null;
     private boolean isHappyHourActive = false;
     private int happyHourDiscountPercent = 0;
     private double finalUnitPrice = 0;
 
+    // Biến Yêu thích & Đánh giá
     private boolean isFavorite = false;
     private User currentUserProfile;
 
+    // Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String userId;
@@ -147,16 +150,12 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         View view = inflater.inflate(R.layout.bottom_sheet_product_detail, container, false);
         initViews(view);
         if (product != null) {
-
             populateInitialData();
             setupStandardOptions();
-
             setupListeners();
             checkCategoryHappyHour();
-
             checkIfFavorite();
             populateReviewInfo();
-
         } else {
             Log.e(TAG, "Product is null, cannot populate data.");
             dismiss();
@@ -194,8 +193,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         ratingBarAverageSheet = view.findViewById(R.id.ratingBarAverageSheet);
         tvReviewCountSheet = view.findViewById(R.id.tvReviewCountSheet);
         btnWriteReviewSheet = view.findViewById(R.id.btnWriteReviewSheet);
+        textViewViewAllReviewsSheet = view.findViewById(R.id.textViewViewAllReviewsSheet);
     }
-
 
     private void populateInitialData() {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -234,10 +233,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private void setupStandardOptions() {
         rgSizeSheet.removeAllViews();
         Map<String, Double> sizes = product.getGia();
-
         String categoryName = (product.getCategory() != null) ? product.getCategory() : "";
 
-        isFoodItem = categoryName.equalsIgnoreCase("Bánh & Đồ ăn nhẹ") ||
+        isFoodItem = categoryName.equalsIgnoreCase("Bánh Ngọt") ||
+                categoryName.equalsIgnoreCase("Bánh & Đồ ăn nhẹ") ||
                 categoryName.equalsIgnoreCase("Combo") ||
                 categoryName.equalsIgnoreCase("Sản phẩm đóng gói");
 
@@ -245,12 +244,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         if (isFoodItem || sizes == null || sizes.size() <= 1) {
             tvSizeLabelSheet.setVisibility(View.GONE);
             rgSizeSheet.setVisibility(View.GONE);
-
             if (sizes != null && sizes.size() == 1) {
                 selectedSizeName = sizes.keySet().iterator().next();
                 currentSelectedSizePrice = product.getPriceForSize(selectedSizeName);
             }
-
         } else {
             tvSizeLabelSheet.setVisibility(View.VISIBLE);
             rgSizeSheet.setVisibility(View.VISIBLE);
@@ -274,7 +271,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             rgIceSheet.setVisibility(View.GONE);
             tvSugarLabelSheet.setVisibility(View.GONE);
             rgSugarSheet.setVisibility(View.GONE);
-
             selectedIceName = "";
             selectedSugarName = "";
             currentIcePrice = 0;
@@ -295,13 +291,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
     }
 
-
-
     private void addRadioButton(RadioGroup radioGroup, String text, double priceDifference, boolean isChecked) {
         if (getContext() == null) return;
         RadioButton radioButton = (RadioButton) LayoutInflater.from(getContext()).inflate(R.layout.radio_button_option, radioGroup, false);
         String displayText = text;
-
         if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null && product.getGia().size() > 1) {
             if (priceDifference > 0) {
                 displayText += " (+" + formatPrice(priceDifference) + ")";
@@ -316,7 +309,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 radioButton.setTag(0.0);
             }
         }
-
         radioButton.setText(displayText);
         radioButton.setChecked(isChecked);
         radioButton.setId(View.generateViewId());
@@ -372,31 +364,36 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
         ivFavoriteSheet.setOnClickListener(v -> toggleFavorite());
         btnWriteReviewSheet.setOnClickListener(v -> showWriteReviewDialog());
+
+        textViewViewAllReviewsSheet.setOnClickListener(v -> {
+            if (product != null && product.getId() != null) {
+                if (getContext() == null) return;
+                Intent intent = new Intent(getContext(), AllReviewsActivity.class);
+                intent.putExtra("PRODUCT_ID", product.getId());
+                startActivity(intent);
+            }
+        });
     }
 
     private void updateTotalPrice() {
-
         double originalUnitPrice;
-
         originalUnitPrice = currentSelectedSizePrice + currentIcePrice + currentSugarPrice;
-
-
         double discountedUnitPrice;
         boolean isDiscounted = false;
 
         if (isHappyHourActive) {
             double baseDiscountedPrice = currentSelectedSizePrice * (1 - (happyHourDiscountPercent / 100.0));
             discountedUnitPrice = baseDiscountedPrice + currentIcePrice + currentSugarPrice;
-
             isDiscounted = true;
-            tvHappyHourTagSheet.setText(String.format(Locale.US, "🔥 -%d %% sale giờ vàng", happyHourDiscountPercent));
+            tvHappyHourTagSheet.setText(String.format(Locale.getDefault(), "🔥 -%d %% sale giờ vàng", happyHourDiscountPercent));
             tvHappyHourTagSheet.setVisibility(View.VISIBLE);
 
         } else if (product.getPhanTramGiamGia() > 0) {
             double discountedSizePrice = currentSelectedSizePrice * (1 - (product.getPhanTramGiamGia() / 100.0));
             discountedUnitPrice = discountedSizePrice + currentIcePrice + currentSugarPrice;
             isDiscounted = true;
-            tvHappyHourTagSheet.setText(String.format(Locale.US, "-%d%%", product.getPhanTramGiamGia()));
+
+            tvHappyHourTagSheet.setText(String.format(Locale.getDefault(), "-%d%%", (int) product.getPhanTramGiamGia()));
             tvHappyHourTagSheet.setVisibility(View.VISIBLE);
 
         } else {
@@ -406,25 +403,20 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
 
         finalUnitPrice = discountedUnitPrice;
-
         double totalPrice = finalUnitPrice * quantity;
         tvTotalPriceSheet.setText(formatPrice(totalPrice));
-
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         if (isDiscounted) {
             double originalTotalPrice = originalUnitPrice * quantity;
             tvOriginalPriceSheet.setText(formatPrice(originalTotalPrice));
             tvOriginalPriceSheet.setPaintFlags(tvOriginalPriceSheet.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             tvOriginalPriceSheet.setVisibility(View.VISIBLE);
-
             double headerOriginalPrice = currentSelectedSizePrice;
             double headerDiscountedPrice = finalUnitPrice - currentIcePrice - currentSugarPrice;
-
             tvOriginalPriceHeaderSheet.setText(formatter.format(headerOriginalPrice));
             tvOriginalPriceHeaderSheet.setPaintFlags(tvOriginalPriceHeaderSheet.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             tvOriginalPriceHeaderSheet.setVisibility(View.VISIBLE);
             tvProductPriceSheet.setText(formatPrice(headerDiscountedPrice));
-
         } else {
             tvOriginalPriceSheet.setVisibility(View.GONE);
             tvOriginalPriceHeaderSheet.setVisibility(View.GONE);
@@ -432,7 +424,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             tvProductPriceSheet.setText(formatPrice(headerPrice));
         }
     }
-
 
     private String formatPrice(double price) {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -444,11 +435,9 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             Toast.makeText(getContext(), "Vui lòng đăng nhập", Toast.LENGTH_SHORT).show();
             return;
         }
-
         String note = etNoteSheet.getText().toString().trim();
         String options = "";
         String cartSize = "";
-
         cartSize = selectedSizeName;
         options = selectedIceName + ", " + selectedSugarName;
         if (isFoodItem) {
@@ -456,12 +445,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             selectedIceName = "";
             selectedSugarName = "";
         }
-
         if (cartSize.isEmpty()) {
             Toast.makeText(getContext(), "Lỗi: Không thể xác định size sản phẩm", Toast.LENGTH_SHORT).show();
             return;
         }
-
         CartItem newItem = new CartItem(
                 product.getId(),
                 product.getTen(),
@@ -475,42 +462,34 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 false,
                 false
         );
-
         String finalCartItemId = product.getId() + "_" + cartSize + "_" + selectedIceName + "_" + selectedSugarName + "_" + note.hashCode();
         DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart").document(finalCartItemId);
-
-        // Dùng Transaction để kiểm tra xem item có tùy chọn y hệt đã tồn tại chưa
         db.runTransaction(transaction -> {
-                    DocumentSnapshot snapshot = transaction.get(cartItemRef);
-                    if (snapshot.exists()) {
-                        CartItem existingItem = snapshot.toObject(CartItem.class);
-                        if (existingItem != null) {
-                            transaction.update(cartItemRef, "quantity", existingItem.getQuantity() + quantity);
-                        }
-                    } else {
-                        // Nếu chưa tồn tại, tạo item mới
-                        transaction.set(cartItemRef, newItem);
-                    }
-                    return null;
-                })
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Lỗi khi thêm vào giỏ hàng", e);
-                    Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+            DocumentSnapshot snapshot = transaction.get(cartItemRef);
+            if (snapshot.exists()) {
+                CartItem existingItem = snapshot.toObject(CartItem.class);
+                if (existingItem != null) {
+                    transaction.update(cartItemRef, "quantity", existingItem.getQuantity() + quantity);
+                }
+            } else {
+                transaction.set(cartItemRef, newItem);
+            }
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            Toast.makeText(getContext(), "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+            dismiss();
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Lỗi khi thêm vào giỏ hàng", e);
+            Toast.makeText(getContext(), "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void checkCategoryHappyHour() {
-        // 1. Ưu tiên Happy Hour của riêng sản phẩm
         if (product != null && product.getHappyHourId() != null && !product.getHappyHourId().isEmpty()) {
             Log.d(TAG, "Sản phẩm có HHId riêng, đang tải: " + product.getHappyHourId());
-            fetchHappyHourInfo(product.getHappyHourId()); // Tải HHId của sản phẩm
+            fetchHappyHourInfo(product.getHappyHourId());
             return;
         }
-
         if (product != null && product.getCategory() != null && !product.getCategory().isEmpty()) {
             Log.d(TAG, "Sản phẩm không có HHId, đang kiểm tra danh mục: " + product.getCategory());
             db.collection("Categories")
@@ -530,7 +509,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                         } else {
                             Log.w(TAG, "Không tìm thấy danh mục: " + product.getCategory());
                         }
-                        // Tải HHId (có thể là null)
                         fetchHappyHourInfo(categoryHappyHourId);
                     })
                     .addOnFailureListener(e -> {
@@ -543,7 +521,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
     }
 
-
     private void fetchHappyHourInfo(String happyHourId) {
         Log.d(TAG,"Fetching happy hour info...");
         if (happyHourId == null || happyHourId.isEmpty()) {
@@ -551,7 +528,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             updateTotalPrice();
             return;
         }
-
         Log.d(TAG,"Happy Hour ID found: " + happyHourId);
         db.collection("HappyHours").document(happyHourId)
                 .get()
@@ -592,7 +568,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         if (getContext() == null) return dp;
         return (int) (dp * getContext().getResources().getDisplayMetrics().density);
     }
-
 
     private void loadUserProfile() {
         if (userId == null) return;
@@ -648,10 +623,17 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
     }
 
+
     private void populateReviewInfo() {
         if(product != null) {
             ratingBarAverageSheet.setRating((float) product.getAverageRating());
             tvReviewCountSheet.setText("(" + product.getReviewCount() + " đánh giá)");
+
+            if (product.getReviewCount() > 0) {
+                textViewViewAllReviewsSheet.setVisibility(View.VISIBLE);
+            } else {
+                textViewViewAllReviewsSheet.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -661,15 +643,12 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             return;
         }
         if (getContext() == null) return;
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_write_review, null);
         builder.setView(dialogView);
-
         final RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
         final EditText editTextComment = dialogView.findViewById(R.id.editTextComment);
-
         builder.setPositiveButton("Gửi", (dialog, which) -> {
             float rating = ratingBar.getRating();
             String comment = editTextComment.getText().toString().trim();
@@ -686,12 +665,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private void submitReview(float rating, String comment) {
         DocumentReference reviewRef = db.collection("reviews").document();
         DocumentReference productRef = db.collection("cafe").document(product.getId());
-
         Review newReview = new Review();
         newReview.setReviewId(reviewRef.getId());
         newReview.setProductId(product.getId());
         newReview.setUserId(userId);
-
         String userName = "Anonymous";
         if (currentUserProfile != null && currentUserProfile.getName() != null && !currentUserProfile.getName().isEmpty()) {
             userName = currentUserProfile.getName();
@@ -699,7 +676,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             userName = mAuth.getCurrentUser().getEmail().split("@")[0];
         }
         newReview.setUserName(userName);
-
         newReview.setRating(rating);
         newReview.setComment(comment);
         newReview.setTimestamp(new Date());
@@ -712,20 +688,17 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             }
             double currentAvg = currentProductData.getAverageRating();
             long currentCount = currentProductData.getReviewCount();
-
             double newAvgRating = ((currentAvg * currentCount) + rating) / (currentCount + 1);
             long newReviewCount = currentCount + 1;
-
             transaction.set(reviewRef, newReview);
             transaction.update(productRef, "averageRating", newAvgRating);
             transaction.update(productRef, "reviewCount", newReviewCount);
-
             return newAvgRating;
         }).addOnSuccessListener(newAvgRating -> {
             Toast.makeText(getContext(), "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();
             product.setAverageRating(newAvgRating);
             product.setReviewCount(product.getReviewCount() + 1);
-            populateReviewInfo(); // Gọi hàm cập nhật UI
+            populateReviewInfo();
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Gửi đánh giá thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });
