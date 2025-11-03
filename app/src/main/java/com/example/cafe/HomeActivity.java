@@ -41,6 +41,9 @@ public class HomeActivity extends AppCompatActivity {
     private Map<String, HappyHour> activeHappyHourMap = new HashMap<>();
     private static final String TAG = "HomeActivity";
 
+    // Lưu trữ thông tin Category (Tên danh mục -> Đối tượng Category)
+    private Map<String, Category> categoryMap = new HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,11 +91,11 @@ public class HomeActivity extends AppCompatActivity {
     private void loadCategories() {
         Log.d(TAG, "Bắt đầu tải Categories...");
         db.collection("Categories")
-                // Sap xep theo thuTuUuTien
                 .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     categoryNames.clear();
+                    categoryMap.clear();
                     categoryNames.add("Tất cả");
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
@@ -100,6 +103,7 @@ public class HomeActivity extends AppCompatActivity {
                             Category cat = document.toObject(Category.class);
                             if (cat != null && cat.getTenDanhMuc() != null && !cat.getTenDanhMuc().isEmpty()) {
                                 categoryNames.add(cat.getTenDanhMuc());
+                                categoryMap.put(cat.getTenDanhMuc(), cat);
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Lỗi khi chuyển đổi Category: " + document.getId(), e);
@@ -136,7 +140,7 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     }
                     Log.d(TAG, "Đã tải " + activeHappyHourMap.size() + " khung giờ vàng đang bật vào map.");
-                    loadProductsFromFirestore();
+                    loadProductsFromFirestore(); // Tải sản phẩm sau khi tải HappyHour
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Lỗi khi tải Happy Hours", e);
@@ -154,7 +158,26 @@ public class HomeActivity extends AppCompatActivity {
                         fullProductList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             try {
-                                fullProductList.add(document.toObject(Product.class));
+                                Product product = document.toObject(Product.class);
+
+                                // --- ƯU TIÊN GIỜ VÀNG ---
+                                // 1. Kiểm tra Giờ Vàng của Sản phẩm
+                                String productHHId = product.getHappyHourId();
+
+                                // 2. Nếu sản phẩm KHÔNG có, kiểm tra Giờ Vàng của Danh mục
+                                if (productHHId == null || productHHId.isEmpty()) {
+                                    String categoryName = product.getCategory();
+                                    if (categoryName != null && categoryMap.containsKey(categoryName)) {
+                                        Category cat = categoryMap.get(categoryName);
+                                        if (cat != null && cat.getHappyHourId() != null && !cat.getHappyHourId().isEmpty()) {
+                                            // Gán Giờ Vàng của Danh mục cho Sản phẩm
+                                            product.setHappyHourId(cat.getHappyHourId());
+                                        }
+                                    }
+                                }
+
+                                fullProductList.add(product);
+
                             } catch (Exception e) {
                                 Log.e(TAG, "Lỗi khi chuyển đổi Product: " + document.getId(), e);
                             }
@@ -163,7 +186,7 @@ public class HomeActivity extends AppCompatActivity {
                         if (productAdapter == null) {
                             setupProductRecyclerView();
                         }
-                        filterProductsByCategory(selectedCategory);
+                        filterProductsByCategory(selectedCategory); // Lọc theo category "Tất cả"
                     } else {
                         Log.e(TAG, "Lỗi khi tải Products: ", task.getException());
                         Toast.makeText(HomeActivity.this, "Lỗi tải sản phẩm", Toast.LENGTH_SHORT).show();
@@ -248,4 +271,3 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 }
-

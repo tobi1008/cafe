@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Objects;
 
 public class EditProductActivity extends AppCompatActivity {
@@ -28,7 +29,7 @@ public class EditProductActivity extends AppCompatActivity {
 
     // UI Sản Phẩm
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent;
-    private MaterialButton btnUpdateProduct; // Dùng MaterialButton
+    private MaterialButton btnUpdateProduct;
 
     private AutoCompleteTextView spinnerCategory;
     private ArrayAdapter<String> categoryAdapter;
@@ -80,7 +81,6 @@ public class EditProductActivity extends AppCompatActivity {
         etSalePercent = findViewById(R.id.editSalePercent);
         btnUpdateProduct = findViewById(R.id.buttonUpdateProduct);
 
-        // *** ÁNH XẠ AutoCompleteTextView ***
         spinnerCategory = findViewById(R.id.spinnerCategory);
         spinnerHappyHour = findViewById(R.id.spinnerHappyHour);
 
@@ -104,7 +104,7 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void loadHappyHours() {
         db.collection("HappyHours")
-                .orderBy("thuTuUuTien", Query.Direction.ASCENDING) // Sắp xếp theo thứ tự
+                .orderBy("gioBatDau", Query.Direction.ASCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     happyHourList.subList(1, happyHourList.size()).clear();
@@ -121,6 +121,7 @@ public class EditProductActivity extends AppCompatActivity {
                         }
                     }
                     happyHourAdapter.notifyDataSetChanged();
+                    Log.d(TAG, "Đã tải " + (happyHourNames.size() - 1) + " khung giờ vàng.");
 
                     isHappyHoursLoaded = true;
                     checkIfAllDataReady();
@@ -209,34 +210,39 @@ public class EditProductActivity extends AppCompatActivity {
         etName.setText(currentProduct.getTen());
         etDescription.setText(currentProduct.getMoTa());
         etImageUrl.setText(currentProduct.getHinhAnh());
-        etSalePercent.setText(String.valueOf(currentProduct.getPhanTramGiamGia()));
+
+        int salePercent = currentProduct.getPhanTramGiamGia();
+        etSalePercent.setText(salePercent == 0 ? "" : String.valueOf(salePercent));
+
 
         if (currentProduct.getGia() != null) {
-            etPriceS.setText(String.valueOf(currentProduct.getPriceForSize("S")));
-            etPriceM.setText(String.valueOf(currentProduct.getPriceForSize("M")));
-            etPriceL.setText(String.valueOf(currentProduct.getPriceForSize("L")));
+            // Nếu giá là 0, hiển thị rỗng. Nếu khác 0, hiển thị số đã định dạng.
+            double priceS = currentProduct.getPriceForSize("S");
+            etPriceS.setText(priceS == 0 ? "" : String.format(Locale.US, "%.0f", priceS));
+
+            double priceM = currentProduct.getPriceForSize("M");
+            etPriceM.setText(priceM == 0 ? "" : String.format(Locale.US, "%.0f", priceM));
+
+            double priceL = currentProduct.getPriceForSize("L");
+            etPriceL.setText(priceL == 0 ? "" : String.format(Locale.US, "%.0f", priceL));
         }
 
-        // ***  Tự động chọn Category ***
         productCategoryName = currentProduct.getCategory();
         if (productCategoryName != null && !productCategoryName.isEmpty() && categoryNames.contains(productCategoryName)) {
-            // Đặt text cho AutoCompleteTextView
             spinnerCategory.setText(productCategoryName, false);
         }
 
-        // *** THAY ĐỔI: Tự động chọn Happy Hour ***
         String productHappyHourId = currentProduct.getHappyHourId();
-        productHappyHourName = "Không áp dụng"; // Mặc định
+        productHappyHourName = "Không áp dụng";
         if (productHappyHourId != null && !productHappyHourId.isEmpty() && happyHourList.size() > 1) {
             for (int i = 1; i < happyHourList.size(); i++) {
                 HappyHour hh = happyHourList.get(i);
                 if (hh != null && productHappyHourId.equals(hh.getId())) {
-                    productHappyHourName = hh.getTenKhungGio(); // Lưu tên
+                    productHappyHourName = hh.getTenKhungGio();
                     break;
                 }
             }
         }
-        // Đặt text cho AutoCompleteTextView
         spinnerHappyHour.setText(productHappyHourName, false);
     }
 

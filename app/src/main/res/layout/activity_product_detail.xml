@@ -66,7 +66,6 @@
                 tools:text="Mô tả sản phẩm rất dài và chi tiết ở đây..."
                 android:textSize="14sp" />
 
-            <!-- *** TAG GIỜ VÀNG MỚI *** -->
             <TextView
                 android:id="@+id/textViewHappyHourTag"
                 android:layout_width="match_parent"
@@ -80,7 +79,7 @@
                 android:textStyle="bold"
                 android:visibility="gone"
                 tools:visibility="visible"
-                tools:text="🔥 Đang giảm giá Giờ Vàng 20%" />
+                tools:text="🔥 Đang giảm giá Giờ Vàng XX%" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -103,70 +102,87 @@
                 <!-- Chips sẽ được thêm bằng code -->
             </com.google.android.material.chip.ChipGroup>
 
-            <!-- LỰA CHỌN ĐÁ -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Đá"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-            <RadioGroup
-                android:id="@+id/radioGroupIce"
+            <!-- BẮT ĐẦU KHU VỰC ĐÁ (ĐÃ BỌC LẠI) -->
+            <LinearLayout
+                android:id="@+id/layoutIceOptions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp">
-                <RadioButton
-                    android:id="@+id/radioIceTogether"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Đá chung"
-                    android:checked="true"/>
-                <RadioButton
-                    android:id="@+id/radioIceSeparate"
+                android:orientation="vertical">
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:text="Đá riêng"/>
-            </RadioGroup>
+                    android:layout_marginTop="16dp"
+                    android:text="Đá"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+                <RadioGroup
+                    android:id="@+id/radioGroupIce"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp">
+                    <RadioButton
+                        android:id="@+id/radioIceTogether"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Đá chung"
+                        android:checked="true"/>
+                    <RadioButton
+                        android:id="@+id/radioIceSeparate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Đá riêng"/>
+                </RadioGroup>
+            </LinearLayout>
+            <!-- KẾT THÚC KHU VỰC ĐÁ -->
 
-            <!-- LỰA CHỌN ĐƯỜNG -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Mức đường"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroupSugar"
+
+            <!-- BẮT ĐẦU KHU VỰC ĐƯỜNG (ĐÃ BỌC LẠI) -->
+            <LinearLayout
+                android:id="@+id/layoutSugarOptions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                app:singleSelection="true">
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSugar100" style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100%" android:checked="true"/>
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSugar70" style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="70%"/>
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSugar50" style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%"/>
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipSugar30" style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%"/>
-            </com.google.android.material.chip.ChipGroup>
+                android:orientation="vertical">
 
-            <!-- GHI CHÚ -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Mức đường"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroupSugar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:singleSelection="true">
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSugar100" style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="100%" android:checked="true"/>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSugar70" style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="70%"/>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSugar50" style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%"/>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipSugar30" style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%"/>
+                </com.google.android.material.chip.ChipGroup>
+            </LinearLayout>
+            <!-- KẾT THÚC KHU VỰC ĐƯỜNG -->
+
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -189,7 +205,6 @@
                 android:padding="12dp"/>
 
 
-            <!-- LỰA CHỌN THÊM (TOPPING) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -215,7 +230,6 @@
                 android:text="Thêm 1 gói đường (+2.000 đ)"/>
 
 
-            <!-- CHỌN SỐ LƯỢNG -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -258,7 +272,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"/>
 
-            <!-- KHU VỰC ĐÁNH GIÁ -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -336,7 +349,6 @@
             android:text="Tổng cộng"
             android:textSize="14sp" />
 
-        <!-- *** GIÁ GỐC GẠCH NGANG (MỚI) *** -->
         <TextView
             android:id="@+id/textViewOriginalPriceDetail"
             android:layout_width="wrap_content"
@@ -374,3 +386,4 @@
     </RelativeLayout>
 
 </RelativeLayout>
+

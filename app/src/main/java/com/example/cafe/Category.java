@@ -5,22 +5,31 @@ import java.io.Serializable;
 public class Category implements Serializable {
     private String id;
     private String tenDanhMuc;
+    private int thuTuUuTien;
 
-    // *** TRƯỜNG MỚI ĐỂ SẮP XẾP ***
-    private int thuTuUuTien; // Ví dụ: 1, 2, 3...
+    private String happyHourId;
+    private String happyHourName;
 
     public Category() {
-        // Constructor rỗng
     }
 
-    // *** CẬP NHẬT HÀM TẠO (3 THAM SỐ) ***
     public Category(String id, String tenDanhMuc, int thuTuUuTien) {
         this.id = id;
         this.tenDanhMuc = tenDanhMuc;
         this.thuTuUuTien = thuTuUuTien;
+        this.happyHourId = null; // Mặc định
+        this.happyHourName = null; // Mặc định
     }
 
-    // --- Getters & Setters ---
+    public Category(String id, String tenDanhMuc, int thuTuUuTien, String happyHourId, String happyHourName) {
+        this.id = id;
+        this.tenDanhMuc = tenDanhMuc;
+        this.thuTuUuTien = thuTuUuTien;
+        this.happyHourId = happyHourId;
+        this.happyHourName = happyHourName;
+    }
+
+
     public String getId() {
         return id;
     }
@@ -33,13 +42,23 @@ public class Category implements Serializable {
     public void setTenDanhMuc(String tenDanhMuc) {
         this.tenDanhMuc = tenDanhMuc;
     }
-
-    // *** GETTER & SETTER MỚI ***
     public int getThuTuUuTien() {
         return thuTuUuTien;
     }
     public void setThuTuUuTien(int thuTuUuTien) {
         this.thuTuUuTien = thuTuUuTien;
     }
-}
 
+    public String getHappyHourId() {
+        return happyHourId;
+    }
+    public void setHappyHourId(String happyHourId) {
+        this.happyHourId = happyHourId;
+    }
+    public String getHappyHourName() {
+        return happyHourName;
+    }
+    public void setHappyHourName(String happyHourName) {
+        this.happyHourName = happyHourName;
+    }
+}

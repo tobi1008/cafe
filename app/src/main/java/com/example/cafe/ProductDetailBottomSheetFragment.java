@@ -68,7 +68,9 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private Button btnWriteReviewSheet;
 
     // Container Views
-    private LinearLayout llStandardOptionsContainer; // Chứa Size, Đá, Đường
+    private LinearLayout llStandardOptionsContainer;
+    private LinearLayout llComboOptionsContainer;
+
 
     // Views Lựa chọn Thường
     private TextView tvSizeLabelSheet, tvIceLabelSheet, tvSugarLabelSheet;
@@ -84,22 +86,18 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private boolean isFoodItem = false;
 
 
-    // Data Chung
     private Product product;
     private int quantity = 1;
     private double basePrice = 0;
 
-    // Biến giảm giá
     private HappyHour activeHappyHour = null;
     private boolean isHappyHourActive = false;
     private int happyHourDiscountPercent = 0;
     private double finalUnitPrice = 0;
 
-    // Biến Yêu thích & Đánh giá
     private boolean isFavorite = false;
     private User currentUserProfile;
 
-    // Firebase
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private String userId;
@@ -150,12 +148,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         initViews(view);
         if (product != null) {
 
-            llStandardOptionsContainer.setVisibility(View.VISIBLE);
             populateInitialData();
             setupStandardOptions();
 
             setupListeners();
-            fetchHappyHourInfo();
+            checkCategoryHappyHour();
 
             checkIfFavorite();
             populateReviewInfo();
@@ -184,6 +181,7 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         etNoteSheet = view.findViewById(R.id.etNoteSheet);
 
         llStandardOptionsContainer = view.findViewById(R.id.llStandardOptionsContainer);
+        llComboOptionsContainer = view.findViewById(R.id.llComboOptionsContainer);
 
         tvSizeLabelSheet = view.findViewById(R.id.tvSizeLabelSheet);
         rgSizeSheet = view.findViewById(R.id.rgSizeSheet);
@@ -198,7 +196,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         btnWriteReviewSheet = view.findViewById(R.id.btnWriteReviewSheet);
     }
 
-    // --- LOGIC CHO SẢN PHẨM THƯỜNG ---
 
     private void populateInitialData() {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -234,14 +231,17 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         tvOriginalPriceHeaderSheet.setVisibility(View.GONE);
     }
 
-    // Đổi tên hàm
     private void setupStandardOptions() {
         rgSizeSheet.removeAllViews();
         Map<String, Double> sizes = product.getGia();
 
         String categoryName = (product.getCategory() != null) ? product.getCategory() : "";
-        isFoodItem = categoryName.equalsIgnoreCase("Bánh Ngọt") || categoryName.equalsIgnoreCase("Bánh & Đồ ăn nhẹ");
 
+        isFoodItem = categoryName.equalsIgnoreCase("Bánh & Đồ ăn nhẹ") ||
+                categoryName.equalsIgnoreCase("Combo") ||
+                categoryName.equalsIgnoreCase("Sản phẩm đóng gói");
+
+        // Ẩn/Hiện Size
         if (isFoodItem || sizes == null || sizes.size() <= 1) {
             tvSizeLabelSheet.setVisibility(View.GONE);
             rgSizeSheet.setVisibility(View.GONE);
@@ -268,6 +268,7 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             }
         }
 
+        // Ẩn/Hiện Đá và Đường
         if (isFoodItem) {
             tvIceLabelSheet.setVisibility(View.GONE);
             rgIceSheet.setVisibility(View.GONE);
@@ -448,7 +449,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         String options = "";
         String cartSize = "";
 
-        // *** ĐÃ XÓA LOGIC COMBO ***
         cartSize = selectedSizeName;
         options = selectedIceName + ", " + selectedSugarName;
         if (isFoodItem) {
@@ -476,10 +476,23 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 false
         );
 
-        String finalCartItemId = product.getId() + "_" + options.hashCode() + "_" + note.hashCode() + "_" + System.currentTimeMillis();
+        String finalCartItemId = product.getId() + "_" + cartSize + "_" + selectedIceName + "_" + selectedSugarName + "_" + note.hashCode();
         DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart").document(finalCartItemId);
 
-        cartItemRef.set(newItem)
+        // Dùng Transaction để kiểm tra xem item có tùy chọn y hệt đã tồn tại chưa
+        db.runTransaction(transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(cartItemRef);
+                    if (snapshot.exists()) {
+                        CartItem existingItem = snapshot.toObject(CartItem.class);
+                        if (existingItem != null) {
+                            transaction.update(cartItemRef, "quantity", existingItem.getQuantity() + quantity);
+                        }
+                    } else {
+                        // Nếu chưa tồn tại, tạo item mới
+                        transaction.set(cartItemRef, newItem);
+                    }
+                    return null;
+                })
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(getContext(), "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
                     dismiss();
@@ -490,16 +503,57 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 });
     }
 
-    private void fetchHappyHourInfo() {
+    private void checkCategoryHappyHour() {
+        // 1. Ưu tiên Happy Hour của riêng sản phẩm
+        if (product != null && product.getHappyHourId() != null && !product.getHappyHourId().isEmpty()) {
+            Log.d(TAG, "Sản phẩm có HHId riêng, đang tải: " + product.getHappyHourId());
+            fetchHappyHourInfo(product.getHappyHourId()); // Tải HHId của sản phẩm
+            return;
+        }
+
+        if (product != null && product.getCategory() != null && !product.getCategory().isEmpty()) {
+            Log.d(TAG, "Sản phẩm không có HHId, đang kiểm tra danh mục: " + product.getCategory());
+            db.collection("Categories")
+                    .whereEqualTo("tenDanhMuc", product.getCategory())
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        String categoryHappyHourId = null;
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            Category cat = queryDocumentSnapshots.getDocuments().get(0).toObject(Category.class);
+                            if (cat != null && cat.getHappyHourId() != null && !cat.getHappyHourId().isEmpty()) {
+                                Log.d(TAG, "Tìm thấy HHId của danh mục: " + cat.getHappyHourId());
+                                categoryHappyHourId = cat.getHappyHourId();
+                            } else {
+                                Log.d(TAG, "Danh mục không có HHId.");
+                            }
+                        } else {
+                            Log.w(TAG, "Không tìm thấy danh mục: " + product.getCategory());
+                        }
+                        // Tải HHId (có thể là null)
+                        fetchHappyHourInfo(categoryHappyHourId);
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Lỗi khi tải danh mục, bỏ qua HH của danh mục", e);
+                        fetchHappyHourInfo(null);
+                    });
+        } else {
+            Log.d(TAG, "Sản phẩm không có HHId và Category, bỏ qua.");
+            fetchHappyHourInfo(null);
+        }
+    }
+
+
+    private void fetchHappyHourInfo(String happyHourId) {
         Log.d(TAG,"Fetching happy hour info...");
-        if (product.getHappyHourId() == null || product.getHappyHourId().isEmpty()) {
+        if (happyHourId == null || happyHourId.isEmpty()) {
             Log.d(TAG,"No Happy Hour ID for this product.");
             updateTotalPrice();
             return;
         }
 
-        Log.d(TAG,"Happy Hour ID found: " + product.getHappyHourId());
-        db.collection("HappyHours").document(product.getHappyHourId())
+        Log.d(TAG,"Happy Hour ID found: " + happyHourId);
+        db.collection("HappyHours").document(happyHourId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
@@ -520,7 +574,7 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                             Log.d(TAG,"Happy Hour is not active (dangBat=false or hh is null).");
                         }
                     } else {
-                        Log.d(TAG,"Happy Hour document not found for ID: " + product.getHappyHourId());
+                        Log.d(TAG,"Happy Hour document not found for ID: " + happyHourId);
                     }
                     updateTotalPrice();
                 })
@@ -560,10 +614,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 User user = documentSnapshot.toObject(User.class);
                 if (user != null && user.getFavoriteProductIds() != null && user.getFavoriteProductIds().contains(product.getId())) {
                     isFavorite = true;
-                    ivFavoriteSheet.setImageResource(R.drawable.ic_favorite_filled); // Cần icon này
+                    ivFavoriteSheet.setImageResource(R.drawable.ic_favorite_filled);
                 } else {
                     isFavorite = false;
-                    ivFavoriteSheet.setImageResource(R.drawable.ic_favorite_border); // Icon bạn đã có
+                    ivFavoriteSheet.setImageResource(R.drawable.ic_favorite_border);
                 }
             } else {
                 isFavorite = false;
@@ -610,7 +664,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = this.getLayoutInflater();
-        // Cần tạo file layout dialog_write_review.xml
         View dialogView = inflater.inflate(R.layout.dialog_write_review, null);
         builder.setView(dialogView);
 
@@ -670,7 +723,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             return newAvgRating;
         }).addOnSuccessListener(newAvgRating -> {
             Toast.makeText(getContext(), "Cảm ơn bạn đã đánh giá!", Toast.LENGTH_SHORT).show();
-            // Cập nhật lại UI sau khi gửi
             product.setAverageRating(newAvgRating);
             product.setReviewCount(product.getReviewCount() + 1);
             populateReviewInfo(); // Gọi hàm cập nhật UI

@@ -5,8 +5,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -22,7 +24,9 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ManageCategoriesActivity extends AppCompatActivity {
 
@@ -31,6 +35,12 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     private List<Category> categoryList = new ArrayList<>();
     private FirebaseFirestore db;
     private static final String TAG = "ManageCategoriesActivity";
+
+    // Danh sách các đối tượng HappyHour (để lấy ID)
+    private List<HappyHour> happyHourListForSpinner = new ArrayList<>();
+    // Danh sách tên HappyHour (để hiển thị trên Spinner)
+    private List<String> happyHourNamesForSpinner = new ArrayList<>();
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +53,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         recyclerView = findViewById(R.id.recyclerViewCategoriesManage);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         adapter = new CategoryManageAdapter(this, categoryList, new CategoryManageAdapter.OnCategoryManageListener() {
@@ -72,8 +81,39 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fabAddCategory);
         fab.setOnClickListener(v -> showAddEditDialog(null));
 
-        loadCategories();
+        loadHappyHoursForSpinner();
     }
+
+    // Tải danh sách Khung Giờ Vàng cho Spinner
+    private void loadHappyHoursForSpinner() {
+        Log.d(TAG, "Đang tải HappyHours cho spinner...");
+        db.collection("HappyHours")
+                .orderBy("tenKhungGio", Query.Direction.ASCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    happyHourListForSpinner.clear();
+                    happyHourNamesForSpinner.clear();
+
+                    // Thêm lựa chọn "Không áp dụng" làm lựa chọn đầu tiên
+                    happyHourNamesForSpinner.add("[Không áp dụng]");
+                    happyHourListForSpinner.add(null); // Thêm null để giữ đúng chỉ số (index)
+
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        HappyHour hh = doc.toObject(HappyHour.class);
+                        hh.setId(doc.getId());
+                        happyHourListForSpinner.add(hh);
+                        happyHourNamesForSpinner.add(hh.getTenKhungGio());
+                    }
+                    Log.d(TAG, "Đã tải " + (happyHourListForSpinner.size() - 1) + " HappyHours.");
+
+                    loadCategories();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Lỗi khi tải HappyHours", e);
+                    loadCategories();
+                });
+    }
+
 
     private void loadCategories() {
         db.collection("Categories")
@@ -124,6 +164,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                 .show();
     }
 
+    // --- HÀM CẬP NHẬT ---
     private void showAddEditDialog(Category categoryToEdit) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -133,15 +174,37 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         EditText etName = dialogView.findViewById(R.id.etCategoryName);
         EditText etPriority = dialogView.findViewById(R.id.etCategoryPriority);
         Button btnSave = dialogView.findViewById(R.id.btnSaveCategory);
+        // Ánh xạ Spinner mới
+        Spinner spinnerHH = dialogView.findViewById(R.id.spinnerHappyHour);
+
+        // Setup Spinner
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, happyHourNamesForSpinner);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerHH.setAdapter(spinnerAdapter);
 
         AlertDialog dialog = builder.create();
         if (categoryToEdit != null) {
             dialog.setTitle("Sửa Danh Mục");
             etName.setText(categoryToEdit.getTenDanhMuc());
             etPriority.setText(String.valueOf(categoryToEdit.getThuTuUuTien()));
+
+            // Chọn giá trị cũ của Spinner
+            if (categoryToEdit.getHappyHourId() != null && categoryToEdit.getHappyHourName() != null) {
+                int spinnerPosition = happyHourNamesForSpinner.indexOf(categoryToEdit.getHappyHourName());
+                if (spinnerPosition >= 0) {
+                    spinnerHH.setSelection(spinnerPosition);
+                } else {
+                    spinnerHH.setSelection(0); // Mặc định [Không áp dụng]
+                }
+            } else {
+                spinnerHH.setSelection(0); // Mặc định [Không áp dụng]
+            }
+
         } else {
             dialog.setTitle("Thêm Danh Mục Mới");
             etPriority.setText(String.valueOf(categoryList.size() + 1));
+            spinnerHH.setSelection(0); // Mặc định [Không áp dụng]
         }
 
         btnSave.setOnClickListener(v -> {
@@ -161,12 +224,27 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                 return;
             }
 
+            // Lấy dữ liệu từ Spinner
+            int selectedPosition = spinnerHH.getSelectedItemPosition();
+            String selectedHappyHourId = null;
+            String selectedHappyHourName = null;
+
+            // Nếu vị trí > 0 (vì vị trí 0 là "[Không áp dụng]")
+            if (selectedPosition > 0 && selectedPosition < happyHourListForSpinner.size()) {
+                HappyHour selectedHH = happyHourListForSpinner.get(selectedPosition);
+                if (selectedHH != null) {
+                    selectedHappyHourId = selectedHH.getId();
+                    selectedHappyHourName = selectedHH.getTenKhungGio();
+                }
+            }
+
             if (categoryToEdit != null) {
                 // --- CHẾ ĐỘ SỬA ---
-                Category updatedCategory = new Category(categoryToEdit.getId(), name, priority);
+                Category updatedCategory = new Category(categoryToEdit.getId(), name, priority, selectedHappyHourId, selectedHappyHourName);
+
                 Log.d(TAG, "Đang cập nhật Category ID: " + categoryToEdit.getId());
                 db.collection("Categories").document(categoryToEdit.getId())
-                        .set(updatedCategory)
+                        .set(updatedCategory) // Dùng .set() để ghi đè đầy đủ
                         .addOnSuccessListener(aVoid -> {
                             Log.d(TAG, "Cập nhật thành công ID: " + categoryToEdit.getId());
                             Toast.makeText(this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
@@ -177,10 +255,10 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                             Toast.makeText(this, "Cập nhật thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
                         });
             } else {
-                // --- CHẾ ĐỘ THÊM MỚI ---
                 DocumentReference newDocRef = db.collection("Categories").document();
                 String newId = newDocRef.getId();
-                Category newCategory = new Category(newId, name, priority);
+                Category newCategory = new Category(newId, name, priority, selectedHappyHourId, selectedHappyHourName);
+
                 Log.d(TAG, "Đang thêm Category mới với ID: " + newId);
                 newDocRef.set(newCategory)
                         .addOnSuccessListener(aVoid -> {
@@ -198,4 +276,3 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         dialog.show();
     }
 }
-
