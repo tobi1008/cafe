@@ -13,7 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText emailEditText, passwordEditText, confirmPasswordEditText;
+    private EditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, phoneEditText;
     private Button signupButton;
     private TextView loginTextView;
     private FirebaseAuth mAuth;
@@ -27,7 +27,8 @@ public class SignupActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // SỬA LỖI Ở ĐÂY: Ánh xạ các UI components từ layout
+        nameEditText = findViewById(R.id.editTextName);
+        phoneEditText = findViewById(R.id.editTextPhone);
         emailEditText = findViewById(R.id.editTextEmail);
         passwordEditText = findViewById(R.id.editTextPassword);
         confirmPasswordEditText = findViewById(R.id.editTextConfirmPassword);
@@ -35,12 +36,14 @@ public class SignupActivity extends AppCompatActivity {
         loginTextView = findViewById(R.id.textViewLogin);
 
         signupButton.setOnClickListener(v -> {
+            String name = nameEditText.getText().toString().trim();
+            String phone = phoneEditText.getText().toString().trim();
             String email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
             String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-            // Bổ sung phần kiểm tra input đầy đủ
-            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            // CẬP NHẬT KIỂM TRA VALIDATION
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || name.isEmpty() || phone.isEmpty()) {
                 Toast.makeText(SignupActivity.this, "Vui lòng điền đầy đủ thông tin.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -55,14 +58,24 @@ public class SignupActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
                             if (firebaseUser != null) {
-                                User newUser = new User(firebaseUser.getEmail());
-                                // GÁN VAI TRÒ MẶC ĐỊNH LÀ "USER"
+                                // GỌI CONSTRUCTOR MỚI (VỚI TÊN VÀ SĐT)
+                                User newUser = new User(firebaseUser.getEmail(), name, phone);
+
                                 newUser.setRole("user");
-                                db.collection("users").document(firebaseUser.getUid()).set(newUser);
+                                newUser.setMemberTier("Đồng");
+                                newUser.setTotalSpending(0);
+
+                                db.collection("users").document(firebaseUser.getUid()).set(newUser)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Chỉ chuyển màn hình sau khi lưu Firestore thành công
+                                            Toast.makeText(SignupActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(SignupActivity.this, LoginActivity.class));
+                                            finish();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                        });
                             }
-                            Toast.makeText(SignupActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignupActivity.this, LoginActivity.class));
-                            finish();
                         } else {
                             Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
@@ -72,4 +85,3 @@ public class SignupActivity extends AppCompatActivity {
         loginTextView.setOnClickListener(v -> finish());
     }
 }
-

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -44,19 +45,31 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
         holder.productName.setText(cartItem.getProductName());
         holder.quantity.setText(String.valueOf(cartItem.getQuantity()));
-        holder.size.setText("Size: " + cartItem.getSelectedSize());
 
-        // Hiển thị tùy chọn Đá và Đường
+        // Ẩn Size nếu không có
+        if (cartItem.getSelectedSize() != null && !cartItem.getSelectedSize().isEmpty()) {
+            holder.size.setText("Size: " + cartItem.getSelectedSize());
+            holder.size.setVisibility(View.VISIBLE);
+        } else {
+            holder.size.setVisibility(View.GONE);
+        }
+
+        // Hiển thị tùy chọn Đá và Đường (Ẩn nếu không có)
         String optionsText = "";
-        if (cartItem.getIceOption() != null) {
+        if (cartItem.getIceOption() != null && !cartItem.getIceOption().isEmpty() && !cartItem.getIceOption().equals("N/A")) {
             optionsText += cartItem.getIceOption();
         }
-        if (cartItem.getSugarLevel() != null) {
+        if (cartItem.getSugarLevel() != null && !cartItem.getSugarLevel().isEmpty() && !cartItem.getSugarLevel().equals("N/A")) {
             if (!optionsText.isEmpty()) optionsText += ", ";
             optionsText += cartItem.getSugarLevel();
         }
-        holder.options.setText(optionsText);
-        holder.options.setVisibility(optionsText.isEmpty() ? View.GONE : View.VISIBLE);
+
+        if(optionsText.isEmpty()) {
+            holder.options.setVisibility(View.GONE);
+        } else {
+            holder.options.setText(optionsText);
+            holder.options.setVisibility(View.VISIBLE);
+        }
 
 
         // Hiển thị ghi chú
@@ -68,12 +81,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        holder.productPrice.setText(formatter.format(cartItem.getPrice()));
+        // Cập nhật giá theo tổng số lượng
+        holder.productPrice.setText(formatter.format(cartItem.getTotalItemPrice()));
 
         Glide.with(context)
                 .load(cartItem.getProductImage())
-                .placeholder(R.drawable.ic_placeholder)
-                .error(R.drawable.ic_placeholder) // Use placeholder also on error
+                .placeholder(R.drawable.placeholder_image)
+                .error(R.drawable.placeholder_image)
                 .into(holder.productImage);
 
         holder.btnIncrease.setOnClickListener(v -> {
@@ -103,7 +117,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName, productPrice, quantity, size, options, note;
-        Button btnIncrease, btnDecrease, btnDelete;
+        ImageButton btnIncrease, btnDecrease, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -120,4 +134,3 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         }
     }
 }
-

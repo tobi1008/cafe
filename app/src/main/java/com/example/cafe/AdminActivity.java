@@ -21,15 +21,14 @@ import java.util.Map;
 public class AdminActivity extends AppCompatActivity {
 
     private EditText etName, etPriceS, etPriceM, etPriceL, etDescription, etImageUrl, etSalePercent;
-
-    // *** Dùng AutoCompleteTextView ***
     private AutoCompleteTextView spinnerCategoryAdmin;
-
     private ArrayAdapter<String> categoryAdapterAdmin;
     private List<Category> categoryListAdmin = new ArrayList<>();
     private List<String> categoryNamesAdmin = new ArrayList<>();
 
+    // Thêm nút mới
     private MaterialButton btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers, btnManageHappyHour, btnManageCategories;
+    private MaterialButton btnManageMembership, btnManageUsers; // NÚT MỚI
 
     private FirebaseFirestore db;
     private static final String TAG = "AdminActivity";
@@ -50,8 +49,6 @@ public class AdminActivity extends AppCompatActivity {
         etImageUrl = findViewById(R.id.editTextProductImageUrl);
         etSalePercent = findViewById(R.id.editTextSalePercent);
         btnAddProduct = findViewById(R.id.buttonAddProduct);
-
-        // *** Ánh xạ AutoCompleteTextView ***
         spinnerCategoryAdmin = findViewById(R.id.spinnerCategoryAdmin);
 
         // Ánh xạ Nút Quản Lý
@@ -60,6 +57,8 @@ public class AdminActivity extends AppCompatActivity {
         btnManageVouchers = findViewById(R.id.buttonManageVouchers);
         btnManageHappyHour = findViewById(R.id.buttonManageHappyHour);
         btnManageCategories = findViewById(R.id.buttonManageCategories);
+        btnManageMembership = findViewById(R.id.buttonManageMembership);
+        btnManageUsers = findViewById(R.id.buttonManageUsers);
 
         categoryAdapterAdmin = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNamesAdmin);
         spinnerCategoryAdmin.setAdapter(categoryAdapterAdmin);
@@ -76,8 +75,17 @@ public class AdminActivity extends AppCompatActivity {
             Log.d(TAG, "Nút Quản lý Danh mục đã được bấm!");
             startActivity(new Intent(AdminActivity.this, ManageCategoriesActivity.class));
         });
+        btnManageMembership.setOnClickListener(v -> {
+            startActivity(new Intent(AdminActivity.this, MembershipSettingsActivity.class));
+        });
+
+        // SỰ KIỆN CLICK CHO NÚT MỚI
+        btnManageUsers.setOnClickListener(v -> {
+            startActivity(new Intent(AdminActivity.this, ManageUsersActivity.class));
+        });
     }
 
+    // (Giữ nguyên hàm loadCategoriesAdmin())
     private void loadCategoriesAdmin() {
         Log.d(TAG, "Bắt đầu tải Categories cho Admin Spinner...");
         db.collection("Categories")
@@ -113,7 +121,6 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     private void addProduct() {
-        // Lấy dữ liệu từ các ô nhập liệu
         String ten = etName.getText().toString().trim();
         String priceSStr = etPriceS.getText().toString().trim();
         String priceMStr = etPriceM.getText().toString().trim();
@@ -121,9 +128,7 @@ public class AdminActivity extends AppCompatActivity {
         String moTa = etDescription.getText().toString().trim();
         String hinhAnh = etImageUrl.getText().toString().trim();
         String salePercentStr = etSalePercent.getText().toString().trim();
-
         String selectedCategoryName = spinnerCategoryAdmin.getText().toString();
-
 
         if (ten.isEmpty() || priceMStr.isEmpty() || selectedCategoryName == null || selectedCategoryName.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập tên, giá size M và chọn danh mục", Toast.LENGTH_SHORT).show();
@@ -140,7 +145,6 @@ public class AdminActivity extends AppCompatActivity {
             return;
         }
 
-
         int phanTramGiamGia = 0;
         if (!salePercentStr.isEmpty()) {
             try {
@@ -155,9 +159,7 @@ public class AdminActivity extends AppCompatActivity {
             }
         }
 
-
         Product newProduct = new Product(null, ten, gia, moTa, hinhAnh, phanTramGiamGia, selectedCategoryName, null);
-
 
         db.collection("cafe")
                 .add(newProduct)
@@ -173,7 +175,6 @@ public class AdminActivity extends AppCompatActivity {
                                 etDescription.setText("");
                                 etImageUrl.setText("");
                                 etSalePercent.setText("");
-                                // *** SỬA: Xóa text trong AutoCompleteTextView ***
                                 spinnerCategoryAdmin.setText("", false);
 
                             })
@@ -188,4 +189,3 @@ public class AdminActivity extends AppCompatActivity {
                 });
     }
 }
-

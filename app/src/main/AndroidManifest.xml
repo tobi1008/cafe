@@ -77,6 +77,10 @@
             android:exported="false"/>
         <activity
             android:name=".EditProfileActivity" />
+        <activity
+            android:name=".MembershipSettingsActivity" />
+        <activity
+            android:name=".ManageUsersActivity" />
 
     </application>
 

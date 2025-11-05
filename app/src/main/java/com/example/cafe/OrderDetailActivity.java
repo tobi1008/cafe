@@ -52,7 +52,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private ImageView imageViewBack;
 
-    private static final String TAG = "OrderDetailActivity"; // Thêm TAG để debug
+    private static final String TAG = "OrderDetailActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,7 +159,6 @@ public class OrderDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Chỉ cộng điểm khi trạng thái cũ KHÔNG PHẢI là "Đã hoàn thành" VÀ trạng thái mới LÀ "Đã hoàn thành"
         boolean shouldAwardPoints = !oldStatus.equals("Đã hoàn thành") && newStatus.equals("Đã hoàn thành");
 
         db.collection("orders").document(order.getOrderId())
@@ -167,9 +166,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Cập nhật trạng thái thành công!", Toast.LENGTH_SHORT).show();
                     tvOrderStatus.setText("Trạng thái: " + newStatus);
-                    order.setStatus(newStatus); // Cập nhật đối tượng order cục bộ
+                    order.setStatus(newStatus);
 
-                    // Kích hoạt logic cộng điểm NẾU cờ shouldAwardPoints là true
                     if (shouldAwardPoints) {
                         if(order.getUserId() != null && order.getTotalPrice() > 0) {
                             awardLoyaltyPoints(order.getUserId(), order.getTotalPrice());
@@ -183,57 +181,74 @@ public class OrderDetailActivity extends AppCompatActivity {
                 });
     }
 
-    // CỘNG ĐIỂM VÀ THĂNG HẠNG
+    // CỘNG ĐIỂM VÀ THĂNG HẠNG (ĐÃ CẬP NHẬT)
     private void awardLoyaltyPoints(String userId, double orderTotal) {
         Log.d(TAG, "Bắt đầu cộng điểm cho user: " + userId + " với số tiền: " + orderTotal);
         final DocumentReference userRef = db.collection("users").document(userId);
 
-        final long TIER_SILVER_START = 1000000;
-        final long TIER_GOLD_START = 4000000;
+        // Đọc mốc tiền từ Firestore CÀI ĐẶT
+        db.collection("Settings").document("Membership").get()
+                .addOnSuccessListener(settingsDoc -> {
 
-        db.runTransaction((Transaction.Function<String>) transaction -> {
-            DocumentSnapshot userSnapshot = transaction.get(userRef);
-            double currentSpending = 0;
-            String currentTier = "Đồng";
+                    // Lấy mốc tiền từ Cài đặt, nếu không có thì dùng mốc MẶC ĐỊNH
+                    final long TIER_SILVER_START = settingsDoc.contains("silverThreshold") ?
+                            settingsDoc.getLong("silverThreshold") : 1000000;
+                    final long TIER_GOLD_START = settingsDoc.contains("goldThreshold") ?
+                            settingsDoc.getLong("goldThreshold") : 4000000;
 
-            if (userSnapshot.contains("totalSpending")) {
-                currentSpending = userSnapshot.getDouble("totalSpending");
-            }
-            if (userSnapshot.contains("memberTier")) {
-                currentTier = userSnapshot.getString("memberTier");
-            }
+                    Log.d(TAG, "Sử dụng mốc: Bạc=" + TIER_SILVER_START + ", Vàng=" + TIER_GOLD_START);
 
-            double newTotalSpending = currentSpending + orderTotal;
-            String newTier = "Đồng";
+                    // Chạy Transaction SAU KHI đã lấy được mốc tiền
+                    db.runTransaction((Transaction.Function<String>) transaction -> {
+                        DocumentSnapshot userSnapshot = transaction.get(userRef);
+                        double currentSpending = 0;
+                        String currentTier = "Đồng";
 
-            if (newTotalSpending >= TIER_GOLD_START) {
-                newTier = "Vàng";
-            } else if (newTotalSpending >= TIER_SILVER_START) {
-                newTier = "Bạc";
-            }
+                        if (userSnapshot.contains("totalSpending")) {
+                            currentSpending = userSnapshot.getDouble("totalSpending");
+                        }
+                        if (userSnapshot.contains("memberTier")) {
+                            currentTier = userSnapshot.getString("memberTier");
+                        }
 
-            transaction.update(userRef, "totalSpending", newTotalSpending);
+                        double newTotalSpending = currentSpending + orderTotal;
+                        String newTier = "Đồng";
 
-            if (!currentTier.equals(newTier)) {
-                transaction.update(userRef, "memberTier", newTier);
-                return newTier; // Trả về hạng mới nếu có thăng hạng
-            }
+                        if (newTotalSpending >= TIER_GOLD_START) {
+                            newTier = "Vàng";
+                        } else if (newTotalSpending >= TIER_SILVER_START) {
+                            newTier = "Bạc";
+                        }
 
-            return null; // Trả về null nếu không thăng hạng
-        }).addOnSuccessListener(newTier -> {
-            if (newTier != null) {
-                Log.d(TAG, "Cộng điểm và thăng hạng thành công lên: " + newTier);
-                Toast.makeText(this, "Đã cộng điểm cho user. Thăng hạng: " + newTier, Toast.LENGTH_LONG).show();
-                grantTierUpVoucher(userId, newTier); // Tặng voucher khi thăng hạng
-            } else {
-                Log.d(TAG, "Cộng điểm thành công, không thăng hạng.");
-                Toast.makeText(this, "Đã cộng điểm cho user.", Toast.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(e -> {
-            Log.w(TAG, "Lỗi khi cộng điểm/thăng hạng", e);
-            Toast.makeText(this, "Lỗi khi cộng điểm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        });
+                        transaction.update(userRef, "totalSpending", newTotalSpending);
+
+                        if (!currentTier.equals(newTier)) {
+                            transaction.update(userRef, "memberTier", newTier);
+                            return newTier;
+                        }
+
+                        return null;
+                    }).addOnSuccessListener(newTier -> {
+                        if (newTier != null) {
+                            Log.d(TAG, "Cộng điểm và thăng hạng thành công lên: " + newTier);
+                            Toast.makeText(this, "Đã cộng điểm cho user. Thăng hạng: " + newTier, Toast.LENGTH_LONG).show();
+                            grantTierUpVoucher(userId, newTier); // Tặng voucher khi thăng hạng
+                        } else {
+                            Log.d(TAG, "Cộng điểm thành công, không thăng hạng.");
+                            Toast.makeText(this, "Đã cộng điểm cho user.", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(e -> {
+                        Log.w(TAG, "Lỗi khi chạy Transaction cộng điểm", e);
+                        Toast.makeText(this, "Lỗi khi cộng điểm (Transaction): " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "LỖI NGHIÊM TRỌNG: Không thể đọc mốc tiền Hạng Thành Viên.", e);
+                    Toast.makeText(this, "Lỗi: Không đọc được cài đặt hạng. Chưa cộng điểm.", Toast.LENGTH_LONG).show();
+                });
     }
+
 
     // TẶNG VOUCHER KHI THĂNG HẠNG
     private void grantTierUpVoucher(String userId, String newTier) {
@@ -280,3 +295,4 @@ public class OrderDetailActivity extends AppCompatActivity {
         });
     }
 }
+

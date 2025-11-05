@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
@@ -86,12 +87,13 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <Button
+            <ImageButton
                 android:id="@+id/buttonDecrease"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:text="-"
-                style="@style/Widget.Material3.Button.IconButton.Filled"/>
+                app:srcCompat="@drawable/ic_remove"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:contentDescription="Giảm" />
 
             <TextView
                 android:id="@+id/textViewQuantity"
@@ -103,25 +105,25 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"/>
 
-            <Button
+            <ImageButton
                 android:id="@+id/buttonIncrease"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                android:text="+"
-                style="@style/Widget.Material3.Button.IconButton.Filled"/>
+                app:srcCompat="@drawable/ic_add"
+                style="@style/Widget.Material3.Button.IconButton.Filled"
+                android:contentDescription="Tăng" />
         </LinearLayout>
 
-        <Button
+        <ImageButton
             android:id="@+id/buttonDelete"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            app:icon="@android:drawable/ic_menu_close_clear_cancel"
-            app:iconTint="@color/colorDelete"
+            app:srcCompat="@drawable/ic_close"
+            app:tint="@color/colorDelete"
             android:contentDescription="Xóa sản phẩm"/>
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>
-

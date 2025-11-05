@@ -46,13 +46,13 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="16dp"/>
 
+                <!-- form thêm sản phẩm -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
                     android:hint="Tên sản phẩm (*)">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextProductName"
                         android:layout_width="match_parent"
@@ -61,13 +61,12 @@
                         android:imeOptions="actionNext"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Giá S, M, L trong TextInputLayout -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="8dp">
-
+                    <!-- Giá S, M, L -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -82,7 +81,6 @@
                             android:inputType="numberDecimal"
                             android:imeOptions="actionNext"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -98,7 +96,6 @@
                             android:inputType="numberDecimal"
                             android:imeOptions="actionNext"/>
                     </com.google.android.material.textfield.TextInputLayout>
-
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="0dp"
                         android:layout_weight="1"
@@ -114,7 +111,6 @@
                             android:imeOptions="actionNext"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -128,7 +124,6 @@
                         android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
                         android:imeOptions="actionNext"/>
                 </com.google.android.material.textfield.TextInputLayout>
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -142,7 +137,6 @@
                         android:inputType="textUri"
                         android:imeOptions="actionNext"/>
                 </com.google.android.material.textfield.TextInputLayout>
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -156,7 +150,6 @@
                         android:inputType="number"
                         android:imeOptions="actionNext"/>
                 </com.google.android.material.textfield.TextInputLayout>
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -170,8 +163,6 @@
                         android:inputType="none"
                         tools:ignore="LabelFor" />
                 </com.google.android.material.textfield.TextInputLayout>
-
-
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/buttonAddProduct"
                     android:layout_width="match_parent"
@@ -181,7 +172,6 @@
                     app:iconGravity="textStart"
                     android:paddingTop="12dp"
                     android:paddingBottom="12dp"/>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -216,7 +206,6 @@
                     app:icon="@drawable/ic_edit"
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"/>
-
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageCategories"
@@ -227,7 +216,6 @@
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"
                     android:layout_marginBottom="8dp"/>
-
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageHappyHour"
@@ -238,7 +226,6 @@
                     app:icon="@drawable/ic_time"
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"/>
-
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageOrders"
@@ -249,7 +236,6 @@
                     app:icon="@drawable/ic_history"
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"/>
-
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:id="@+id/buttonManageVouchers"
@@ -260,10 +246,30 @@
                     app:icon="@drawable/ic_voucher"
                     app:iconGravity="textStart"
                     android:textAlignment="textStart"/>
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:id="@+id/buttonManageMembership"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Cài đặt Hạng Thành Viên"
+                    android:layout_marginBottom="8dp"
+                    app:icon="@android:drawable/ic_menu_preferences"
+                    app:iconGravity="textStart"
+                    android:textAlignment="textStart"/>
+
+                <!-- NÚT MỚI ĐƯỢC THÊM VÀO -->
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:id="@+id/buttonManageUsers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Quản lý Người Dùng"
+                    app:icon="@drawable/ic_admin_panel"
+                    app:iconGravity="textStart"
+                    android:textAlignment="textStart"/>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 </ScrollView>
-

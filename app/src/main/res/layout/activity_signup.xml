@@ -27,12 +27,36 @@
         android:textSize="24sp"
         android:textStyle="bold" />
 
+    <!-- HỌ TÊN -->
     <EditText
-        android:id="@+id/editTextEmail"
+        android:id="@+id/editTextName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/textViewWelcome"
         android:layout_marginTop="32dp"
+        android:background="@drawable/edit_text_background"
+        android:hint="Họ và Tên"
+        android:inputType="textPersonName|textCapWords"
+        android:padding="12dp" />
+
+    <!-- SỐ ĐIỆN THOẠI -->
+    <EditText
+        android:id="@+id/editTextPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextName"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/edit_text_background"
+        android:hint="Số điện thoại"
+        android:inputType="phone"
+        android:padding="12dp" />
+
+    <EditText
+        android:id="@+id/editTextEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextPhone"
+        android:layout_marginTop="16dp"
         android:background="@drawable/edit_text_background"
         android:hint="Email"
         android:inputType="textEmailAddress"
@@ -82,4 +106,3 @@
         android:textStyle="bold" />
 
 </RelativeLayout>
-
