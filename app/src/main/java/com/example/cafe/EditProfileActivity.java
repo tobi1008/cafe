@@ -22,7 +22,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private static final String TAG = "EditProfileActivity";
 
-    private EditText etName, etPhone, etAddress;
+    private EditText etName, etPhone, etAddress, etEmail, etPassword;
     private MaterialButton btnSave;
     private Toolbar toolbar;
 
@@ -48,15 +48,15 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         // Ánh xạ UI
-        toolbar = findViewById(R.id.toolbarEditProfile);
         etName = findViewById(R.id.etEditName);
         etPhone = findViewById(R.id.etEditPhone);
         etAddress = findViewById(R.id.etEditAddress);
+        etEmail = findViewById(R.id.etEditEmail);
+        etPassword = findViewById(R.id.etEditPassword);
         btnSave = findViewById(R.id.btnSaveProfile);
 
-        // Toolbar
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> onBackPressed()); // Nút back
+        // Custom Back Button
+        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
 
         // Tải thông tin hiện tại
         loadExistingUserInfo();
@@ -66,6 +66,10 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void loadExistingUserInfo() {
+        if (currentUser != null) {
+            etEmail.setText(currentUser.getEmail()); // Set email từ Auth
+        }
+
         db.collection("users").document(currentUser.getUid())
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -92,28 +96,79 @@ public class EditProfileActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
         if (name.isEmpty()) {
             etName.setError("Tên không được để trống");
             return;
         }
+        if (email.isEmpty()) {
+            etEmail.setError("Email không được để trống");
+            return;
+        }
 
-        // Tạo Map để cập nhật
+        // Show loading or disable button to prevent multiple clicks (Optional but
+        // recommended)
+        btnSave.setEnabled(false);
+        Toast.makeText(this, "Đang cập nhật...", Toast.LENGTH_SHORT).show();
+
+        // 1. Cập nhật Firestore trước
         Map<String, Object> updates = new HashMap<>();
         updates.put("name", name);
         updates.put("phone", phone);
         updates.put("address", address);
+        updates.put("email", email);
 
         db.collection("users").document(currentUser.getUid())
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
-                    finish(); // Đóng màn hình và quay lại Profile
+                    // Firestore thành công -> Tiếp tục cập nhật Auth
+                    updateAuthInfo(email, password);
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Cập nhật thất bại", Toast.LENGTH_SHORT).show();
+                    btnSave.setEnabled(true);
+                    Toast.makeText(this, "Lỗi cập nhật Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Failed to update profile", e);
                 });
     }
-}
 
+    private void updateAuthInfo(String newEmail, String newPassword) {
+        // Cập nhật Email nếu thay đổi
+        if (!newEmail.equals(currentUser.getEmail())) {
+            currentUser.updateEmail(newEmail)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "User email updated.");
+                        // Sau khi xong email -> update password
+                        updatePasswordInSequence(newPassword);
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSave.setEnabled(true);
+                        Toast.makeText(this, "Lỗi cập nhật Email (Cần đăng nhập lại): " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
+        } else {
+            // Email không đổi -> chuyển sang password
+            updatePasswordInSequence(newPassword);
+        }
+    }
+
+    private void updatePasswordInSequence(String newPassword) {
+        if (!newPassword.isEmpty()) {
+            currentUser.updatePassword(newPassword)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+                        finish();
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSave.setEnabled(true);
+                        Toast.makeText(this, "Lỗi cập nhật Mật khẩu (Cần đăng nhập lại): " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
+        } else {
+            // Không đổi password -> Hoàn tất
+            Toast.makeText(this, "Cập nhật thành công!", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+}

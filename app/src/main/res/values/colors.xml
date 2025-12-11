@@ -29,6 +29,15 @@
     <!-- MÀU CAM MỚI CHO NÚT TIẾP TỤC -->
     <color name="colorButtonOrange">#F57C00</color>
 
+    <!-- UI ADMIN REDESIGNS -->
+    <color name="admin_background">#EFEBE9</color> <!-- Brown 50 (Warm Grey) -->
+    <color name="surface_color">#FFFFFF</color>
+    <color name="button_tonal_bg">#D7CCC8</color> <!-- Brown 100 -->
+    <color name="button_tonal_text">#3E2723</color> <!-- Brown 900 -->
 
-</resources>
+    <!-- MEMBERSHIP TIERS -->
+    <color name="colorBronze">#CD7F32</color>
+    <color name="colorGold">#FFD700</color>
+    <color name="colorPlatinum">#E5E4E2</color>
+    <color name="colorDiamond">#B9F2FF</color></resources>
 

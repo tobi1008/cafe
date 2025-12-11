@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -41,7 +42,8 @@ import java.util.Map;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
-    private TextView tvOrderId, tvOrderDate, tvOrderStatus, tvCustomerName, tvCustomerPhone, tvCustomerAddress, tvTotalPrice;
+    private TextView tvOrderId, tvOrderDate, tvOrderStatus, tvCustomerName, tvCustomerPhone, tvCustomerAddress,
+            tvTotalPrice;
     private RecyclerView recyclerViewItems;
     private OrderDetailAdapter adapter;
     private Order order;
@@ -61,6 +63,9 @@ public class OrderDetailActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+
+        imageViewBack = findViewById(R.id.imageViewBack);
+        imageViewBack.setOnClickListener(v -> finish());
 
         tvOrderId = findViewById(R.id.textViewDetailOrderId);
         tvOrderDate = findViewById(R.id.textViewDetailOrderDate);
@@ -112,7 +117,8 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void checkUserRoleAndSetupAdminUI() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         db.collection("users").document(currentUser.getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -169,7 +175,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                     order.setStatus(newStatus);
 
                     if (shouldAwardPoints) {
-                        if(order.getUserId() != null && order.getTotalPrice() > 0) {
+                        if (order.getUserId() != null && order.getTotalPrice() > 0) {
                             awardLoyaltyPoints(order.getUserId(), order.getTotalPrice());
                         } else {
                             Log.w(TAG, "Không thể cộng điểm: userId rỗng hoặc totalPrice = 0");
@@ -191,75 +197,125 @@ public class OrderDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(settingsDoc -> {
 
                     // Lấy mốc tiền từ Cài đặt, nếu không có thì dùng mốc MẶC ĐỊNH
-                    final long TIER_SILVER_START = settingsDoc.contains("silverThreshold") ?
-                            settingsDoc.getLong("silverThreshold") : 1000000;
-                    final long TIER_GOLD_START = settingsDoc.contains("goldThreshold") ?
-                            settingsDoc.getLong("goldThreshold") : 4000000;
+                    final long TIER_BRONZE_START = settingsDoc.contains("bronzeThreshold")
+                            ? settingsDoc.getLong("bronzeThreshold")
+                            : 500000;
+                    final long TIER_SILVER_START = settingsDoc.contains("silverThreshold")
+                            ? settingsDoc.getLong("silverThreshold")
+                            : 1000000;
+                    final long TIER_GOLD_START = settingsDoc.contains("goldThreshold")
+                            ? settingsDoc.getLong("goldThreshold")
+                            : 4000000;
+                    final long TIER_PLATINUM_START = settingsDoc.contains("platinumThreshold")
+                            ? settingsDoc.getLong("platinumThreshold")
+                            : 10000000;
+                    final long TIER_DIAMOND_START = settingsDoc.contains("diamondThreshold")
+                            ? settingsDoc.getLong("diamondThreshold")
+                            : 20000000;
 
-                    Log.d(TAG, "Sử dụng mốc: Bạc=" + TIER_SILVER_START + ", Vàng=" + TIER_GOLD_START);
+                    // Lấy mã voucher từ Cài đặt
+                    final String VOUCHER_BRONZE = settingsDoc.contains("bronzeVoucher")
+                            ? settingsDoc.getString("bronzeVoucher")
+                            : "BRONZEUP";
+                    final String VOUCHER_SILVER = settingsDoc.contains("silverVoucher")
+                            ? settingsDoc.getString("silverVoucher")
+                            : "SILVERUP";
+                    final String VOUCHER_GOLD = settingsDoc.contains("goldVoucher")
+                            ? settingsDoc.getString("goldVoucher")
+                            : "GOLDUP";
+                    final String VOUCHER_PLATINUM = settingsDoc.contains("platinumVoucher")
+                            ? settingsDoc.getString("platinumVoucher")
+                            : "PLATINUMUP";
+                    final String VOUCHER_DIAMOND = settingsDoc.contains("diamondVoucher")
+                            ? settingsDoc.getString("diamondVoucher")
+                            : "DIAMONDUP";
+
+                    Log.d(TAG, "Sử dụng mốc: Đồng=" + TIER_BRONZE_START + ", Bạc=" + TIER_SILVER_START);
 
                     // Chạy Transaction SAU KHI đã lấy được mốc tiền
                     db.runTransaction((Transaction.Function<String>) transaction -> {
                         DocumentSnapshot userSnapshot = transaction.get(userRef);
                         double currentSpending = 0;
-                        String currentTier = "Đồng";
+                        String currentTier = "Thành viên"; // Mặc định ĐÚNG phải là Thành viên
 
                         if (userSnapshot.contains("totalSpending")) {
                             currentSpending = userSnapshot.getDouble("totalSpending");
                         }
                         if (userSnapshot.contains("memberTier")) {
-                            currentTier = userSnapshot.getString("memberTier");
+                            String tierFromDb = userSnapshot.getString("memberTier");
+                            if (tierFromDb != null && !tierFromDb.isEmpty()) {
+                                currentTier = tierFromDb;
+                            }
                         }
 
                         double newTotalSpending = currentSpending + orderTotal;
-                        String newTier = "Đồng";
+                        String newTier = "Thành viên";
 
-                        if (newTotalSpending >= TIER_GOLD_START) {
+                        if (newTotalSpending >= TIER_DIAMOND_START) {
+                            newTier = "Kim Cương";
+                        } else if (newTotalSpending >= TIER_PLATINUM_START) {
+                            newTier = "Platinum";
+                        } else if (newTotalSpending >= TIER_GOLD_START) {
                             newTier = "Vàng";
                         } else if (newTotalSpending >= TIER_SILVER_START) {
                             newTier = "Bạc";
+                        } else if (newTotalSpending >= TIER_BRONZE_START) {
+                            newTier = "Đồng";
                         }
 
                         transaction.update(userRef, "totalSpending", newTotalSpending);
 
+                        // Chỉ cập nhật nếu hạng thay đổi (thang hạng)
                         if (!currentTier.equals(newTier)) {
                             transaction.update(userRef, "memberTier", newTier);
                             return newTier;
                         }
 
-                        return null;
+                        return null; // Không đổi hạng -> trả về null
                     }).addOnSuccessListener(newTier -> {
                         if (newTier != null) {
                             Log.d(TAG, "Cộng điểm và thăng hạng thành công lên: " + newTier);
-                            Toast.makeText(this, "Đã cộng điểm cho user. Thăng hạng: " + newTier, Toast.LENGTH_LONG).show();
-                            grantTierUpVoucher(userId, newTier); // Tặng voucher khi thăng hạng
+                            Toast.makeText(this, "Chúc mừng! Bạn đã thăng hạng: " + newTier, Toast.LENGTH_LONG).show();
+
+                            // Xác định mã voucher cần tặng dựa trên tier mới
+                            String voucherToGrant = null;
+                            if (newTier.equals("Đồng"))
+                                voucherToGrant = VOUCHER_BRONZE;
+                            else if (newTier.equals("Bạc"))
+                                voucherToGrant = VOUCHER_SILVER;
+                            else if (newTier.equals("Vàng"))
+                                voucherToGrant = VOUCHER_GOLD;
+                            else if (newTier.equals("Platinum"))
+                                voucherToGrant = VOUCHER_PLATINUM;
+                            else if (newTier.equals("Kim Cương"))
+                                voucherToGrant = VOUCHER_DIAMOND;
+
+                            if (voucherToGrant != null) {
+                                grantTierUpVoucher(userId, voucherToGrant);
+                            } else {
+                                Log.w(TAG, "Không có mã voucher nào được cấu hình cho hạng: " + newTier);
+                            }
+
                         } else {
                             Log.d(TAG, "Cộng điểm thành công, không thăng hạng.");
-                            Toast.makeText(this, "Đã cộng điểm cho user.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Đã cộng điểm tích lũy.", Toast.LENGTH_SHORT).show();
                         }
                     }).addOnFailureListener(e -> {
                         Log.w(TAG, "Lỗi khi chạy Transaction cộng điểm", e);
-                        Toast.makeText(this, "Lỗi khi cộng điểm (Transaction): " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Lỗi khi cộng điểm: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
 
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "LỖI NGHIÊM TRỌNG: Không thể đọc mốc tiền Hạng Thành Viên.", e);
-                    Toast.makeText(this, "Lỗi: Không đọc được cài đặt hạng. Chưa cộng điểm.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Lỗi kết nối Cài đặt. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                 });
     }
 
-
     // TẶNG VOUCHER KHI THĂNG HẠNG
-    private void grantTierUpVoucher(String userId, String newTier) {
-        String voucherCode = null;
-        if (newTier.equals("Bạc")) {
-            voucherCode = "SILVERUP";
-        } else if (newTier.equals("Vàng")) {
-            voucherCode = "GOLDUP";
-        }
-
-        if (voucherCode == null) return;
+    private void grantTierUpVoucher(String userId, String voucherCode) {
+        if (voucherCode == null)
+            return;
 
         final String finalVoucherCode = voucherCode;
         DocumentReference templateVoucherRef = db.collection("vouchers").document(finalVoucherCode);
@@ -267,8 +323,10 @@ public class OrderDetailActivity extends AppCompatActivity {
         templateVoucherRef.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 Voucher templateVoucher = documentSnapshot.toObject(Voucher.class);
-                if (templateVoucher == null || templateVoucher.getExpiryDate() == null || !templateVoucher.getExpiryDate().after(new Date())) {
-                    Log.w(TAG, "Voucher mẫu " + finalVoucherCode + " không hợp lệ hoặc đã hết hạn.");
+                // Với voucher thăng hạng, có thể không cần check ngày hết hạn của bản mẫu,
+                // hoặc bản mẫu nên set ngày rất xa. Ở đây vẫn giữ check cho an toàn.
+                if (templateVoucher == null) {
+                    Log.w(TAG, "Voucher mẫu null");
                     return;
                 }
 
@@ -278,7 +336,14 @@ public class OrderDetailActivity extends AppCompatActivity {
                 newVoucherData.put("description", templateVoucher.getDescription());
                 newVoucherData.put("discountType", templateVoucher.getDiscountType());
                 newVoucherData.put("discountValue", templateVoucher.getDiscountValue());
+
+                // Nếu voucher mẫu có hạn, dùng hạn đó. Nếu không (hoặc muốn set hạn riêng cho
+                // user voucher),
+                // có thể tính toán lại ở đây (ví dụ: +30 ngày từ lúc nhận).
+                // Hiện tại giữ nguyên logic copy từ mẫu.
                 newVoucherData.put("expiryDate", templateVoucher.getExpiryDate());
+
+                newVoucherData.put("minTier", templateVoucher.getMinTier()); // Giữ nguyên yêu cầu hạng nếu có
                 newVoucherData.put("used", false);
 
                 // Thêm vào sub-collection của user
@@ -286,13 +351,15 @@ public class OrderDetailActivity extends AppCompatActivity {
                         .add(newVoucherData)
                         .addOnSuccessListener(documentReference -> {
                             Log.d(TAG, "Đã tặng voucher thăng hạng: " + finalVoucherCode + " cho user " + userId);
-                            Toast.makeText(OrderDetailActivity.this, "Đã tặng voucher " + finalVoucherCode, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(OrderDetailActivity.this, "Đã tặng voucher " + finalVoucherCode,
+                                    Toast.LENGTH_SHORT).show();
                         })
                         .addOnFailureListener(e -> Log.w(TAG, "Lỗi khi tặng voucher thăng hạng", e));
             } else {
-                Log.w(TAG, "Không tìm thấy voucher mẫu: " + finalVoucherCode + " trong /vouchers");
+                Log.w(TAG, "Không tìm thấy voucher mẫu: " + finalVoucherCode
+                        + " trong /vouchers. Hãy đảm bảo admin đã tạo voucher này.");
+                Toast.makeText(this, "Lỗi: Không tìm thấy voucher mẫu " + finalVoucherCode, Toast.LENGTH_LONG).show();
             }
         });
     }
 }
-

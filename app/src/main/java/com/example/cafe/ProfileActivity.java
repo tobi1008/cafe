@@ -33,8 +33,11 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private static final String TAG = "ProfileActivity";
 
+    private long TIER_BRONZE_START = 500000;
     private long TIER_SILVER_START = 1000000;
     private long TIER_GOLD_START = 4000000;
+    private long TIER_PLATINUM_START = 10000000;
+    private long TIER_DIAMOND_START = 20000000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +61,6 @@ public class ProfileActivity extends AppCompatActivity {
         progressMembership = findViewById(R.id.progressMembership);
         tvMembershipProgress = findViewById(R.id.tvMembershipProgress);
 
-
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             // Tải mốc cài đặt TRƯỚC, sau đó mới tải thông tin user
@@ -70,12 +72,11 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
         }
 
-        layoutFavorites.setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, FavoritesActivity.class)));
-        layoutOrderHistory.setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, OrderHistoryActivity.class)));
-        layoutAdminPanel.setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, AdminActivity.class)));
+        layoutFavorites
+                .setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, FavoritesActivity.class)));
+        layoutOrderHistory
+                .setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, OrderHistoryActivity.class)));
+        layoutAdminPanel.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, AdminActivity.class)));
         layoutLogout.setOnClickListener(v -> {
             mAuth.signOut();
             Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
@@ -83,8 +84,8 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-        btnEditProfile.setOnClickListener(v ->
-                startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class)));
+        btnEditProfile
+                .setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, EditProfileActivity.class)));
     }
 
     private void loadMembershipSettingsAndThenUserInfo(String userId, String email) {
@@ -92,11 +93,22 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnSuccessListener(settingsDoc -> {
                     if (settingsDoc.exists()) {
                         // Lấy mốc tiền từ Cài đặt
-                        TIER_SILVER_START = settingsDoc.contains("silverThreshold") ?
-                                settingsDoc.getLong("silverThreshold") : 1000000;
-                        TIER_GOLD_START = settingsDoc.contains("goldThreshold") ?
-                                settingsDoc.getLong("goldThreshold") : 4000000;
-                        Log.d(TAG, "Tải mốc cài đặt thành công: Bạc=" + TIER_SILVER_START + ", Vàng=" + TIER_GOLD_START);
+                        TIER_BRONZE_START = settingsDoc.contains("bronzeThreshold")
+                                ? settingsDoc.getLong("bronzeThreshold")
+                                : 500000;
+                        TIER_SILVER_START = settingsDoc.contains("silverThreshold")
+                                ? settingsDoc.getLong("silverThreshold")
+                                : 1000000;
+                        TIER_GOLD_START = settingsDoc.contains("goldThreshold") ? settingsDoc.getLong("goldThreshold")
+                                : 4000000;
+                        TIER_PLATINUM_START = settingsDoc.contains("platinumThreshold")
+                                ? settingsDoc.getLong("platinumThreshold")
+                                : 10000000;
+                        TIER_DIAMOND_START = settingsDoc.contains("diamondThreshold")
+                                ? settingsDoc.getLong("diamondThreshold")
+                                : 20000000;
+
+                        Log.d(TAG, "Tải mốc cài đặt thành công.");
                     } else {
                         Log.d(TAG, "Không tìm thấy file cài đặt, dùng mốc mặc định.");
                     }
@@ -122,15 +134,20 @@ public class ProfileActivity extends AppCompatActivity {
                         layoutAdminPanel.setVisibility(View.GONE);
                         tvUserPhone.setText("Chưa cập nhật");
                         tvUserAddress.setText("Chưa cập nhật");
-                        tvMemberTier.setText("Đồng");
-                        // Gọi hàm update UI với mốc tiền đã tải
-                        updateMembershipProgressUI("Đồng", 0);
+                        tvMemberTier.setText("Thành viên");
+                        // Gọi hàm update UI
+                        updateMembershipProgressUI("Thành viên", 0);
                         return;
                     }
 
                     if (documentSnapshot != null && documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         if (user != null) {
+
+                            // TỰ ĐỘNG ĐỒNG BỘ HẠNG (Auto-Sync)
+                            // Kiểm tra xem hạng hiện tại có khớp với số tiền chi tiêu không
+                            verifyAndSyncTier(user, userId);
+
                             // logic hiển thị Tên, SĐT, Địa chỉ
                             if (user.getName() != null && !user.getName().isEmpty()) {
                                 tvUserName.setText(user.getName());
@@ -152,14 +169,14 @@ public class ProfileActivity extends AppCompatActivity {
                             String tier = user.getMemberTier();
                             double spending = user.getTotalSpending();
                             if (tier == null || tier.isEmpty()) {
-                                tier = "Đồng";
+                                tier = "Thành viên";
                             }
                             tvMemberTier.setText(tier);
 
                             // Gọi hàm update UI với mốc tiền đã tải
                             updateMembershipProgressUI(tier, spending);
 
-                            //  logic Ẩn/Hiện nút Admin
+                            // logic Ẩn/Hiện nút Admin
                             if ("admin".equals(user.getRole())) {
                                 layoutAdminPanel.setVisibility(View.VISIBLE);
                             } else {
@@ -178,6 +195,37 @@ public class ProfileActivity extends AppCompatActivity {
                 });
     }
 
+    private void verifyAndSyncTier(User user, String userId) {
+        double spending = user.getTotalSpending();
+        String currentTier = user.getMemberTier();
+        if (currentTier == null)
+            currentTier = "Thành viên";
+
+        String calculatedTier = "Thành viên";
+        if (spending >= TIER_DIAMOND_START)
+            calculatedTier = "Kim Cương";
+        else if (spending >= TIER_PLATINUM_START)
+            calculatedTier = "Platinum";
+        else if (spending >= TIER_GOLD_START)
+            calculatedTier = "Vàng";
+        else if (spending >= TIER_SILVER_START)
+            calculatedTier = "Bạc";
+        else if (spending >= TIER_BRONZE_START)
+            calculatedTier = "Đồng";
+
+        final String finalCorrectTier = calculatedTier; // Biến final để dùng trong Lambda
+
+        if (!currentTier.equals(finalCorrectTier)) {
+            Log.w(TAG, "Phát hiện sai lệch hạng! Hiện tại: " + currentTier + ", Đúng: " + finalCorrectTier
+                    + ". Đang đồng bộ...");
+            // Cập nhật lại Firestore
+            db.collection("users").document(userId).update("memberTier", finalCorrectTier)
+                    .addOnSuccessListener(
+                            aVoid -> Log.d(TAG, "Đã tự động đồng bộ hạng thành công: " + finalCorrectTier))
+                    .addOnFailureListener(e -> Log.e(TAG, "Lỗi khi đồng bộ hạng", e));
+        }
+    }
+
     private void updateMembershipProgressUI(String tier, double spending) {
 
         long currentSpending = (long) spending;
@@ -187,26 +235,90 @@ public class ProfileActivity extends AppCompatActivity {
         formatter.setMaximumFractionDigits(0);
         String formattedSpending = formatter.format(currentSpending);
 
-        if (tier.equals("Đồng")) {
-            String formattedMax = formatter.format(TIER_SILVER_START);
-            progressMembership.setMax((int) TIER_SILVER_START);
-            progressMembership.setProgress((int) currentSpending);
-            tvMembershipProgress.setText(String.format("Chi tiêu: %s / %s", formattedSpending, formattedMax));
-            tvMemberTier.setTextColor(ContextCompat.getColor(this, android.R.color.black));
+        long maxProgress = 0;
+        long currentProgress = 0;
+        String nextTierName = "";
+        int tierColor = android.R.color.black;
 
-        } else if (tier.equals("Bạc")) {
-            String formattedMax = formatter.format(TIER_GOLD_START);
-            progressMembership.setMax((int) (TIER_GOLD_START - TIER_SILVER_START));
-            progressMembership.setProgress((int) (currentSpending - TIER_SILVER_START));
-            tvMembershipProgress.setText(String.format("Chi tiêu: %s / %s", formattedSpending, formattedMax));
-            tvMemberTier.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray));
+        switch (tier) {
+            case "Thành viên":
+                maxProgress = TIER_BRONZE_START;
+                currentProgress = currentSpending;
+                nextTierName = "Đồng";
+                tierColor = android.R.color.black;
+                break;
+            case "Đồng":
+                maxProgress = TIER_SILVER_START - TIER_BRONZE_START;
+                currentProgress = currentSpending - TIER_BRONZE_START;
+                nextTierName = "Bạc";
+                tierColor = R.color.colorBronze;
+                break;
+            case "Bạc":
+                maxProgress = TIER_GOLD_START - TIER_SILVER_START;
+                currentProgress = currentSpending - TIER_SILVER_START;
+                nextTierName = "Vàng";
+                tierColor = android.R.color.darker_gray;
+                break;
+            case "Vàng":
+                maxProgress = TIER_PLATINUM_START - TIER_GOLD_START;
+                currentProgress = currentSpending - TIER_GOLD_START;
+                nextTierName = "Platinum";
+                tierColor = R.color.colorGold;
+                break;
+            case "Platinum":
+                maxProgress = TIER_DIAMOND_START - TIER_PLATINUM_START;
+                currentProgress = currentSpending - TIER_PLATINUM_START;
+                nextTierName = "Kim Cương";
+                tierColor = R.color.colorPlatinum;
+                break;
+            case "Kim Cương":
+                maxProgress = 100;
+                currentProgress = 100;
+                nextTierName = "Max";
+                tierColor = R.color.colorDiamond;
+                break;
+            default:
+                maxProgress = TIER_BRONZE_START;
+                currentProgress = currentSpending;
+        }
 
-        } else { // Vàng
+        if (nextTierName.equals("Max")) {
             progressMembership.setMax(100);
             progressMembership.setProgress(100);
-            tvMembershipProgress.setText(String.format("Đã đạt hạng cao nhất! (Tổng chi tiêu: %s)", formattedSpending));
-            tvMemberTier.setTextColor(ContextCompat.getColor(this, R.color.colorWarning));
+            tvMembershipProgress.setText(String.format("Đã đạt hạng cao nhất! (%s)", formattedSpending));
+        } else {
+            // Đảm bảo không âm
+            if (currentProgress < 0)
+                currentProgress = 0;
+            // Nếu current > max (do chưa update tier), set full
+            if (currentProgress > maxProgress)
+                currentProgress = maxProgress;
+
+            progressMembership.setMax((int) maxProgress);
+            progressMembership.setProgress((int) currentProgress);
+
+            String formattedMax = formatter.format(maxProgress + (spending - currentProgress)); // Hiển thị mốc tổng
+            // Hoặc đơn giản hiển thị số dư cần thiết:
+            long remaining = maxProgress - currentProgress;
+            String formattedRemaining = formatter.format(remaining);
+
+            // Logic hiển thị cũ: Chi tiêu: [Hiện tại] / [Mốc kế tiếp]
+            long nextTierValue = 0;
+            if (tier.equals("Thành viên"))
+                nextTierValue = TIER_BRONZE_START;
+            else if (tier.equals("Đồng"))
+                nextTierValue = TIER_SILVER_START;
+            else if (tier.equals("Bạc"))
+                nextTierValue = TIER_GOLD_START;
+            else if (tier.equals("Vàng"))
+                nextTierValue = TIER_PLATINUM_START;
+            else if (tier.equals("Platinum"))
+                nextTierValue = TIER_DIAMOND_START;
+
+            String formattedNext = formatter.format(nextTierValue);
+            tvMembershipProgress.setText(String.format("Chi tiêu: %s / %s", formattedSpending, formattedNext));
         }
+
+        tvMemberTier.setTextColor(ContextCompat.getColor(this, tierColor));
     }
 }
-

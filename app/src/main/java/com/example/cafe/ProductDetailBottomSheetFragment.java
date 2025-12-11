@@ -55,7 +55,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
     // Views
     private ImageView ivProductImageSheet;
-    private TextView tvProductNameSheet, tvProductPriceSheet, tvProductDescriptionSheet, tvQuantitySheet, tvTotalPriceSheet;
+    private TextView tvProductNameSheet, tvProductPriceSheet, tvProductDescriptionSheet, tvQuantitySheet,
+            tvTotalPriceSheet;
     private ImageButton btnIncreaseQuantitySheet, btnDecreaseQuantitySheet, btnCloseSheet;
     private Button btnContinueSheet;
     private TextView tvHappyHourTagSheet, tvOriginalPriceSheet, tvOriginalPriceHeaderSheet;
@@ -105,7 +106,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     private FirebaseAuth mAuth;
     private String userId;
 
-
     public static ProductDetailBottomSheetFragment newInstance(Product product) {
         ProductDetailBottomSheetFragment fragment = new ProductDetailBottomSheetFragment();
         Bundle args = new Bundle();
@@ -129,12 +129,14 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.setOnShowListener(dialogInterface -> {
             BottomSheetDialog bottomSheetDialog = (BottomSheetDialog) dialogInterface;
-            View bottomSheetInternal = bottomSheetDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            View bottomSheetInternal = bottomSheetDialog
+                    .findViewById(com.google.android.material.R.id.design_bottom_sheet);
             if (bottomSheetInternal != null) {
                 BottomSheetBehavior.from(bottomSheetInternal).setState(BottomSheetBehavior.STATE_EXPANDED);
                 bottomSheetInternal.setBackgroundResource(R.drawable.bottom_sheet_background);
@@ -143,10 +145,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         return dialog;
     }
 
-
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.bottom_sheet_product_detail, container, false);
         initViews(view);
         if (product != null) {
@@ -198,7 +200,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
     private void populateInitialData() {
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        Glide.with(requireContext()).load(product.getHinhAnh()).placeholder(R.drawable.placeholder_image).into(ivProductImageSheet);
+        Glide.with(requireContext()).load(product.getHinhAnh()).placeholder(R.drawable.placeholder_image)
+                .into(ivProductImageSheet);
         tvProductNameSheet.setText(product.getTen());
         tvProductDescriptionSheet.setText(product.getMoTa());
 
@@ -253,9 +256,12 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             rgSizeSheet.setVisibility(View.VISIBLE);
             List<String> sortedSizes = new ArrayList<>(sizes.keySet());
             sortedSizes.sort((s1, s2) -> {
-                if (s1.equals("S")) return -1;
-                if (s1.equals("M") && s2.equals("L")) return -1;
-                if (s1.equals("L")) return 1;
+                if (s1.equals("S"))
+                    return -1;
+                if (s1.equals("M") && s2.equals("L"))
+                    return -1;
+                if (s1.equals("L"))
+                    return 1;
                 return 0;
             });
             for (String size : sortedSizes) {
@@ -292,8 +298,10 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     }
 
     private void addRadioButton(RadioGroup radioGroup, String text, double priceDifference, boolean isChecked) {
-        if (getContext() == null) return;
-        RadioButton radioButton = (RadioButton) LayoutInflater.from(getContext()).inflate(R.layout.radio_button_option, radioGroup, false);
+        if (getContext() == null)
+            return;
+        RadioButton radioButton = (RadioButton) LayoutInflater.from(getContext()).inflate(R.layout.radio_button_option,
+                radioGroup, false);
         String displayText = text;
         if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null && product.getGia().size() > 1) {
             if (priceDifference > 0) {
@@ -303,7 +311,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             }
             radioButton.setTag(product.getPriceForSize(text));
         } else {
-            if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null && product.getGia().containsKey(text)) {
+            if (radioGroup.getId() == R.id.rgSizeSheet && product.getGia() != null
+                    && product.getGia().containsKey(text)) {
                 radioButton.setTag(product.getPriceForSize(text));
             } else {
                 radioButton.setTag(0.0);
@@ -315,7 +324,6 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         radioButton.setTag(R.id.tag_option_name, text);
         radioGroup.addView(radioButton);
     }
-
 
     private void setupListeners() {
         btnCloseSheet.setOnClickListener(v -> dismiss());
@@ -367,7 +375,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
         textViewViewAllReviewsSheet.setOnClickListener(v -> {
             if (product != null && product.getId() != null) {
-                if (getContext() == null) return;
+                if (getContext() == null)
+                    return;
                 Intent intent = new Intent(getContext(), AllReviewsActivity.class);
                 intent.putExtra("PRODUCT_ID", product.getId());
                 startActivity(intent);
@@ -385,7 +394,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             double baseDiscountedPrice = currentSelectedSizePrice * (1 - (happyHourDiscountPercent / 100.0));
             discountedUnitPrice = baseDiscountedPrice + currentIcePrice + currentSugarPrice;
             isDiscounted = true;
-            tvHappyHourTagSheet.setText(String.format(Locale.getDefault(), "🔥 -%d %% sale giờ vàng", happyHourDiscountPercent));
+            tvHappyHourTagSheet
+                    .setText(String.format(Locale.getDefault(), "🔥 -%d %% sale giờ vàng", happyHourDiscountPercent));
             tvHappyHourTagSheet.setVisibility(View.VISIBLE);
 
         } else if (product.getPhanTramGiamGia() > 0) {
@@ -393,7 +403,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             discountedUnitPrice = discountedSizePrice + currentIcePrice + currentSugarPrice;
             isDiscounted = true;
 
-            tvHappyHourTagSheet.setText(String.format(Locale.getDefault(), "-%d%%", (int) product.getPhanTramGiamGia()));
+            tvHappyHourTagSheet
+                    .setText(String.format(Locale.getDefault(), "-%d%%", (int) product.getPhanTramGiamGia()));
             tvHappyHourTagSheet.setVisibility(View.VISIBLE);
 
         } else {
@@ -404,7 +415,14 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
         finalUnitPrice = discountedUnitPrice;
         double totalPrice = finalUnitPrice * quantity;
-        tvTotalPriceSheet.setText(formatPrice(totalPrice));
+
+        // Cập nhật giá lên nút Button
+        String priceText = formatPrice(totalPrice);
+        btnContinueSheet.setText("Thêm vào giỏ - " + priceText);
+
+        // Vẫn set cho TextView cũ (dù ẩn) để tránh lỗi logic nếu có chỗ khác dùng
+        tvTotalPriceSheet.setText(priceText);
+
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         if (isDiscounted) {
             double originalTotalPrice = originalUnitPrice * quantity;
@@ -414,7 +432,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             double headerOriginalPrice = currentSelectedSizePrice;
             double headerDiscountedPrice = finalUnitPrice - currentIcePrice - currentSugarPrice;
             tvOriginalPriceHeaderSheet.setText(formatter.format(headerOriginalPrice));
-            tvOriginalPriceHeaderSheet.setPaintFlags(tvOriginalPriceHeaderSheet.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            tvOriginalPriceHeaderSheet
+                    .setPaintFlags(tvOriginalPriceHeaderSheet.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             tvOriginalPriceHeaderSheet.setVisibility(View.VISIBLE);
             tvProductPriceSheet.setText(formatPrice(headerDiscountedPrice));
         } else {
@@ -460,10 +479,11 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
                 selectedSugarName,
                 note,
                 false,
-                false
-        );
-        String finalCartItemId = product.getId() + "_" + cartSize + "_" + selectedIceName + "_" + selectedSugarName + "_" + note.hashCode();
-        DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart").document(finalCartItemId);
+                false);
+        String finalCartItemId = product.getId() + "_" + cartSize + "_" + selectedIceName + "_" + selectedSugarName
+                + "_" + note.hashCode();
+        DocumentReference cartItemRef = db.collection("users").document(userId).collection("cart")
+                .document(finalCartItemId);
         db.runTransaction(transaction -> {
             DocumentSnapshot snapshot = transaction.get(cartItemRef);
             if (snapshot.exists()) {
@@ -522,35 +542,36 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     }
 
     private void fetchHappyHourInfo(String happyHourId) {
-        Log.d(TAG,"Fetching happy hour info...");
+        Log.d(TAG, "Fetching happy hour info...");
         if (happyHourId == null || happyHourId.isEmpty()) {
-            Log.d(TAG,"No Happy Hour ID for this product.");
+            Log.d(TAG, "No Happy Hour ID for this product.");
             updateTotalPrice();
             return;
         }
-        Log.d(TAG,"Happy Hour ID found: " + happyHourId);
+        Log.d(TAG, "Happy Hour ID found: " + happyHourId);
         db.collection("HappyHours").document(happyHourId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        Log.d(TAG,"Happy Hour document found.");
+                        Log.d(TAG, "Happy Hour document found.");
                         HappyHour hh = documentSnapshot.toObject(HappyHour.class);
                         if (hh != null && hh.isDangBat()) {
-                            Log.d(TAG,"Happy Hour is active (dangBat=true).");
+                            Log.d(TAG, "Happy Hour is active (dangBat=true).");
                             int currentHour = getCurrentHour();
-                            Log.d(TAG,"Current hour: " + currentHour + ", Start: " + hh.getGioBatDau() + ", End: " + hh.getGioKetThuc());
+                            Log.d(TAG, "Current hour: " + currentHour + ", Start: " + hh.getGioBatDau() + ", End: "
+                                    + hh.getGioKetThuc());
                             if (currentHour >= hh.getGioBatDau() && currentHour < hh.getGioKetThuc()) {
-                                Log.d(TAG,"Currently within Happy Hour!");
+                                Log.d(TAG, "Currently within Happy Hour!");
                                 isHappyHourActive = true;
                                 happyHourDiscountPercent = hh.getPhanTramGiamGia();
                             } else {
-                                Log.d(TAG,"Not within Happy Hour time range.");
+                                Log.d(TAG, "Not within Happy Hour time range.");
                             }
                         } else {
-                            Log.d(TAG,"Happy Hour is not active (dangBat=false or hh is null).");
+                            Log.d(TAG, "Happy Hour is not active (dangBat=false or hh is null).");
                         }
                     } else {
-                        Log.d(TAG,"Happy Hour document not found for ID: " + happyHourId);
+                        Log.d(TAG, "Happy Hour document not found for ID: " + happyHourId);
                     }
                     updateTotalPrice();
                 })
@@ -565,12 +586,14 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
     }
 
     private int dpToPx(int dp) {
-        if (getContext() == null) return dp;
+        if (getContext() == null)
+            return dp;
         return (int) (dp * getContext().getResources().getDisplayMetrics().density);
     }
 
     private void loadUserProfile() {
-        if (userId == null) return;
+        if (userId == null)
+            return;
         db.collection("users").document(userId).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 currentUserProfile = doc.toObject(User.class);
@@ -580,14 +603,16 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
 
     private void checkIfFavorite() {
         if (userId == null || product == null || product.getId() == null) {
-            if (ivFavoriteSheet != null) ivFavoriteSheet.setVisibility(View.GONE);
+            if (ivFavoriteSheet != null)
+                ivFavoriteSheet.setVisibility(View.GONE);
             return;
         }
         ivFavoriteSheet.setVisibility(View.VISIBLE);
         db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 User user = documentSnapshot.toObject(User.class);
-                if (user != null && user.getFavoriteProductIds() != null && user.getFavoriteProductIds().contains(product.getId())) {
+                if (user != null && user.getFavoriteProductIds() != null
+                        && user.getFavoriteProductIds().contains(product.getId())) {
                     isFavorite = true;
                     ivFavoriteSheet.setImageResource(R.drawable.ic_favorite_filled);
                 } else {
@@ -623,9 +648,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         }
     }
 
-
     private void populateReviewInfo() {
-        if(product != null) {
+        if (product != null) {
             ratingBarAverageSheet.setRating((float) product.getAverageRating());
             tvReviewCountSheet.setText("(" + product.getReviewCount() + " đánh giá)");
 
@@ -642,7 +666,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
             Toast.makeText(getContext(), "Vui lòng đăng nhập để đánh giá", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (getContext() == null) return;
+        if (getContext() == null)
+            return;
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_write_review, null);
@@ -670,7 +695,8 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         newReview.setProductId(product.getId());
         newReview.setUserId(userId);
         String userName = "Anonymous";
-        if (currentUserProfile != null && currentUserProfile.getName() != null && !currentUserProfile.getName().isEmpty()) {
+        if (currentUserProfile != null && currentUserProfile.getName() != null
+                && !currentUserProfile.getName().isEmpty()) {
             userName = currentUserProfile.getName();
         } else if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().getEmail() != null) {
             userName = mAuth.getCurrentUser().getEmail().split("@")[0];
@@ -704,4 +730,3 @@ public class ProductDetailBottomSheetFragment extends BottomSheetDialogFragment 
         });
     }
 }
-

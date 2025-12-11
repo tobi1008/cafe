@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,11 +39,13 @@ import java.util.Map;
 
 public class CheckoutActivity extends AppCompatActivity {
 
-    private ImageView imageViewBack;
-    private TextView tvDeliveryAddressLine1, tvDeliveryAddressLine2, tvSubtotal, tvShippingFee, tvTotalAmount, tvChangeAddress;
+    private ImageView iconLocation; // Placeholder if needed in logic, else remove
+    private ImageButton imageViewBack;
+    private TextView tvDeliveryAddressLine1, tvDeliveryAddressLine2, tvSubtotal, tvShippingFee, tvTotalAmount,
+            tvChangeAddress;
     private CheckBox checkboxPaymentCard, checkboxPaymentCash;
     private Button buttonPlaceOrder, btnApplyVoucher;
-    private EditText etVoucher;
+    private EditText etVoucher; // Ideally change to TextInputEditText but EditText is compatible parent
     private LinearLayout layoutDiscount;
     private TextView tvDiscountAmount;
 
@@ -60,6 +63,8 @@ public class CheckoutActivity extends AppCompatActivity {
     private Voucher appliedVoucher = null;
     private double discountAmount = 0;
 
+    // View Containers for Click Listeners
+    private View layoutPaymentCardContainer, layoutPaymentCashContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +86,15 @@ public class CheckoutActivity extends AppCompatActivity {
         tvDeliveryAddressLine1 = findViewById(R.id.tvDeliveryAddressLine1);
         tvDeliveryAddressLine2 = findViewById(R.id.tvDeliveryAddressLine2);
         tvChangeAddress = findViewById(R.id.tvChangeAddress);
+
+        // Find CheckBoxes
         checkboxPaymentCard = findViewById(R.id.checkboxPaymentCard);
         checkboxPaymentCash = findViewById(R.id.checkboxPaymentCash);
+
+        // Find Containers for Payment Methods
+        layoutPaymentCardContainer = findViewById(R.id.layoutPaymentCard);
+        layoutPaymentCashContainer = findViewById(R.id.layoutPaymentCash);
+
         tvSubtotal = findViewById(R.id.tvSubtotal);
         tvShippingFee = findViewById(R.id.tvShippingFee);
         tvTotalAmount = findViewById(R.id.tvTotalAmount);
@@ -103,16 +115,22 @@ public class CheckoutActivity extends AppCompatActivity {
         imageViewBack.setOnClickListener(v -> finish());
         tvChangeAddress.setOnClickListener(v -> showEditAddressDialog());
 
-        checkboxPaymentCard.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                checkboxPaymentCash.setChecked(false);
-            }
-        });
-        checkboxPaymentCash.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                checkboxPaymentCard.setChecked(false);
-            }
-        });
+        // Payment Method Logic: Handle clicks on both CheckBox and Container
+        View.OnClickListener cardClickListener = v -> {
+            checkboxPaymentCard.setChecked(true);
+            checkboxPaymentCash.setChecked(false);
+        };
+
+        View.OnClickListener cashClickListener = v -> {
+            checkboxPaymentCash.setChecked(true);
+            checkboxPaymentCard.setChecked(false);
+        };
+
+        checkboxPaymentCard.setOnClickListener(cardClickListener);
+        layoutPaymentCardContainer.setOnClickListener(cardClickListener);
+
+        checkboxPaymentCash.setOnClickListener(cashClickListener);
+        layoutPaymentCashContainer.setOnClickListener(cashClickListener);
 
         tvSelectUserVoucher.setOnClickListener(v -> showVoucherSelectionDialog());
 
@@ -126,7 +144,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng chọn hình thức thanh toán", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if(tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
+            if (tvDeliveryAddressLine1.getText().toString().equals("Chưa có địa chỉ")) {
                 Toast.makeText(this, "Vui lòng thêm địa chỉ giao hàng", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -158,7 +176,6 @@ public class CheckoutActivity extends AppCompatActivity {
             }
         });
 
-
         builder.setPositiveButton("Lưu", (dialog, which) -> {
             String newName = etNewName.getText().toString().trim();
             String newPhone = etNewPhone.getText().toString().trim();
@@ -176,8 +193,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 db.collection("users").document(userId).update(
                         "name", newName,
                         "phone", newPhone,
-                        "address", newAddress
-                );
+                        "address", newAddress);
             }
             dialog.dismiss();
         });
@@ -205,17 +221,18 @@ public class CheckoutActivity extends AppCompatActivity {
     }
 
     private void loadCartData() {
-        db.collection("users").document(userId).collection("cart").get().addOnSuccessListener(queryDocumentSnapshots -> {
-            cartItems.clear();
-            subtotal = 0;
-            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                CartItem item = doc.toObject(CartItem.class);
-                cartItems.add(item);
-                subtotal += item.getTotalItemPrice();
-            }
-            calculateDiscount();
-            updateSummary();
-        });
+        db.collection("users").document(userId).collection("cart").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    cartItems.clear();
+                    subtotal = 0;
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        CartItem item = doc.toObject(CartItem.class);
+                        cartItems.add(item);
+                        subtotal += item.getTotalItemPrice();
+                    }
+                    calculateDiscount();
+                    updateSummary();
+                });
     }
 
     private void loadUserVouchers() {
@@ -233,7 +250,8 @@ public class CheckoutActivity extends AppCompatActivity {
                         }
                     }
                     Log.d(TAG, "Đã tải " + availableVouchers.size() + " voucher hợp lệ.");
-                    tvSelectUserVoucher.setText("Kho voucher của bạn (" + availableVouchers.size() + ") (Nhấn để chọn)");
+                    tvSelectUserVoucher
+                            .setText("Kho voucher của bạn (" + availableVouchers.size() + ") (Nhấn để chọn)");
                 })
                 .addOnFailureListener(e -> {
                     Log.w(TAG, "Lỗi khi tải userVouchers", e);
@@ -304,7 +322,8 @@ public class CheckoutActivity extends AppCompatActivity {
                         DocumentSnapshot userVoucherDoc = queryDocumentSnapshots.getDocuments().get(0);
                         Voucher userVoucher = userVoucherDoc.toObject(Voucher.class);
 
-                        if (userVoucher != null && userVoucher.getExpiryDate() != null && userVoucher.getExpiryDate().after(new Date())) {
+                        if (userVoucher != null && userVoucher.getExpiryDate() != null
+                                && userVoucher.getExpiryDate().after(new Date())) {
                             appliedVoucher = userVoucher;
                             appliedUserVoucherId = userVoucherDoc.getId();
                             calculateDiscount();
@@ -330,13 +349,12 @@ public class CheckoutActivity extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         Voucher voucher = documentSnapshot.toObject(Voucher.class);
-                        if (voucher != null && voucher.getExpiryDate() != null && voucher.getExpiryDate().after(new Date())) {
-                            appliedVoucher = voucher;
-                            appliedUserVoucherId = null;
-                            calculateDiscount();
-                            updateSummary();
-                            Toast.makeText(this, "Áp dụng voucher thành công!", Toast.LENGTH_SHORT).show();
-                            etVoucher.setError(null);
+                        if (voucher != null && voucher.getExpiryDate() != null
+                                && voucher.getExpiryDate().after(new Date())) {
+
+                            // *** KIỂM TRA HẠNG THÀNH VIÊN ***
+                            checkTierEligibility(voucher);
+
                         } else {
                             Toast.makeText(this, "Voucher đã hết hạn hoặc không hợp lệ.", Toast.LENGTH_SHORT).show();
                             resetVoucher();
@@ -349,6 +367,55 @@ public class CheckoutActivity extends AppCompatActivity {
                     Toast.makeText(this, "Lỗi khi kiểm tra voucher: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     resetVoucher();
                 });
+    }
+
+    private void checkTierEligibility(Voucher voucher) {
+        db.collection("users").document(userId).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                User user = documentSnapshot.toObject(User.class);
+                if (user != null) {
+                    String userTier = user.getMemberTier();
+                    String minTier = voucher.getMinTier();
+
+                    if (minTier == null || minTier.isEmpty())
+                        minTier = "Thành viên";
+                    if (userTier == null || userTier.isEmpty())
+                        userTier = "Thành viên";
+
+                    if (getTierLevel(userTier) >= getTierLevel(minTier)) {
+                        appliedVoucher = voucher;
+                        appliedUserVoucherId = null;
+                        calculateDiscount();
+                        updateSummary();
+                        Toast.makeText(this, "Áp dụng voucher thành công!", Toast.LENGTH_SHORT).show();
+                        etVoucher.setError(null);
+                    } else {
+                        Toast.makeText(this, "Bạn chưa đủ hạng thành viên (" + minTier + ") để dùng voucher này.",
+                                Toast.LENGTH_LONG).show();
+                        resetVoucher();
+                    }
+                }
+            }
+        });
+    }
+
+    private int getTierLevel(String tier) {
+        switch (tier) {
+            case "Thành viên":
+                return 1;
+            case "Đồng":
+                return 2;
+            case "Bạc":
+                return 3;
+            case "Vàng":
+                return 4;
+            case "Platinum":
+                return 5;
+            case "Kim Cương":
+                return 6;
+            default:
+                return 0;
+        }
     }
 
     private void resetVoucher() {
@@ -384,7 +451,8 @@ public class CheckoutActivity extends AppCompatActivity {
             layoutDiscount.setVisibility(View.GONE);
         }
         double finalTotal = subtotal + shippingFee - discountAmount;
-        if (finalTotal < 0) finalTotal = 0;
+        if (finalTotal < 0)
+            finalTotal = 0;
         tvTotalAmount.setText(formatter.format(finalTotal));
     }
 
@@ -433,7 +501,8 @@ public class CheckoutActivity extends AppCompatActivity {
         db.collection("users").document(userId).collection("userVouchers")
                 .document(userVoucherDocId)
                 .update("used", true)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Đã đánh dấu voucher " + userVoucherDocId + " là đã sử dụng."))
+                .addOnSuccessListener(
+                        aVoid -> Log.d(TAG, "Đã đánh dấu voucher " + userVoucherDocId + " là đã sử dụng."))
                 .addOnFailureListener(e -> Log.w(TAG, "Lỗi khi đánh dấu voucher " + userVoucherDocId, e));
     }
 
@@ -451,4 +520,3 @@ public class CheckoutActivity extends AppCompatActivity {
                 });
     }
 }
-

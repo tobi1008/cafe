@@ -27,7 +27,8 @@ public class AdminActivity extends AppCompatActivity {
     private List<String> categoryNamesAdmin = new ArrayList<>();
 
     // Thêm nút mới
-    private MaterialButton btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers, btnManageHappyHour, btnManageCategories;
+    private MaterialButton btnAddProduct, btnManageProducts, btnManageOrders, btnManageVouchers, btnManageHappyHour,
+            btnManageCategories;
     private MaterialButton btnManageMembership, btnManageUsers; // NÚT MỚI
 
     private FirebaseFirestore db;
@@ -60,17 +61,22 @@ public class AdminActivity extends AppCompatActivity {
         btnManageMembership = findViewById(R.id.buttonManageMembership);
         btnManageUsers = findViewById(R.id.buttonManageUsers);
 
-        categoryAdapterAdmin = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, categoryNamesAdmin);
+        categoryAdapterAdmin = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item,
+                categoryNamesAdmin);
         spinnerCategoryAdmin.setAdapter(categoryAdapterAdmin);
 
         loadCategoriesAdmin();
 
         // Gán sự kiện click cho các nút
         btnAddProduct.setOnClickListener(v -> addProduct());
-        btnManageProducts.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class)));
-        btnManageOrders.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageOrdersActivity.class)));
-        btnManageVouchers.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageVouchersActivity.class)));
-        btnManageHappyHour.setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageHappyHourActivity.class)));
+        btnManageProducts
+                .setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageProductsActivity.class)));
+        btnManageOrders
+                .setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageOrdersActivity.class)));
+        btnManageVouchers
+                .setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageVouchersActivity.class)));
+        btnManageHappyHour
+                .setOnClickListener(v -> startActivity(new Intent(AdminActivity.this, ManageHappyHourActivity.class)));
         btnManageCategories.setOnClickListener(v -> {
             Log.d(TAG, "Nút Quản lý Danh mục đã được bấm!");
             startActivity(new Intent(AdminActivity.this, ManageCategoriesActivity.class));
@@ -83,6 +89,9 @@ public class AdminActivity extends AppCompatActivity {
         btnManageUsers.setOnClickListener(v -> {
             startActivity(new Intent(AdminActivity.this, ManageUsersActivity.class));
         });
+
+        // NÚT QUAY LẠI
+        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
     }
 
     // (Giữ nguyên hàm loadCategoriesAdmin())
@@ -107,8 +116,9 @@ public class AdminActivity extends AppCompatActivity {
                     }
                     categoryAdapterAdmin.notifyDataSetChanged();
                     Log.d(TAG, "Đã tải " + categoryNamesAdmin.size() + " categories vào Admin Spinner.");
-                    if(categoryNamesAdmin.isEmpty()){
-                        Toast.makeText(this, "Chưa có danh mục nào. Vui lòng vào 'Quản lý Danh mục' để thêm.", Toast.LENGTH_LONG).show();
+                    if (categoryNamesAdmin.isEmpty()) {
+                        Toast.makeText(this, "Chưa có danh mục nào. Vui lòng vào 'Quản lý Danh mục' để thêm.",
+                                Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -137,9 +147,11 @@ public class AdminActivity extends AppCompatActivity {
 
         Map<String, Double> gia = new HashMap<>();
         try {
-            if (!priceSStr.isEmpty()) gia.put("S", Double.parseDouble(priceSStr));
+            if (!priceSStr.isEmpty())
+                gia.put("S", Double.parseDouble(priceSStr));
             gia.put("M", Double.parseDouble(priceMStr));
-            if (!priceLStr.isEmpty()) gia.put("L", Double.parseDouble(priceLStr));
+            if (!priceLStr.isEmpty())
+                gia.put("L", Double.parseDouble(priceLStr));
         } catch (NumberFormatException e) {
             Toast.makeText(this, "Giá tiền không hợp lệ", Toast.LENGTH_SHORT).show();
             return;
@@ -167,7 +179,8 @@ public class AdminActivity extends AppCompatActivity {
                     String docId = documentReference.getId();
                     documentReference.update("id", docId)
                             .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công!", Toast.LENGTH_SHORT)
+                                        .show();
                                 etName.setText("");
                                 etPriceS.setText("");
                                 etPriceM.setText("");
@@ -180,7 +193,8 @@ public class AdminActivity extends AppCompatActivity {
                             })
                             .addOnFailureListener(e -> {
                                 Log.e("AdminActivity", "Lỗi khi cập nhật ID cho sản phẩm mới", e);
-                                Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công (Lỗi cập nhật ID)", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AdminActivity.this, "Thêm sản phẩm thành công (Lỗi cập nhật ID)",
+                                        Toast.LENGTH_SHORT).show();
                             });
                 })
                 .addOnFailureListener(e -> {

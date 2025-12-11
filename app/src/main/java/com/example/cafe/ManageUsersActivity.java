@@ -68,10 +68,11 @@ public class ManageUsersActivity extends AppCompatActivity implements UserAdapte
         db.collection("Settings").document("Membership").get()
                 .addOnSuccessListener(settingsDoc -> {
                     if (settingsDoc.exists()) {
-                        TIER_SILVER_START = settingsDoc.contains("silverThreshold") ?
-                                settingsDoc.getLong("silverThreshold") : 1000000;
-                        TIER_GOLD_START = settingsDoc.contains("goldThreshold") ?
-                                settingsDoc.getLong("goldThreshold") : 4000000;
+                        TIER_SILVER_START = settingsDoc.contains("silverThreshold")
+                                ? settingsDoc.getLong("silverThreshold")
+                                : 1000000;
+                        TIER_GOLD_START = settingsDoc.contains("goldThreshold") ? settingsDoc.getLong("goldThreshold")
+                                : 4000000;
                         Log.d(TAG, "Tải mốc cài đặt: Bạc=" + TIER_SILVER_START + ", Vàng=" + TIER_GOLD_START);
                     }
                     loadUsers();
@@ -81,7 +82,6 @@ public class ManageUsersActivity extends AppCompatActivity implements UserAdapte
                     loadUsers();
                 });
     }
-
 
     private void loadUsers() {
         db.collection("users")
@@ -128,7 +128,7 @@ public class ManageUsersActivity extends AppCompatActivity implements UserAdapte
         showEditUserDialog(user);
     }
 
-    //  Xử lý click Xóa
+    // Xử lý click Xóa
     @Override
     public void onDeleteClick(User user) {
         showDeleteConfirmationDialog(user);
@@ -137,18 +137,51 @@ public class ManageUsersActivity extends AppCompatActivity implements UserAdapte
     private void showDeleteConfirmationDialog(User user) {
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận Xóa")
-                .setMessage("Bạn có chắc muốn xóa user '" + user.getEmail() + "'?\n(Lưu ý: Hành động này chỉ xóa dữ liệu trên Firestore, không xóa tài khoản Authentication. User có thể đăng nhập lại và tạo dữ liệu mới.)")
+                .setMessage("Bạn có chắc muốn xóa user '" + user.getEmail()
+                        + "'?\n\nHệ thống sẽ xóa:\n- Thông tin hồ sơ (Database)\n- Lịch sử đơn hàng (Database)\n\nLƯU Ý: Tài khoản đăng nhập (Email) KHÔNG thể xóa từ đây do chính sách bảo mật của Google. User vẫn có thể đăng nhập lại.")
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     if (user.getUid() == null || user.getUid().isEmpty()) {
                         Toast.makeText(this, "Lỗi: Không tìm thấy User ID", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    db.collection("users").document(user.getUid()).delete()
-                            .addOnSuccessListener(aVoid -> Toast.makeText(this, "Đã xóa user", Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e -> Toast.makeText(this, "Xóa thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    deleteUserAndRelatedData(user.getUid());
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+
+    private void deleteUserAndRelatedData(String userId) {
+        // 1. Tìm và xóa tất cả đơn hàng của user trước
+        db.collection("orders")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    // Dùng Batch để xóa nhiều file một lúc cho nhanh và an toàn
+                    com.google.firebase.firestore.WriteBatch batch = db.batch();
+
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        batch.delete(doc.getReference());
+                    }
+
+                    // Thêm lệnh xóa User vào batch luôn
+                    batch.delete(db.collection("users").document(userId));
+
+                    // Thực thi
+                    batch.commit()
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Đã xóa sạch dữ liệu User và Đơn hàng!", Toast.LENGTH_SHORT)
+                                        .show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Lỗi khi xóa dữ liệu: " + e.getMessage(), Toast.LENGTH_SHORT)
+                                        .show();
+                                Log.e(TAG, "Delete failed", e);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Lỗi khi tìm đơn hàng của user.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Find orders failed", e);
+                });
     }
 
     private void showEditUserDialog(User user) {

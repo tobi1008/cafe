@@ -52,6 +52,9 @@ public class ManageProductsActivity extends AppCompatActivity {
         });
 
         recyclerView.setAdapter(adapter);
+
+        // NÚT QUAY LẠI
+        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
     }
 
     // Tải lại dữ liệu mỗi khi quay lại màn hình này
@@ -63,7 +66,7 @@ public class ManageProductsActivity extends AppCompatActivity {
 
     private void fetchProducts() {
         db.collection("cafe")
-                // ***  SẮP XẾP Theo "ten" (tên), thứ tự Tăng dần (A-Z) ***
+                // *** SẮP XẾP Theo "ten" (tên), thứ tự Tăng dần (A-Z) ***
                 .orderBy("ten", Query.Direction.ASCENDING)
                 .get()
                 .addOnCompleteListener(task -> {

@@ -2,19 +2,19 @@ package com.example.cafe;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, phoneEditText;
-    private Button signupButton;
+    private TextInputEditText emailEditText, passwordEditText, confirmPasswordEditText, nameEditText, phoneEditText;
+    private MaterialButton signupButton;
     private TextView loginTextView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -36,14 +36,19 @@ public class SignupActivity extends AppCompatActivity {
         loginTextView = findViewById(R.id.textViewLogin);
 
         signupButton.setOnClickListener(v -> {
-            String name = nameEditText.getText().toString().trim();
-            String phone = phoneEditText.getText().toString().trim();
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
-            String confirmPassword = confirmPasswordEditText.getText().toString().trim();
+            // Sử dụng getText() chắc chắn không null với TextInputEditText nhưng cần kiểm
+            // tra cẩn thận
+            String name = nameEditText.getText() != null ? nameEditText.getText().toString().trim() : "";
+            String phone = phoneEditText.getText() != null ? phoneEditText.getText().toString().trim() : "";
+            String email = emailEditText.getText() != null ? emailEditText.getText().toString().trim() : "";
+            String password = passwordEditText.getText() != null ? passwordEditText.getText().toString().trim() : "";
+            String confirmPassword = confirmPasswordEditText.getText() != null
+                    ? confirmPasswordEditText.getText().toString().trim()
+                    : "";
 
             // CẬP NHẬT KIỂM TRA VALIDATION
-            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || name.isEmpty() || phone.isEmpty()) {
+            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || name.isEmpty()
+                    || phone.isEmpty()) {
                 Toast.makeText(SignupActivity.this, "Vui lòng điền đầy đủ thông tin.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -62,22 +67,30 @@ public class SignupActivity extends AppCompatActivity {
                                 User newUser = new User(firebaseUser.getEmail(), name, phone);
 
                                 newUser.setRole("user");
-                                newUser.setMemberTier("Đồng");
+                                newUser.setMemberTier("Thành viên");
                                 newUser.setTotalSpending(0);
 
                                 db.collection("users").document(firebaseUser.getUid()).set(newUser)
                                         .addOnSuccessListener(aVoid -> {
                                             // Chỉ chuyển màn hình sau khi lưu Firestore thành công
-                                            Toast.makeText(SignupActivity.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(SignupActivity.this, "Đăng ký thành công!",
+                                                    Toast.LENGTH_SHORT).show();
                                             startActivity(new Intent(SignupActivity.this, LoginActivity.class));
                                             finish();
                                         })
                                         .addOnFailureListener(e -> {
-                                            Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                            Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + e.getMessage(),
+                                                    Toast.LENGTH_LONG).show();
                                         });
                             }
                         } else {
-                            Toast.makeText(SignupActivity.this, "Đăng ký thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            if (task.getException() != null) {
+                                Toast.makeText(SignupActivity.this,
+                                        "Đăng ký thất bại: " + task.getException().getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(SignupActivity.this, "Đăng ký thất bại.", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
         });

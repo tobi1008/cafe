@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="membership_tiers_array">
+        <item>Tất cả</item>
+        <item>Thành viên</item>
+        <item>Đồng</item>
+        <item>Bạc</item>
+        <item>Vàng</item>
+        <item>Platinum</item>
+        <item>Kim Cương</item>
+    </string-array>
+</resources>

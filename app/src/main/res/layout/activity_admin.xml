@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#F5F5F5">
+    android:background="@color/admin_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,21 +14,38 @@
         android:padding="16dp"
         tools:context=".AdminActivity">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Bảng Điều Khiển Admin"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:textColor="?android:attr/textColorPrimary"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_marginBottom="24dp">
+
+            <ImageButton
+                android:id="@+id/buttonBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/colorPrimaryVariant"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:contentDescription="Quay lại"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bảng Điều Khiển Admin"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
 
         <!-- === Khối Thêm Sản Phẩm === -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface_color"
             app:cardElevation="4dp"
             android:layout_marginBottom="24dp">
 
@@ -44,6 +61,7 @@
                     android:text="Thêm Sản Phẩm Mới"
                     android:textSize="20sp"
                     android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:layout_marginBottom="16dp"/>
 
                 <!-- form thêm sản phẩm -->
@@ -168,6 +186,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Thêm vào Menu"
+                    app:backgroundTint="@color/colorPrimary"
                     app:icon="@drawable/ic_add"
                     app:iconGravity="textStart"
                     android:paddingTop="12dp"
@@ -180,6 +199,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
+            app:cardBackgroundColor="@color/surface_color"
             app:cardElevation="4dp">
 
             <LinearLayout
@@ -194,10 +214,14 @@
                     android:text="Chức Năng Quản Lý"
                     android:textSize="20sp"
                     android:textStyle="bold"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:layout_marginBottom="16dp"/>
 
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageProducts"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -208,6 +232,9 @@
                     android:textAlignment="textStart"/>
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageCategories"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -218,6 +245,9 @@
                     android:layout_marginBottom="8dp"/>
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageHappyHour"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -228,6 +258,9 @@
                     android:textAlignment="textStart"/>
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageOrders"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -238,6 +271,9 @@
                     android:textAlignment="textStart"/>
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageVouchers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -248,6 +284,9 @@
                     android:textAlignment="textStart"/>
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageMembership"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -260,6 +299,9 @@
                 <!-- NÚT MỚI ĐƯỢC THÊM VÀO -->
                 <com.google.android.material.button.MaterialButton
                     style="@style/Widget.Material3.Button.TonalButton"
+                    app:backgroundTint="@color/button_tonal_bg"
+                    android:textColor="@color/button_tonal_text"
+                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageUsers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

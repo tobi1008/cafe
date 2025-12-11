@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F7F7F7"
+    android:background="@color/admin_background"
     tools:context=".ProfileActivity">
 
     <!-- Thanh tiêu đề -->
@@ -14,7 +14,7 @@
         android:layout_height="?attr/actionBarSize"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:background="@android:color/white"
+        android:background="#FFFFFF"
         android:elevation="4dp">
         <TextView
             android:layout_width="wrap_content"
@@ -22,7 +22,7 @@
             android:text="Thông tin cá nhân"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/colorPrimaryVariant"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
 
@@ -66,13 +66,13 @@
                 tools:text="Admin Tebi"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/black"/>
+                android:textColor="@color/colorPrimaryVariant"/>
             <TextView
                 android:id="@+id/textViewUserEmailPhone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="admin@quyenlt.com"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/colorSecondary"
                 android:textSize="14sp"/>
         </LinearLayout>
 
@@ -98,7 +98,7 @@
         android:layout_marginEnd="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
-        app:cardBackgroundColor="@android:color/white">
+        app:cardBackgroundColor="@color/surface_color">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -111,6 +111,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Hạng thành viên"
+                android:textColor="@color/colorPrimaryVariant"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tvMemberTier"
@@ -138,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textSize="12sp"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/colorSecondary"
                 tools:text="Chi tiêu: 300.000đ / 1.000.000đ"
                 android:layout_marginBottom="12dp"/>
 
@@ -148,6 +149,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Số điện thoại"
+                android:textColor="@color/colorPrimaryVariant"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tvUserPhone"
@@ -155,7 +157,7 @@
                 android:layout_height="wrap_content"
                 tools:text="0987654321"
                 android:textSize="16sp"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="@color/colorSecondary"
                 android:layout_marginBottom="12dp"/>
 
             <!-- Địa chỉ -->
@@ -163,6 +165,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Địa chỉ giao hàng"
+                android:textColor="@color/colorPrimaryVariant"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/tvUserAddress"
@@ -170,7 +173,7 @@
                 android:layout_height="wrap_content"
                 tools:text="123 Đường ABC, Phường X, Quận Y, TP. Z"
                 android:textSize="16sp"
-                android:textColor="?android:attr/textColorSecondary"/>
+                android:textColor="@color/colorSecondary"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -184,7 +187,7 @@
         android:layout_marginTop="16dp"
         app:cardCornerRadius="12dp"
         app:cardElevation="2dp"
-        app:cardBackgroundColor="@android:color/white">
+        app:cardBackgroundColor="@color/surface_color">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -214,7 +217,7 @@
                     android:layout_toEndOf="@id/iconFavorites"
                     android:layout_marginStart="16dp"
                     android:layout_centerVertical="true"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:textSize="16sp"/>
                 <ImageView
                     android:layout_width="24dp"
@@ -247,7 +250,7 @@
                     android:layout_toEndOf="@id/iconOrderHistory"
                     android:layout_marginStart="16dp"
                     android:layout_centerVertical="true"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:textSize="16sp"/>
                 <ImageView
                     android:layout_width="24dp"
@@ -282,7 +285,7 @@
                     android:layout_toEndOf="@id/iconAdminPanel"
                     android:layout_marginStart="16dp"
                     android:layout_centerVertical="true"
-                    android:textColor="@android:color/black"
+                    android:textColor="@color/colorPrimaryVariant"
                     android:textSize="16sp"/>
                 <ImageView
                     android:layout_width="24dp"

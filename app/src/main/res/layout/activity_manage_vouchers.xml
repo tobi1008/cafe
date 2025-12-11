@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ManageVouchersActivity">
@@ -8,96 +8,202 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Custom Header with Back Button -->
+        <RelativeLayout
+            android:id="@+id/headerLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Quản lý Voucher"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@color/admin_background">
 
-        <!-- Form tạo voucher -->
-        <EditText
-            android:id="@+id/editTextVoucherCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Mã Voucher (ví dụ: GIAM10)"
-            android:textAllCaps="true"/>
-        <EditText
-            android:id="@+id/editTextVoucherDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Mô tả"/>
-        <RadioGroup
-            android:id="@+id/radioGroupDiscountType"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/radioPercent"
+            <ImageButton
+                android:id="@+id/buttonBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/colorPrimaryVariant"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:contentDescription="Quay lại"/>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giảm theo %"
-                android:checked="true"/>
-            <RadioButton
-                android:id="@+id/radioFixedAmount"
+                android:text="Quản lý Voucher"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryVariant"
+                android:layout_centerInParent="true"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/admin_background">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/surface_color">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tạo Voucher Mới"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorPrimaryVariant"
+                        android:layout_marginBottom="16dp"/>
+
+                    <!-- Form tạo voucher -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp"
+                        android:hint="Mã Voucher">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextVoucherCode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapCharacters"
+                            android:textAllCaps="true"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp"
+                        android:hint="Mô tả">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextVoucherDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Loại giảm giá"
+                        android:textColor="@color/colorSecondaryVariant"
+                        android:layout_marginTop="8dp"/>
+
+                    <RadioGroup
+                        android:id="@+id/radioGroupDiscountType"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <RadioButton
+                            android:id="@+id/radioPercent"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Giảm %"
+                            android:checked="true"
+                            android:buttonTint="@color/colorPrimary"/>
+                        <RadioButton
+                            android:id="@+id/radioFixedAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="Giảm tiền"
+                            android:buttonTint="@color/colorPrimary"/>
+                    </RadioGroup>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_marginBottom="8dp"
+                        android:hint="Giá trị giảm">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/editTextDiscountValue"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Chọn hạng thành viên tối thiểu -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Hạng thành viên tối thiểu"
+                        android:textColor="@color/colorSecondaryVariant"
+                        android:layout_marginTop="8dp"/>
+
+                    <Spinner
+                        android:id="@+id/spinnerMinTier"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:entries="@array/membership_tiers_array"
+                        android:minHeight="48dp" />
+
+                    <!--  TRƯỜNG CHỌN NGÀY  -->
+                    <TextView
+                        android:id="@+id/tvSelectExpiryDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Chọn ngày hết hạn"
+                        android:text="Chọn ngày hết hạn"
+                        android:textSize="16sp"
+                        android:padding="16dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/category_unselected_background"
+                        android:drawableEnd="@drawable/ic_edit"
+                        android:drawableTint="@color/colorPrimary"
+                        android:gravity="center_vertical"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonAddVoucher"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tạo Voucher"
+                        android:layout_marginTop="24dp"
+                        app:cornerRadius="24dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giảm tiền cố định"/>
-        </RadioGroup>
-        <EditText
-            android:id="@+id/editTextDiscountValue"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Giá trị (ví dụ: 10 hoặc 20000)"
-            android:inputType="numberDecimal"/>
+                android:text="Danh sách Voucher"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorPrimaryVariant"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"/>
 
-        <!--  TRƯỜNG CHỌN NGÀY  -->
-        <TextView
-            android:id="@+id/tvSelectExpiryDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Chọn ngày hết hạn"
-            android:textSize="18sp"
-            android:padding="12dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:drawableEnd="@android:drawable/ic_menu_my_calendar"
-            android:drawablePadding="12dp"
-            android:gravity="center_vertical"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewVouchers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"/>
 
-        <Button
-            android:id="@+id/buttonAddVoucher"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tạo Voucher"
-            android:layout_gravity="end"
-            android:layout_marginTop="16dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"/>
-
-        <!--  RecyclerView -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Danh sách Voucher hiện có"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewVouchers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"/>
-
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

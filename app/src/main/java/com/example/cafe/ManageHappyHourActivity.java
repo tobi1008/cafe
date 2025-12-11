@@ -22,7 +22,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,11 +41,10 @@ public class ManageHappyHourActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // Toolbar
-        Toolbar toolbar = findViewById(R.id.toolbarManageHappyHour);
-        setSupportActionBar(toolbar);
-        // Bỏ dòng này nếu bạn không muốn nút back
-        // getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        // toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        // Back Button Logic
+        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
+
+        // Toolbar code removed as we use custom header now
 
         // RecyclerView
         recyclerView = findViewById(R.id.recyclerViewHappyHours);
@@ -58,7 +56,8 @@ public class ManageHappyHourActivity extends AppCompatActivity {
             public void onEditClick(HappyHour happyHour) {
                 // *** KIỂM TRA ID TRƯỚC KHI SỬA ***
                 if (happyHour == null || happyHour.getId() == null || happyHour.getId().isEmpty()) {
-                    Toast.makeText(ManageHappyHourActivity.this, "Lỗi: Không tìm thấy ID để sửa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManageHappyHourActivity.this, "Lỗi: Không tìm thấy ID để sửa", Toast.LENGTH_SHORT)
+                            .show();
                     Log.e(TAG, "onEditClick: HappyHour ID is null or empty");
                     return;
                 }
@@ -69,7 +68,8 @@ public class ManageHappyHourActivity extends AppCompatActivity {
             public void onDeleteClick(HappyHour happyHour) {
                 // *** KIỂM TRA ID TRƯỚC KHI XOÁ ***
                 if (happyHour == null || happyHour.getId() == null || happyHour.getId().isEmpty()) {
-                    Toast.makeText(ManageHappyHourActivity.this, "Lỗi: Không tìm thấy ID để xóa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManageHappyHourActivity.this, "Lỗi: Không tìm thấy ID để xóa", Toast.LENGTH_SHORT)
+                            .show();
                     Log.e(TAG, "onDeleteClick: HappyHour ID is null or empty");
                     return;
                 }
@@ -116,7 +116,6 @@ public class ManageHappyHourActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     private void deleteHappyHour(HappyHour happyHour) {
         // Hỏi xác nhận trước khi xóa
@@ -175,7 +174,8 @@ public class ManageHappyHourActivity extends AppCompatActivity {
             String endStr = etEndHour.getText().toString().trim();
             String discountStr = etDiscount.getText().toString().trim();
 
-            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(startStr) || TextUtils.isEmpty(endStr) || TextUtils.isEmpty(discountStr)) {
+            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(startStr) || TextUtils.isEmpty(endStr)
+                    || TextUtils.isEmpty(discountStr)) {
                 Toast.makeText(this, "Vui lòng nhập đủ thông tin", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -187,7 +187,8 @@ public class ManageHappyHourActivity extends AppCompatActivity {
                 end = Integer.parseInt(endStr);
                 discount = Integer.parseInt(discountStr);
                 if (start < 0 || start > 23 || end < 0 || end > 23 || start >= end || discount < 0 || discount > 100) {
-                    Toast.makeText(this, "Giờ (0-23), Giảm giá (0-100) không hợp lệ hoặc Giờ bắt đầu >= Giờ kết thúc", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Giờ (0-23), Giảm giá (0-100) không hợp lệ hoặc Giờ bắt đầu >= Giờ kết thúc",
+                            Toast.LENGTH_LONG).show();
                     return;
                 }
             } catch (NumberFormatException e) {
@@ -234,4 +235,3 @@ public class ManageHappyHourActivity extends AppCompatActivity {
         dialog.show();
     }
 }
-

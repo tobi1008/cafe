@@ -29,6 +29,7 @@ public class ManageVouchersActivity extends AppCompatActivity {
     private EditText etCode, etDescription, etValue;
     private RadioGroup rgType;
     private Button btnAddVoucher;
+    private android.widget.Spinner spinnerMinTier; // *** ADD THIS ***
     private RecyclerView recyclerViewVouchers;
     private VoucherAdapter adapter;
     private List<Voucher> voucherList = new ArrayList<>();
@@ -50,10 +51,14 @@ public class ManageVouchersActivity extends AppCompatActivity {
         etDescription = findViewById(R.id.editTextVoucherDescription);
         etValue = findViewById(R.id.editTextDiscountValue);
         rgType = findViewById(R.id.radioGroupDiscountType);
+        spinnerMinTier = findViewById(R.id.spinnerMinTier); // *** ADD THIS ***
         btnAddVoucher = findViewById(R.id.buttonAddVoucher);
         recyclerViewVouchers = findViewById(R.id.recyclerViewVouchers);
 
-        // *** ÁNH XẠ  VÀ SET CLICK LISTENER *
+        // Header Back Button
+        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
+
+        // *** ÁNH XẠ VÀ SET CLICK LISTENER *
         tvSelectExpiryDate = findViewById(R.id.tvSelectExpiryDate);
         tvSelectExpiryDate.setOnClickListener(v -> showDatePickerDialog());
 
@@ -124,7 +129,8 @@ public class ManageVouchersActivity extends AppCompatActivity {
 
         // *** KIỂM TRA NGÀY HẾT HẠN ***
         // Kiểm tra xem đã chọn ngày chưa)
-        if (tvSelectExpiryDate.getText().toString().equals("Chọn ngày hết hạn") || tvSelectExpiryDate.getText().toString().isEmpty()) {
+        if (tvSelectExpiryDate.getText().toString().equals("Chọn ngày hết hạn")
+                || tvSelectExpiryDate.getText().toString().isEmpty()) {
             Toast.makeText(this, "Vui lòng chọn ngày hết hạn", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -146,6 +152,13 @@ public class ManageVouchersActivity extends AppCompatActivity {
             voucher.setDiscountType("FIXED_AMOUNT");
         }
 
+        // *** SET MIN TIER ***
+        String selectedTier = spinnerMinTier.getSelectedItem().toString();
+        if (selectedTier.equals("Tất cả")) {
+            voucher.setMinTier("Thành viên"); // Mặc định là thấp nhất
+        } else {
+            voucher.setMinTier(selectedTier);
+        }
 
         voucher.setExpiryDate(selectedCalendar.getTime());
 

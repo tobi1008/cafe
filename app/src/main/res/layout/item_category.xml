@@ -9,6 +9,6 @@
     android:paddingBottom="8dp"
     android:layout_margin="4dp"
     android:text="Category"
-    android:textColor="@color/colorPrimary"
+    android:textColor="@color/category_text_selector"
     android:background="@drawable/category_unselected_background"
     android:textStyle="bold" />

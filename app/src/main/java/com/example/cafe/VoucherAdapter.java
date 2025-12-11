@@ -57,7 +57,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView code, description, expiryDate;
-        Button deleteButton;
+        android.widget.ImageButton deleteButton; // Changed from Button to ImageButton
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -68,4 +68,3 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
         }
     }
 }
-
