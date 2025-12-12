@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.LinearLayout; // Add import if missing or ensure it's there
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -22,7 +23,7 @@ import java.util.Locale;
 public class ProfileActivity extends AppCompatActivity {
 
     private TextView tvUserName, tvUserEmailPhone, tvUserPhone, tvUserAddress, tvMemberTier;
-    private RelativeLayout layoutFavorites, layoutOrderHistory, layoutAdminPanel, layoutLogout;
+    private LinearLayout layoutFavorites, layoutOrderHistory, layoutAdminPanel, layoutLogout; // Changed to LinearLayout
     private ImageView imageViewAvatar;
     private ImageButton btnEditProfile;
 

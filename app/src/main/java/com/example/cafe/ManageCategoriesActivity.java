@@ -41,7 +41,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     // Danh sách tên HappyHour (để hiển thị trên Spinner)
     private List<String> happyHourNamesForSpinner = new ArrayList<>();
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +58,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             @Override
             public void onEditClick(Category category) {
                 if (category == null || category.getId() == null || category.getId().isEmpty()) {
-                    Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để sửa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để sửa", Toast.LENGTH_SHORT)
+                            .show();
                     Log.e(TAG, "onEditCategoryClick: Category ID is null or empty");
                     return;
                 }
@@ -69,7 +69,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             @Override
             public void onDeleteClick(Category category) {
                 if (category == null || category.getId() == null || category.getId().isEmpty()) {
-                    Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để xóa", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ManageCategoriesActivity.this, "Lỗi: Không tìm thấy ID để xóa", Toast.LENGTH_SHORT)
+                            .show();
                     Log.e(TAG, "onDeleteCategoryClick: Category ID is null or empty");
                     return;
                 }
@@ -114,7 +115,6 @@ public class ManageCategoriesActivity extends AppCompatActivity {
                 });
     }
 
-
     private void loadCategories() {
         db.collection("Categories")
                 .orderBy("thuTuUuTien", Query.Direction.ASCENDING)
@@ -146,7 +146,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
     private void deleteCategory(Category category) {
         new AlertDialog.Builder(this)
                 .setTitle("Xác nhận Xóa")
-                .setMessage("Bạn có chắc muốn xóa danh mục '" + category.getTenDanhMuc() + "'? \n(Lưu ý: Các sản phẩm thuộc danh mục này sẽ không bị xóa)")
+                .setMessage("Bạn có chắc muốn xóa danh mục '" + category.getTenDanhMuc()
+                        + "'? \n(Lưu ý: Các sản phẩm thuộc danh mục này sẽ không bị xóa)")
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     Log.d(TAG, "Đang xóa Category ID: " + category.getId());
                     db.collection("Categories").document(category.getId())
@@ -174,6 +175,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
         EditText etName = dialogView.findViewById(R.id.etCategoryName);
         EditText etPriority = dialogView.findViewById(R.id.etCategoryPriority);
         Button btnSave = dialogView.findViewById(R.id.btnSaveCategory);
+        android.widget.TextView tvTitle = dialogView.findViewById(R.id.tvDialogTitle);
         // Ánh xạ Spinner mới
         Spinner spinnerHH = dialogView.findViewById(R.id.spinnerHappyHour);
 
@@ -185,7 +187,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         if (categoryToEdit != null) {
-            dialog.setTitle("Sửa Danh Mục");
+            tvTitle.setText("Sửa Danh Mục");
             etName.setText(categoryToEdit.getTenDanhMuc());
             etPriority.setText(String.valueOf(categoryToEdit.getThuTuUuTien()));
 
@@ -202,7 +204,7 @@ public class ManageCategoriesActivity extends AppCompatActivity {
             }
 
         } else {
-            dialog.setTitle("Thêm Danh Mục Mới");
+            tvTitle.setText("Thêm Danh Mục Mới");
             etPriority.setText(String.valueOf(categoryList.size() + 1));
             spinnerHH.setSelection(0); // Mặc định [Không áp dụng]
         }
@@ -240,7 +242,8 @@ public class ManageCategoriesActivity extends AppCompatActivity {
 
             if (categoryToEdit != null) {
                 // --- CHẾ ĐỘ SỬA ---
-                Category updatedCategory = new Category(categoryToEdit.getId(), name, priority, selectedHappyHourId, selectedHappyHourName);
+                Category updatedCategory = new Category(categoryToEdit.getId(), name, priority, selectedHappyHourId,
+                        selectedHappyHourName);
 
                 Log.d(TAG, "Đang cập nhật Category ID: " + categoryToEdit.getId());
                 db.collection("Categories").document(categoryToEdit.getId())

@@ -4,126 +4,152 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginTop="4dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginBottom="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:contentPadding="12dp">
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
+        <!-- Product Image -->
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imageViewCartItem"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:background="#F5F5F5"
             android:scaleType="centerCrop"
-            android:layout_centerVertical="true"
-            android:contentDescription="Ảnh sản phẩm trong giỏ hàng"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
+            tools:srcCompat="@tools:sample/avatars" />
 
-        <LinearLayout
-            android:id="@+id/infoLayout"
-            android:layout_width="match_parent"
+        <!-- Delete Button (Top Right) -->
+        <ImageView
+            android:id="@+id/buttonDelete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorDelete" />
+
+        <!-- Product Name -->
+        <TextView
+            android:id="@+id/textViewCartItemName"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/imageViewCartItem"
-            android:layout_toStartOf="@id/buttonDelete"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
-            android:orientation="vertical">
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="Tên Sản Phẩm"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/buttonDelete"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCartItem"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/textViewCartItemName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tên Sản Phẩm"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"/>
+        <!-- Size -->
+        <TextView
+            android:id="@+id/textViewCartItemSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Size: M"
+            android:textColor="#757575"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@+id/textViewCartItemName"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCartItemName" />
 
-            <TextView
-                android:id="@+id/textViewCartItemSize"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Size: M"
-                android:textSize="12sp"/>
+        <!-- Options (Ice/Sugar) -->
+        <TextView
+            android:id="@+id/textViewCartItemOptions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="16dp"
+            android:text="Đá chung, 100% đường"
+            android:textColor="#757575"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textViewCartItemName"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCartItemSize" />
 
-            <TextView
-                android:id="@+id/textViewCartItemOptions"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đá chung, 100% đường"
-                android:textSize="12sp"
-                android:layout_marginTop="2dp"/>
+        <!-- Note -->
+        <TextView
+            android:id="@+id/textViewCartItemNote"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Ghi chú..."
+            android:textColor="#757575"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/textViewCartItemName"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCartItemOptions"
+            tools:visibility="visible" />
 
-            <TextView
-                android:id="@+id/textViewCartItemNote"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ghi chú: Ít ngọt"
-                android:textSize="12sp"
-                android:textStyle="italic"
-                android:visibility="gone"/>
+        <!-- Price -->
+        <TextView
+            android:id="@+id/textViewCartItemPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="20.000 đ"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/textViewCartItemName"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCartItemNote" />
 
-            <TextView
-                android:id="@+id/textViewCartItemPrice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="30.000 đ"
-                android:textColor="@color/colorPrimary"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
-
+        <!-- Quantity Controls -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/infoLayout"
-            android:layout_alignStart="@id/infoLayout"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="@+id/textViewCartItemName"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCartItemPrice">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/buttonDecrease"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                app:srcCompat="@drawable/ic_remove"
-                style="@style/Widget.Material3.Button.IconButton.Filled"
-                android:contentDescription="Giảm" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_remove"
+                app:tint="#000000" />
 
             <TextView
                 android:id="@+id/textViewQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"/>
+                android:layout_marginEnd="16dp"
+                android:minWidth="20dp"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/buttonIncrease"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                app:srcCompat="@drawable/ic_add"
-                style="@style/Widget.Material3.Button.IconButton.Filled"
-                android:contentDescription="Tăng" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_add"
+                app:tint="#000000" />
+
         </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/buttonDelete"
-            style="@style/Widget.Material3.Button.IconButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            app:srcCompat="@drawable/ic_close"
-            app:tint="@color/colorDelete"
-            android:contentDescription="Xóa sản phẩm"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </RelativeLayout>
 </androidx.cardview.widget.CardView>

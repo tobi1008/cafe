@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -23,6 +22,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     public interface CartItemListener {
         void onQuantityChanged(CartItem item);
+
         void onItemDeleted(CartItem item);
     }
 
@@ -56,21 +56,23 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
         // Hiển thị tùy chọn Đá và Đường (Ẩn nếu không có)
         String optionsText = "";
-        if (cartItem.getIceOption() != null && !cartItem.getIceOption().isEmpty() && !cartItem.getIceOption().equals("N/A")) {
+        if (cartItem.getIceOption() != null && !cartItem.getIceOption().isEmpty()
+                && !cartItem.getIceOption().equals("N/A")) {
             optionsText += cartItem.getIceOption();
         }
-        if (cartItem.getSugarLevel() != null && !cartItem.getSugarLevel().isEmpty() && !cartItem.getSugarLevel().equals("N/A")) {
-            if (!optionsText.isEmpty()) optionsText += ", ";
+        if (cartItem.getSugarLevel() != null && !cartItem.getSugarLevel().isEmpty()
+                && !cartItem.getSugarLevel().equals("N/A")) {
+            if (!optionsText.isEmpty())
+                optionsText += ", ";
             optionsText += cartItem.getSugarLevel();
         }
 
-        if(optionsText.isEmpty()) {
+        if (optionsText.isEmpty()) {
             holder.options.setVisibility(View.GONE);
         } else {
             holder.options.setText(optionsText);
             holder.options.setVisibility(View.VISIBLE);
         }
-
 
         // Hiển thị ghi chú
         if (cartItem.getNote() != null && !cartItem.getNote().isEmpty()) {
@@ -117,7 +119,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView productImage;
         TextView productName, productPrice, quantity, size, options, note;
-        ImageButton btnIncrease, btnDecrease, btnDelete;
+        ImageView btnIncrease, btnDecrease, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

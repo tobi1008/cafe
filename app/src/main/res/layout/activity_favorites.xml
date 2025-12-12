@@ -3,24 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFF9F9"
     tools:context=".FavoritesActivity">
 
     <TextView
         android:id="@+id/textViewFavoritesTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sản phẩm yêu thích"
-        android:textSize="24sp"
-        android:textStyle="bold"
         android:layout_centerHorizontal="true"
-        android:padding="16dp"/>
+        android:layout_marginTop="16dp"
+        android:text="Sản phẩm yêu thích"
+        android:textColor="#424242"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewFavorites"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/textViewFavoritesTitle"
-        android:padding="8dp"/>
+        android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
 
     <TextView
         android:id="@+id/textViewNoFavorites"

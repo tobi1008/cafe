@@ -49,7 +49,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        holder.orderTotal.setText("Tổng tiền: " + formatter.format(order.getTotalPrice()));
+        holder.orderTotal.setText(formatter.format(order.getTotalPrice()));
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, OrderDetailActivity.class);
@@ -75,4 +75,3 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
     }
 }
-

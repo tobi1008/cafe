@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/admin_background">
+    android:background="#F2F2F2"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,40 +14,42 @@
         android:padding="16dp"
         tools:context=".AdminActivity">
 
+        <!-- Header -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="8dp">
 
             <ImageButton
                 android:id="@+id/buttonBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_arrow_back"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/colorPrimaryVariant"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:contentDescription="Quay lại"/>
+                android:contentDescription="Quay lại"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#3E2723"
+                android:layout_centerVertical="true"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
                 android:text="Bảng Điều Khiển Admin"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="?android:attr/textColorPrimary"
-                android:layout_centerInParent="true"/>
+                android:textColor="#333333"
+                android:textSize="20sp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
-        <!-- === Khối Thêm Sản Phẩm === -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Add Product Section -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="@color/surface_color"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="24dp">
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,149 +60,155 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:text="Thêm Sản Phẩm Mới"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimaryVariant"
-                    android:layout_marginBottom="16dp"/>
+                    android:textColor="#5D4037"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-                <!-- form thêm sản phẩm -->
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
                     android:hint="Tên sản phẩm (*)">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextProductName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textCapSentences|textNoSuggestions"
-                        android:imeOptions="actionNext"/>
+                        android:inputType="textCapSentences" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="8dp">
-                    <!-- Giá S, M, L -->
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
                         android:hint="Giá S">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextPriceS"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:imeOptions="actionNext"/>
+                            android:inputType="numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
+
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
                         android:hint="Giá M (*)">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextPriceM"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:imeOptions="actionNext"/>
+                            android:inputType="numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
+
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
+                        android:layout_weight="1"
                         android:hint="Giá L">
+
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextPriceL"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="numberDecimal"
-                            android:imeOptions="actionNext"/>
+                            android:inputType="numberDecimal" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
                     android:hint="Mô tả ngắn">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextProductDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textMultiLine|textCapSentences|textNoSuggestions"
-                        android:imeOptions="actionNext"/>
+                        android:inputType="textMultiLine" />
                 </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
                     android:hint="URL Hình ảnh">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextProductImageUrl"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textUri"
-                        android:imeOptions="actionNext"/>
+                        android:inputType="textUri" />
                 </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_marginBottom="8dp"
                     android:hint="Phần trăm giảm giá (0-100)">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextSalePercent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="number"
-                        android:imeOptions="actionNext"/>
+                        android:inputType="number" />
                 </com.google.android.material.textfield.TextInputLayout>
+
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_marginBottom="16dp"
                     android:hint="Chọn Danh Mục (*)">
+
                     <AutoCompleteTextView
                         android:id="@+id/spinnerCategoryAdmin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none"
-                        tools:ignore="LabelFor" />
+                        android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
-                <com.google.android.material.button.MaterialButton
+
+                <Button
                     android:id="@+id/buttonAddProduct"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Thêm vào Menu"
-                    app:backgroundTint="@color/colorPrimary"
-                    app:icon="@drawable/ic_add"
-                    app:iconGravity="textStart"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"/>
+                    android:layout_height="56dp"
+                    android:backgroundTint="#6D4C41"
+                    android:text="+  Thêm vào Menu"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:cornerRadius="28dp" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </androidx.cardview.widget.CardView>
 
-        <!-- === Khối Các Chức Năng Quản Lý === -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Management Functions -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@android:color/white"
             app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="@color/surface_color"
-            app:cardElevation="4dp">
+            app:cardElevation="2dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -211,107 +219,125 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:text="Chức Năng Quản Lý"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/colorPrimaryVariant"
-                    android:layout_marginBottom="16dp"/>
+                    android:textColor="#5D4037"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
+                <!-- Quản lý sản phẩm -->
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
                     android:id="@+id/buttonManageProducts"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
                     android:text="Quản lý Sản Phẩm (Sửa/Xoá)"
-                    android:layout_marginBottom="8dp"
-                    app:icon="@drawable/ic_edit"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageCategories"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Quản lý Danh mục"
-                    app:icon="@drawable/ic_category"
-                    app:iconGravity="textStart"
                     android:textAlignment="textStart"
-                    android:layout_marginBottom="8dp"/>
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageHappyHour"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Quản lý Giờ Vàng"
-                    android:layout_marginBottom="8dp"
-                    app:icon="@drawable/ic_time"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageOrders"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Quản lý Đơn hàng"
-                    android:layout_marginBottom="8dp"
-                    app:icon="@drawable/ic_history"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageVouchers"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Quản lý Voucher"
-                    android:layout_marginBottom="8dp"
-                    app:icon="@drawable/ic_voucher"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
-                <com.google.android.material.button.MaterialButton
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageMembership"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Cài đặt Hạng Thành Viên"
-                    android:layout_marginBottom="8dp"
-                    app:icon="@android:drawable/ic_menu_preferences"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@drawable/ic_edit"
+                    app:iconTint="#3E2723" />
 
-                <!-- NÚT MỚI ĐƯỢC THÊM VÀO -->
+                <!-- Quản lý Danh mục -->
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageCategories"
                     style="@style/Widget.Material3.Button.TonalButton"
-                    app:backgroundTint="@color/button_tonal_bg"
-                    android:textColor="@color/button_tonal_text"
-                    app:iconTint="@color/button_tonal_text"
-                    android:id="@+id/buttonManageUsers"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Quản lý Danh mục"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@drawable/ic_category"
+                    app:iconTint="#3E2723" />
+
+                <!-- Quản lý Giờ Vàng -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageHappyHour"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Quản lý Giờ Vàng"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@drawable/ic_time"
+                    app:iconTint="#3E2723" />
+
+                <!-- Quản lý Đơn hàng -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageOrders"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Quản lý Đơn hàng"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@drawable/ic_history"
+                    app:iconTint="#3E2723" />
+                
+                <!-- Quản lý Voucher -->
+                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageVouchers"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Quản lý Voucher"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@drawable/ic_voucher"
+                    app:iconTint="#3E2723" />
+                
+                <!-- Cài đặt Hạng Thành Viên -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageMembership"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="Cài đặt Hạng Thành Viên"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
+                    app:icon="@android:drawable/ic_menu_preferences"
+                    app:iconTint="#3E2723" />
+                    
+                <!-- Quản lý Người Dùng -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonManageUsers"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
                     android:text="Quản lý Người Dùng"
+                    android:textAlignment="textStart"
+                    android:textColor="#3E2723"
+                    android:textSize="14sp"
+                    app:backgroundTint="#D7CCC8"
+                    app:cornerRadius="28dp"
                     app:icon="@drawable/ic_admin_panel"
-                    app:iconGravity="textStart"
-                    android:textAlignment="textStart"/>
+                    app:iconTint="#3E2723" />
 
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 </ScrollView>

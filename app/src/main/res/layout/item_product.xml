@@ -5,129 +5,124 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="@color/surface_color"
-    app:cardElevation="4dp">
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!-- Tag Giảm giá (HH hoặc Sale) -->
-        <TextView
-            android:id="@+id/textViewSaleTag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/discount_background"
-            android:paddingStart="8dp"
-            android:paddingTop="2dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="2dp"
-            android:text="-20% HH"
-            android:textColor="@android:color/white"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:elevation="2dp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+        android:layout_height="wrap_content"
+        android:paddingBottom="16dp">
 
         <ImageView
             android:id="@+id/imageViewProduct"
             android:layout_width="0dp"
-            android:layout_height="120dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/placeholder_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        android:scaleType="fitCenter"
-
-        android:src="@drawable/placeholder_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <!-- Tag Giảm giá -->
+        <TextView
+            android:id="@+id/textViewSaleTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/discount_background"
+            android:elevation="4dp"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="2dp"
+            android:text="-20%"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/textViewProductName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
             android:ellipsize="end"
-            android:maxLines="1"
+            android:maxLines="2"
             android:text="Tên Sản Phẩm"
-            android:textColor="@color/colorPrimaryVariant"
-            android:textSize="16sp"
+            android:textColor="#424242"
+            android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/imageViewProduct" />
-
-        <!-- Phần Đánh giá (Rating) -->
-        <RatingBar
+        
+         <RatingBar
             android:id="@+id/ratingBarProduct"
             style="?android:attr/ratingBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:isIndicator="true"
             android:numStars="5"
             android:progressTint="@color/purple_500"
             android:rating="4.5"
             android:stepSize="0.1"
-
-        android:visibility="gone"
-
-        tools:visibility="visible"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
-
-        <TextView
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
+            
+         <TextView
             android:id="@+id/textViewRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:text="4.5"
             android:textSize="12sp"
-
-        android:visibility="gone"
-
-        tools:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="@id/ratingBarProduct"
-        app:layout_constraintStart_toEndOf="@id/ratingBarProduct"
-        app:layout_constraintTop_toTopOf="@id/ratingBarProduct" />
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/ratingBarProduct"
+            app:layout_constraintStart_toEndOf="@id/ratingBarProduct"
+            app:layout_constraintTop_toTopOf="@id/ratingBarProduct" />
 
         <TextView
             android:id="@+id/textViewProductPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:paddingBottom="8dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
             android:text="25.000 đ"
-            android:textColor="@color/colorPrimary"
-            android:textSize="16sp"
+            android:textColor="#5D4037"
+            android:textSize="15sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ratingBarProduct" />
-
-        <!-- Giá gốc (Bị gạch ngang) -->
-        <TextView
+            app:layout_constraintTop_toBottomOf="@id/textViewProductName" />
+            
+         <!-- Giá gốc -->
+         <TextView
             android:id="@+id/textViewOriginalPrice"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="30.000 đ"
             android:textColor="@android:color/darker_gray"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:visibility="gone"
-            tools:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@id/textViewProductPrice"
-            app:layout_constraintStart_toEndOf="@id/textViewProductPrice" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewProductPrice"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
-

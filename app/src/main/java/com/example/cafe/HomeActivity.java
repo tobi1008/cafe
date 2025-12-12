@@ -122,7 +122,6 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 
-
     private void loadHappyHours() {
         Log.d(TAG, "Bắt đầu tải Happy Hours...");
         db.collection("HappyHours")
@@ -148,7 +147,6 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 
-
     private void loadProductsFromFirestore() {
         Log.d(TAG, "Bắt đầu tải Products...");
         db.collection("cafe")
@@ -169,7 +167,8 @@ public class HomeActivity extends AppCompatActivity {
                                     String categoryName = product.getCategory();
                                     if (categoryName != null && categoryMap.containsKey(categoryName)) {
                                         Category cat = categoryMap.get(categoryName);
-                                        if (cat != null && cat.getHappyHourId() != null && !cat.getHappyHourId().isEmpty()) {
+                                        if (cat != null && cat.getHappyHourId() != null
+                                                && !cat.getHappyHourId().isEmpty()) {
                                             // Gán Giờ Vàng của Danh mục cho Sản phẩm
                                             product.setHappyHourId(cat.getHappyHourId());
                                         }
@@ -236,7 +235,8 @@ public class HomeActivity extends AppCompatActivity {
     private void setupSearch() {
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -246,12 +246,23 @@ public class HomeActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
     }
 
+    private BottomNavigationView bottomNavigationView;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.navigation_home);
+        }
+    }
+
     private void setupBottomNavigationView() {
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
 
         bottomNavigationView.setOnItemSelectedListener(item -> {

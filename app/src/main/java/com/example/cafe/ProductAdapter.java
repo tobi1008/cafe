@@ -47,7 +47,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             return;
         }
 
-
         if (product.getTen() != null) {
             holder.productName.setText(product.getTen());
         } else {
@@ -68,17 +67,29 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         calculateAndDisplayPrice(holder, product);
 
         holder.itemView.setOnClickListener(v -> {
-            if (context instanceof AppCompatActivity) {
-                AppCompatActivity activity = (AppCompatActivity) context;
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            try {
+                // Fix: Nếu đang ở FavoritesActivity thì dùng Activity mới để tránh lỗi crash
+                // BottomSheet
+                if (context.getClass().getSimpleName().equals("FavoritesActivity")) {
+                    Intent intent = new Intent(context, ProductDetailActivity.class);
+                    intent.putExtra("PRODUCT_DETAIL", product);
+                    context.startActivity(intent);
+                } else if (context instanceof AppCompatActivity) {
+                    AppCompatActivity activity = (AppCompatActivity) context;
+                    FragmentManager fragmentManager = activity.getSupportFragmentManager();
 
-                ProductDetailBottomSheetFragment bottomSheetFragment = ProductDetailBottomSheetFragment.newInstance(product);
-
-                bottomSheetFragment.show(fragmentManager, bottomSheetFragment.getTag());
-            } else {
-                Intent intent = new Intent(context, ProductDetailActivity.class);
-                intent.putExtra("PRODUCT_DETAIL", product);
-                context.startActivity(intent);
+                    if (product != null) {
+                        ProductDetailBottomSheetFragment bottomSheetFragment = ProductDetailBottomSheetFragment
+                                .newInstance(product);
+                        bottomSheetFragment.show(fragmentManager, "ProductDetailBottomSheet");
+                    }
+                } else {
+                    Intent intent = new Intent(context, ProductDetailActivity.class);
+                    intent.putExtra("PRODUCT_DETAIL", product);
+                    context.startActivity(intent);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -94,7 +105,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         boolean isHappyHourActive = false;
         HappyHour activeHappyHour = null;
 
-        if (product.getHappyHourId() != null && happyHourMap != null && happyHourMap.containsKey(product.getHappyHourId())) {
+        if (product.getHappyHourId() != null && happyHourMap != null
+                && happyHourMap.containsKey(product.getHappyHourId())) {
             HappyHour hh = happyHourMap.get(product.getHappyHourId());
             if (hh != null && hh.isDangBat() && currentHour >= hh.getGioBatDau() && currentHour < hh.getGioKetThuc()) {
                 isHappyHourActive = true;
@@ -106,8 +118,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             double happyHourPrice = basePriceM * (1 - (activeHappyHour.getPhanTramGiamGia() / 100.0));
             holder.productPrice.setText(formatter.format(happyHourPrice));
             holder.tvProductOriginalPrice.setText(formattedOriginalPrice);
-            holder.tvProductOriginalPrice.setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.tvSaleTag.setText(String.format(Locale.US, "-%d %% sale giờ vàng", activeHappyHour.getPhanTramGiamGia()));
+            holder.tvProductOriginalPrice
+                    .setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvSaleTag
+                    .setText(String.format(Locale.US, "-%d %% sale giờ vàng", activeHappyHour.getPhanTramGiamGia()));
             holder.tvProductOriginalPrice.setVisibility(View.VISIBLE);
             holder.tvSaleTag.setVisibility(View.VISIBLE);
 
@@ -115,7 +129,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             double salePrice = product.getFinalPriceForSize("M");
             holder.productPrice.setText(formatter.format(salePrice));
             holder.tvProductOriginalPrice.setText(formattedOriginalPrice);
-            holder.tvProductOriginalPrice.setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvProductOriginalPrice
+                    .setPaintFlags(holder.tvProductOriginalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.tvSaleTag.setText(String.format(Locale.US, "-%d%%", product.getPhanTramGiamGia()));
             holder.tvProductOriginalPrice.setVisibility(View.VISIBLE);
             holder.tvSaleTag.setVisibility(View.VISIBLE);
@@ -153,4 +168,3 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         }
     }
 }
-

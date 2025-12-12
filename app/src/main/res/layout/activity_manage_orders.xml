@@ -1,33 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F2F2F2"
     tools:context=".ManageOrdersActivity">
 
-    <TextView
-        android:id="@+id/textViewManageOrdersTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Quản Lý Đơn Hàng"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_centerHorizontal="true"
-        android:padding="16dp"/>
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbarManageOrders"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:title="Quản lý Đơn Hàng"
+        app:titleTextColor="@android:color/white" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewManageOrders"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/textViewManageOrdersTitle"
-        android:padding="8dp"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbarManageOrders"
+        tools:listitem="@layout/item_order" />
 
     <TextView
         android:id="@+id/textViewNoOrdersAdmin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Chưa có đơn hàng nào."
-        android:layout_centerInParent="true"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
