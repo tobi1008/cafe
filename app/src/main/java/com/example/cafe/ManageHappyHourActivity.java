@@ -42,7 +42,10 @@ public class ManageHappyHourActivity extends AppCompatActivity {
 
         // Toolbar
         // Back Button Logic
-        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
+        // Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbarHappyHour);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         // Toolbar code removed as we use custom header now
 

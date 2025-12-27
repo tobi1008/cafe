@@ -55,8 +55,10 @@ public class ManageVouchersActivity extends AppCompatActivity {
         btnAddVoucher = findViewById(R.id.buttonAddVoucher);
         recyclerViewVouchers = findViewById(R.id.recyclerViewVouchers);
 
-        // Header Back Button
-        findViewById(R.id.buttonBack).setOnClickListener(v -> finish());
+        // Header Back Button (Toolbar)
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbarManageVouchers);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
 
         // *** ÁNH XẠ VÀ SET CLICK LISTENER *
         tvSelectExpiryDate = findViewById(R.id.tvSelectExpiryDate);
