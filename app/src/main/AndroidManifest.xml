@@ -13,74 +13,87 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cafe">
 
+        <!-- Auth Activities -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.auth.SignupActivity"
+            android:exported="false" />
 
+        <!-- Home Activity -->
         <activity
-            android:name=".SignupActivity"
+            android:name=".ui.home.HomeActivity"
             android:exported="false" />
-        <activity
-            android:name=".HomeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CartActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CheckoutActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ManageProductsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EditProductActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ProductDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".OrderHistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".OrderDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ManageOrdersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".FavoritesActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AllReviewsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ManageVouchersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ManageHappyHourActivity"
-            android:exported="false"/>
 
+        <!-- Profile Activities -->
         <activity
-            android:name=".ManageCategoriesActivity"
-            android:exported="false"/>
+            android:name=".ui.profile.ProfileActivity"
+            android:exported="false" />
         <activity
-            android:name=".EditProfileActivity" />
+            android:name=".ui.profile.EditProfileActivity"
+            android:exported="false" />
+
+        <!-- Cart Activities -->
         <activity
-            android:name=".MembershipSettingsActivity" />
+            android:name=".ui.cart.CartActivity"
+            android:exported="false" />
         <activity
-            android:name=".ManageUsersActivity" />
+            android:name=".ui.cart.CheckoutActivity"
+            android:exported="false" />
+
+        <!-- Product Activities -->
+        <activity
+            android:name=".ui.product.ProductDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.product.FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.product.AllReviewsActivity"
+            android:exported="false" />
+
+        <!-- Order Activities -->
+        <activity
+            android:name=".ui.order.OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.order.OrderDetailActivity"
+            android:exported="false" />
+
+        <!-- Admin Activities -->
+        <activity
+            android:name=".ui.admin.AdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageProductsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.EditProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageOrdersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageCategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageVouchersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageHappyHourActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.MembershipSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.ManageUsersActivity"
+            android:exported="false" />
 
     </application>
 
